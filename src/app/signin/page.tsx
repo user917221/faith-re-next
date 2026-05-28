@@ -1,5 +1,8 @@
 import { signIn } from "@/lib/auth";
 
+// Cette page lit `searchParams.callbackUrl` (Server Action), donc rendu dynamique requis.
+export const dynamic = "force-dynamic";
+
 export default function SignInPage({
   searchParams,
 }: {
