@@ -9,6 +9,7 @@ import { AttributesGrid } from "./AttributesGrid";
 import { EvolutionSection } from "./EvolutionSection";
 import { ProfileEditor } from "./ProfileEditor";
 import { TrainingRequestButton } from "./TrainingRequestButton";
+import { RecoveryPanel } from "./RecoveryPanel";
 import type { CharacterSheetProps } from "./types";
 
 function SigilDivider({ mark = "✦" }: { mark?: string }) {
@@ -30,6 +31,8 @@ export default function CharacterSheet({
   onTrainingChange,
   onProfileChange,
   onRequestTraining,
+  onRecoverHp,
+  onRecoverEndurance,
 }: CharacterSheetProps) {
   const allocated = countAllocatedPoints(character.skills);
   const isCapped = allocated >= SKILL_CAP;
@@ -55,6 +58,13 @@ export default function CharacterSheet({
 
       <SigilDivider mark="✦" />
       <VitalsHeader character={character} onVitalChange={onVitalChange} />
+
+      {(onRecoverHp || onRecoverEndurance) && (
+        <>
+          <SigilDivider mark="✚" />
+          <RecoveryPanel onRecoverHp={onRecoverHp} onRecoverEndurance={onRecoverEndurance} />
+        </>
+      )}
 
       <SigilDivider mark="✧" />
       <EnduranceActionPanel onActionCost={onActionCost} />

@@ -20,6 +20,8 @@ export { rollSkillCheck, rollCustomFormula } from "./roll";
 
 export { updateProfile } from "./profile";
 
+export { recoverHp, recoverEndurance } from "./recovery";
+
 export {
   requestTraining,
   approveTraining,

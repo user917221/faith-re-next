@@ -15,6 +15,8 @@ import {
   updateProfile,
   approveTraining,
   rejectTraining,
+  recoverHp,
+  recoverEndurance,
   type TrainingRequestWithChar,
 } from "@/lib/actions";
 
@@ -60,6 +62,20 @@ export function MJCharacterClient({ character }: { character: Character }) {
       onProfileChange={async (patch: ProfilePatch) => {
         await updateProfile(character.id, patch);
         refresh();
+      }}
+      onRecoverHp={async () => {
+        const res = await recoverHp(character.id);
+        if (!res.ok) throw new Error(res.reason);
+        refresh();
+        const { gain, d1, d2, ecaille, newHp, maxHp } = res;
+        return { gain, d1, d2, ecaille, newHp, maxHp };
+      }}
+      onRecoverEndurance={async () => {
+        const res = await recoverEndurance(character.id);
+        if (!res.ok) throw new Error(res.reason);
+        refresh();
+        const { gain, roll, newEndurance, maxEndurance } = res;
+        return { gain, roll, newEndurance, maxEndurance };
       }}
     />
   );
