@@ -10,6 +10,7 @@ import { EvolutionSection } from "./EvolutionSection";
 import { ProfileEditor } from "./ProfileEditor";
 import { TrainingRequestButton } from "./TrainingRequestButton";
 import { RecoveryPanel } from "./RecoveryPanel";
+import { PresenceBadge } from "./PresenceBadge";
 import type { CharacterSheetProps } from "./types";
 
 function SigilDivider({ mark = "✦" }: { mark?: string }) {
@@ -33,6 +34,8 @@ export default function CharacterSheet({
   onRequestTraining,
   onRecoverHp,
   onRecoverEndurance,
+  onTogglePresence,
+  onRollSkill,
 }: CharacterSheetProps) {
   const allocated = countAllocatedPoints(character.skills);
   const isCapped = allocated >= SKILL_CAP;
@@ -56,6 +59,10 @@ export default function CharacterSheet({
         </span>
       </header>
 
+      {onTogglePresence && (
+        <PresenceBadge isPresent={character.isPresent} onToggle={onTogglePresence} />
+      )}
+
       <SigilDivider mark="✦" />
       <VitalsHeader character={character} onVitalChange={onVitalChange} />
 
@@ -77,6 +84,7 @@ export default function CharacterSheet({
         character={character}
         isCapped={isCapped}
         onSkillChange={onSkillChange}
+        onRollSkill={onRollSkill}
       />
 
       {!isMJ && onRequestTraining && (

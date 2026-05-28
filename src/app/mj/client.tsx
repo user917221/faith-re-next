@@ -17,6 +17,8 @@ import {
   rejectTraining,
   recoverHp,
   recoverEndurance,
+  togglePresence,
+  rollSkillWithDD,
   type TrainingRequestWithChar,
 } from "@/lib/actions";
 
@@ -76,6 +78,19 @@ export function MJCharacterClient({ character }: { character: Character }) {
         refresh();
         const { gain, roll, newEndurance, maxEndurance } = res;
         return { gain, roll, newEndurance, maxEndurance };
+      }}
+      onTogglePresence={async () => {
+        await togglePresence(character.id);
+        refresh();
+      }}
+      onRollSkill={async ({ attrName, skillName, dd }) => {
+        await rollSkillWithDD({
+          characterId: character.id,
+          attrName,
+          skillName: skillName ?? null,
+          dd,
+        });
+        refresh();
       }}
     />
   );

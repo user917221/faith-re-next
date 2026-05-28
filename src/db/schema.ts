@@ -102,6 +102,8 @@ export const characters = pgTable("character", {
   runes: jsonb("runes").$type<string[]>().default([]).notNull(),
   // intégrations
   discordMessageId: text("discord_message_id"),
+  // présence sur le plateau (rejoint la session ON/OFF)
+  isPresent: integer("is_present").default(0).notNull(),
   // audit
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -138,6 +140,10 @@ export const publicRolls = pgTable("public_roll", {
   skillName: text("skill_name"),
   skillScore: integer("skill_score"),
   total: integer("total").notNull(),
+  // Difficulté ciblée (DD) — null si pas de DD défini (jet libre)
+  dd: integer("dd"),
+  // Réussite vs DD — null si pas de DD ; 1 = succès, 0 = échec
+  success: integer("success"),
   isCritSucc: integer("is_crit_succ").default(0).notNull(),
   isCritFail: integer("is_crit_fail").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

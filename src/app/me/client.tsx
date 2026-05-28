@@ -17,6 +17,8 @@ import {
   updateRunes,
   updateProfile,
   requestTraining,
+  togglePresence,
+  rollSkillWithDD,
 } from "@/lib/actions";
 
 export function MyCharacterClient({
@@ -92,6 +94,19 @@ export function MyCharacterClient({
           onRequestTraining={async (note) => {
             const res = await requestTraining(character.id, note);
             if (!res.ok) throw new Error(res.reason);
+            refresh();
+          }}
+          onTogglePresence={async () => {
+            await togglePresence(character.id);
+            refresh();
+          }}
+          onRollSkill={async ({ attrName, skillName, dd }) => {
+            await rollSkillWithDD({
+              characterId: character.id,
+              attrName,
+              skillName: skillName ?? null,
+              dd,
+            });
             refresh();
           }}
         />

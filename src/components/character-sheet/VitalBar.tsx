@@ -1,13 +1,17 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 
 /**
  * Barre vitale game-UI — segmentée, animée, avec icône sigil inline.
  *
  * Modes :
- *  - `full`    : carte complète avec label, chiffres, boutons +/- (utilisé dans la fiche)
+ *  - `full`    : carte complète avec label, chiffres, et VitalAdjuster (input + boutons Dégât / Soin)
  *  - `compact` : barre fine sans contrôles (utilisé dans /plateau)
+ *
+ * Le VitalAdjuster remplace les anciens boutons +step / -step. L'utilisateur
+ * tape un montant (ou ajuste via les − / +), puis frappe DÉGÂT ou SOIN.
+ * Évite le spam clic en cas de gros impact.
  */
 
 type Kind = "hp" | "mhp" | "endu";
@@ -79,6 +83,24 @@ function Sigil({ kind }: { kind: Kind }) {
   );
 }
 
+/* Petits SVG icônes pour les boutons Dégât / Soin */
+function DamageIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="8" cy="8" r="6" />
+      <circle cx="8" cy="8" r="2.5" />
+      <path d="M8 1 V 4 M8 12 V 15 M1 8 H 4 M12 8 H 15" />
+    </svg>
+  );
+}
+function HealIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M8 3 V 13 M3 8 H 13" />
+    </svg>
+  );
+}
+
 function SegmentedFill({ pct, fillFrom, fillTo, isLow }: { pct: number; fillFrom: string; fillTo: string; isLow: boolean }) {
   const clamped = Math.max(0, Math.min(100, pct));
   return (
@@ -121,18 +143,101 @@ function SegmentedFill({ pct, fillFrom, fillTo, isLow }: { pct: number; fillFrom
   );
 }
 
+/**
+ * VitalAdjuster — widget input numérique + boutons Dégât / Soin.
+ *
+ * - Le nombre saisi représente un MONTANT (jamais une valeur absolue).
+ * - − / + ajustent le montant entre 1 et 999.
+ * - DÉGÂT applique `onAdjust(-amount)`. SOIN applique `onAdjust(+amount)`.
+ */
+function VitalAdjuster({
+  defaultAmount,
+  onAdjust,
+}: {
+  defaultAmount: number;
+  onAdjust: (delta: number) => Promise<void>;
+}) {
+  const [amount, setAmount] = useState<number>(defaultAmount);
+  const [isPending, startTransition] = useTransition();
+
+  function clamp(n: number) {
+    if (!Number.isFinite(n)) return 1;
+    return Math.max(1, Math.min(999, Math.round(n)));
+  }
+  function step(delta: number) {
+    setAmount((a) => clamp(a + delta));
+  }
+  function apply(sign: 1 | -1) {
+    startTransition(() => onAdjust(sign * amount));
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <div className="flex items-stretch overflow-hidden rounded-[--radius-sm] border border-gold-aged/18">
+        <button
+          type="button"
+          aria-label="Diminuer le montant"
+          onClick={() => step(-1)}
+          disabled={isPending}
+          className="focus-grimoire flex h-7 w-7 items-center justify-center text-parchment-dim transition-colors hover:bg-ink-far hover:text-gold-aged disabled:opacity-35"
+        >
+          −
+        </button>
+        <input
+          type="number"
+          inputMode="numeric"
+          aria-label="Montant"
+          min={1}
+          max={999}
+          value={amount}
+          onChange={(e) => setAmount(clamp(parseInt(e.target.value || "0", 10)))}
+          onFocus={(e) => e.currentTarget.select()}
+          disabled={isPending}
+          className="tabular h-7 w-12 border-x border-gold-aged/15 bg-ink-deep text-center text-[0.85rem] text-parchment outline-none focus-visible:border-gold-aged/45 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]"
+        />
+        <button
+          type="button"
+          aria-label="Augmenter le montant"
+          onClick={() => step(1)}
+          disabled={isPending}
+          className="focus-grimoire flex h-7 w-7 items-center justify-center text-parchment-dim transition-colors hover:bg-ink-far hover:text-gold-aged disabled:opacity-35"
+        >
+          +
+        </button>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => apply(-1)}
+        disabled={isPending}
+        aria-label={`Infliger ${amount} dégât(s)`}
+        title={`Infliger ${amount} dégât(s)`}
+        className="focus-grimoire flex h-7 items-center gap-1.5 rounded-[--radius-sm] border border-blood-dried/40 bg-blood-dried/15 px-2.5 text-blood-dried transition-colors hover:border-blood-dried/60 hover:bg-blood-dried/25 disabled:opacity-35"
+      >
+        <DamageIcon />
+        <span className="font-display text-[0.62rem] uppercase tracking-[0.16em]">Dégât</span>
+      </button>
+      <button
+        type="button"
+        onClick={() => apply(1)}
+        disabled={isPending}
+        aria-label={`Soigner ${amount}`}
+        title={`Soigner ${amount}`}
+        className="focus-grimoire flex h-7 items-center gap-1.5 rounded-[--radius-sm] border border-celadon/40 bg-celadon/15 px-2.5 text-celadon transition-colors hover:border-celadon/60 hover:bg-celadon/25 disabled:opacity-35"
+      >
+        <HealIcon />
+        <span className="font-display text-[0.62rem] uppercase tracking-[0.16em]">Soin</span>
+      </button>
+    </div>
+  );
+}
+
 export function VitalBar({ kind, current, max, label, compact, step, onAdjust }: Props) {
   const palette = PALETTE[kind];
   const pct = max > 0 ? (current / max) * 100 : 0;
   const isLow = pct < 25;
   const isCritical = pct < 10;
-  const [isPending, startTransition] = useTransition();
   const finalStep = step ?? palette.defaultStep;
-
-  function adjust(delta: number) {
-    if (!onAdjust) return;
-    startTransition(() => onAdjust(delta));
-  }
 
   if (compact) {
     return (
@@ -162,10 +267,10 @@ export function VitalBar({ kind, current, max, label, compact, step, onAdjust }:
         }}
       />
 
-      <div className="relative z-[1] flex items-center justify-between gap-3 mb-3">
+      <div className="relative z-[1] flex flex-wrap items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2.5">
           <span
-            className={`flex h-6 w-6 items-center justify-center rounded-[--radius-xs] border ${palette.ring} bg-ink-deep ${palette.text}`}
+            className={`flex h-7 w-7 items-center justify-center rounded-[--radius-xs] border ${palette.ring} bg-ink-deep ${palette.text}`}
             aria-hidden
           >
             <Sigil kind={kind} />
@@ -173,31 +278,16 @@ export function VitalBar({ kind, current, max, label, compact, step, onAdjust }:
           <span className="label-grimoire">{label ?? palette.label}</span>
         </div>
         {onAdjust && (
-          <div className="flex gap-1.5">
-            <button
-              type="button"
-              onClick={() => adjust(-finalStep)}
-              disabled={isPending}
-              className="btn-ghost h-7 px-2.5 tabular text-[0.7rem]"
-              aria-label={`Retirer ${finalStep}`}
-            >
-              −{finalStep}
-            </button>
-            <button
-              type="button"
-              onClick={() => adjust(finalStep)}
-              disabled={isPending}
-              className="btn-ghost h-7 px-2.5 tabular text-[0.7rem]"
-              aria-label={`Ajouter ${finalStep}`}
-            >
-              +{finalStep}
-            </button>
-          </div>
+          <VitalAdjuster defaultAmount={finalStep} onAdjust={onAdjust} />
         )}
       </div>
 
       <div className="relative z-[1] flex items-baseline gap-2 mb-2">
-        <span className={`font-display tabular text-3xl font-bold ${palette.text} ${isLow ? "drop-shadow-[0_0_8px_currentColor]" : ""}`}>
+        <span
+          key={current}
+          className={`font-display tabular text-4xl font-bold ${palette.text} ${isLow ? "drop-shadow-[0_0_10px_currentColor]" : ""}`}
+          style={{ animation: "vital-flash 0.25s ease-out" }}
+        >
           {current}
         </span>
         <span className="font-display tabular text-lg text-parchment-mute">

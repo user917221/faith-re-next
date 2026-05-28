@@ -253,6 +253,8 @@ export async function listRecentPublicRolls(): Promise<
     skillName: string | null;
     skillScore: number | null;
     total: number;
+    dd: number | null;
+    success: boolean | null;
     isCritSucc: boolean;
     isCritFail: boolean;
     createdAt: Date;
@@ -275,6 +277,8 @@ export async function listRecentPublicRolls(): Promise<
     skillName: r.skillName,
     skillScore: r.skillScore,
     total: r.total,
+    dd: r.dd,
+    success: r.success === null ? null : r.success === 1,
     isCritSucc: r.isCritSucc === 1,
     isCritFail: r.isCritFail === 1,
     createdAt: r.createdAt,

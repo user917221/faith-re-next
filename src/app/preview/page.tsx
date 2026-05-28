@@ -26,6 +26,7 @@ function buildMockBrad(): Character {
     maxMental: 125,
     maxEndurance: 750,
     fatePoints: 2,
+    isPresent: true,
     runes: ["Rune Physique (Feu)", "", ""],
     skills: Object.fromEntries(ALL_SKILLS.map((s) => [s, 1])),
   };

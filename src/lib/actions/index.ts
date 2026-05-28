@@ -22,6 +22,10 @@ export { updateProfile } from "./profile";
 
 export { recoverHp, recoverEndurance } from "./recovery";
 
+export { togglePresence } from "./presence";
+
+export { rollSkillWithDD } from "./roll-skill-dd";
+
 export {
   requestTraining,
   approveTraining,

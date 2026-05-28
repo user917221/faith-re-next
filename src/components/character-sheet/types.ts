@@ -7,6 +7,7 @@
  * route loader).
  */
 import type { ENDURANCE_COSTS } from "@/lib/faith-system";
+import type { AttributeName } from "@/lib/skills";
 
 export type Character = {
   id: string;
@@ -25,6 +26,7 @@ export type Character = {
   fatePoints: number;
   runes: string[];
   skills: Record<string, number>;
+  isPresent: boolean;
 };
 
 export type ActionType = keyof typeof ENDURANCE_COSTS;
@@ -57,4 +59,10 @@ export type CharacterSheetProps = {
   onRequestTraining?: (note?: string) => Promise<void>;
   onRecoverHp?: () => Promise<{ gain: number; d1: number; d2: number; ecaille: number; newHp: number; maxHp: number }>;
   onRecoverEndurance?: () => Promise<{ gain: number; roll: number; newEndurance: number; maxEndurance: number }>;
+  onTogglePresence?: () => Promise<void>;
+  onRollSkill?: (input: {
+    attrName: AttributeName;
+    skillName?: string | null;
+    dd: number | null;
+  }) => Promise<void>;
 };
