@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { SKILL_DESCRIPTIONS, SKILL_TO_ATTRIBUTE } from "@/lib/skills";
-import { DDPopover } from "./DDPopover";
+import { SKILL_DESCRIPTIONS, SKILL_TO_ATTRIBUTE, type AttributeName } from "@/lib/skills";
+import type { RollContext } from "./DDDrawer";
 
 type Props = {
   name: string;
@@ -10,14 +10,9 @@ type Props = {
   attrScore: number;
   isCapped: boolean;
   onSkillChange?: (skillName: string, delta: 1 | -1) => Promise<void>;
-  onRollSkill?: (input: {
-    attrName: import("@/lib/skills").AttributeName;
-    skillName?: string | null;
-    dd: number | null;
-  }) => Promise<void>;
+  onOpenRollDrawer?: (ctx: RollContext & { attrName: AttributeName; skillName: string }) => void;
 };
 
-/* SVG mini-dé pour le bouton de jet */
 function DieIcon() {
   return (
     <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -31,7 +26,7 @@ function DieIcon() {
   );
 }
 
-export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onRollSkill }: Props) {
+export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onOpenRollDrawer }: Props) {
   const [isPending, startTransition] = useTransition();
   const description = SKILL_DESCRIPTIONS[name] ?? "";
   const attrName = SKILL_TO_ATTRIBUTE[name];
@@ -45,9 +40,19 @@ export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onRo
     });
   }
 
+  function openRoll() {
+    if (!onOpenRollDrawer || !attrName) return;
+    onOpenRollDrawer({
+      title: name,
+      bonus: attrScore + value,
+      bonusLabel: `${attrName} (${attrScore}) + ${name} (${value})`,
+      attrName,
+      skillName: name,
+    });
+  }
+
   const plusDisabled = isPending || !onSkillChange || isCapped;
   const minusDisabled = isPending || !onSkillChange || value <= 0;
-  const totalBonus = attrScore + value;
 
   return (
     <div className="group flex items-center justify-between gap-3 text-sm">
@@ -82,25 +87,16 @@ export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onRo
         >
           +
         </button>
-        {onRollSkill && attrName && (
-          <DDPopover
-            title={name}
-            bonus={totalBonus}
-            bonusLabel={`${attrName}+${name}`}
-            onRoll={async (dd) =>
-              onRollSkill({ attrName, skillName: name, dd })
-            }
-            trigger={
-              <button
-                type="button"
-                aria-label={`Lancer 2d6 + ${name}`}
-                title={`Lancer 2d6 + ${attrName} + ${name}`}
-                className="focus-grimoire flex h-6 w-6 items-center justify-center rounded-[--radius-xs] border border-gold-aged/18 text-gold-aged transition-colors hover:border-gold-aged/45 hover:bg-gold-aged/10 hover:text-gold-bright"
-              >
-                <DieIcon />
-              </button>
-            }
-          />
+        {onOpenRollDrawer && attrName && (
+          <button
+            type="button"
+            aria-label={`Lancer 2d6 + ${name}`}
+            title={`Lancer 2d6 + ${attrName} + ${name}`}
+            onClick={openRoll}
+            className="focus-grimoire flex h-6 w-6 items-center justify-center rounded-[--radius-xs] border border-gold-aged/18 text-gold-aged transition-all hover:-translate-y-px hover:border-gold-aged/45 hover:bg-gold-aged/10 hover:text-gold-bright"
+          >
+            <DieIcon />
+          </button>
         )}
       </div>
     </div>

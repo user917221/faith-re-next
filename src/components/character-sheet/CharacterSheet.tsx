@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import type { AttributeName } from "@/lib/skills";
 import { countAllocatedPoints } from "@/lib/skills";
 import { SKILL_CAP, calculateLevel } from "@/lib/faith-system";
 import { VitalsHeader } from "./VitalsHeader";
@@ -11,7 +13,13 @@ import { ProfileEditor } from "./ProfileEditor";
 import { TrainingRequestButton } from "./TrainingRequestButton";
 import { RecoveryPanel } from "./RecoveryPanel";
 import { PresenceBadge } from "./PresenceBadge";
+import { DDDrawer, type RollContext } from "./DDDrawer";
 import type { CharacterSheetProps } from "./types";
+
+type DrawerCtx = RollContext & {
+  attrName: AttributeName;
+  skillName: string | null;
+};
 
 function SigilDivider({ mark = "✦" }: { mark?: string }) {
   return (
@@ -40,6 +48,9 @@ export default function CharacterSheet({
   const allocated = countAllocatedPoints(character.skills);
   const isCapped = allocated >= SKILL_CAP;
   const derivedLevel = calculateLevel(character.xp);
+
+  const [drawerCtx, setDrawerCtx] = useState<DrawerCtx | null>(null);
+  const openRollDrawer = onRollSkill ? (ctx: DrawerCtx) => setDrawerCtx(ctx) : undefined;
 
   return (
     <div className="relative z-[2] flex flex-col gap-2">
@@ -84,8 +95,24 @@ export default function CharacterSheet({
         character={character}
         isCapped={isCapped}
         onSkillChange={onSkillChange}
-        onRollSkill={onRollSkill}
+        onOpenRollDrawer={openRollDrawer}
       />
+
+      {onRollSkill && (
+        <DDDrawer
+          context={drawerCtx}
+          onClose={() => setDrawerCtx(null)}
+          onRoll={async (dd) => {
+            if (!drawerCtx) return;
+            await onRollSkill({
+              attrName: drawerCtx.attrName,
+              skillName: drawerCtx.skillName,
+              dd,
+            });
+            setDrawerCtx(null);
+          }}
+        />
+      )}
 
       {!isMJ && onRequestTraining && (
         <>

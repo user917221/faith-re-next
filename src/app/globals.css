@@ -231,6 +231,12 @@ body::before {
   100% { transform: translateX(120%); opacity: 0; }
 }
 
+/* Drawer latéral slide depuis la droite */
+@keyframes drawer-slide {
+  from { transform: translateX(100%); opacity: 0.4; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
 /* ============================================================
    Select grimoire — restyle des <select> natifs
    ============================================================ */
