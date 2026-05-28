@@ -62,7 +62,6 @@ export default async function MePage() {
                     className="w-full rounded-xl border border-white/10 bg-white/[0.02] p-4 text-left transition hover:bg-white/5"
                   >
                     <span className="text-lg font-semibold">{c.name}</span>
-                    <span className="ml-2 text-sm text-white/50">({c.age} ans · Niv. 0)</span>
                   </button>
                 </form>
               ))
