@@ -7,7 +7,7 @@
  * Usage : `pnpm db:seed`
  */
 
-import "dotenv/config";
+// L'env est chargé via `dotenv -e .env.local` dans le script package.json db:seed.
 import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { characters, characterSkills } from "./schema";

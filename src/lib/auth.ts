@@ -26,7 +26,15 @@ declare module "next-auth" {
   }
 }
 
-const MJ_DISCORD_ID = process.env.MJ_DISCORD_ID || "";
+/**
+ * MJ_DISCORD_ID accepte un ou plusieurs IDs séparés par virgule.
+ * Exemple : "1327269625867669575,1194658275535368394"
+ * Tout user dont le providerAccountId Discord correspond à l'un d'eux est promu MJ.
+ */
+const MJ_DISCORD_IDS = (process.env.MJ_DISCORD_ID || "")
+  .split(",")
+  .map((id) => id.trim())
+  .filter(Boolean);
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -58,7 +66,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // À chaque login Discord, synchronise discord_id + role MJ si match.
       if (account?.provider === "discord" && account.providerAccountId && user.id) {
         const discordId = account.providerAccountId;
-        const isMJ = MJ_DISCORD_ID && discordId === MJ_DISCORD_ID;
+        const isMJ = MJ_DISCORD_IDS.includes(discordId);
         await db
           .update(users)
           .set({
