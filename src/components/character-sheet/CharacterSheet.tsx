@@ -40,7 +40,7 @@ export default function CharacterSheet({
       {/* Header identité */}
       <header className="flex flex-wrap items-end justify-between gap-3 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-bold tracking-wide text-gold-aged">
+          <h1 className="font-display text-3xl font-bold tracking-[0.02em] text-gold-aged">
             {character.name}
             {character.nom ? ` ${character.nom}` : ""}
           </h1>

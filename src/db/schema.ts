@@ -119,6 +119,30 @@ export const characterSkills = pgTable(
   (t) => [primaryKey({ columns: [t.characterId, t.skillName] })],
 );
 
+// Jets publics : tout user connecté lance, snapshot du nom perso + caster.
+// Visibles sur /plateau pour l'ensemble de la table.
+export const publicRolls = pgTable("public_roll", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  characterId: uuid("character_id").references(() => characters.id, {
+    onDelete: "set null",
+  }),
+  characterName: text("character_name").notNull(),
+  casterUserId: text("caster_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  casterName: text("caster_name").notNull(),
+  formula: text("formula").notNull(),
+  rolls: jsonb("rolls").$type<number[]>().notNull(),
+  attrName: text("attr_name"),
+  attrScore: integer("attr_score"),
+  skillName: text("skill_name"),
+  skillScore: integer("skill_score"),
+  total: integer("total").notNull(),
+  isCritSucc: integer("is_crit_succ").default(0).notNull(),
+  isCritFail: integer("is_crit_fail").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Requêtes d'entraînement endurance : le joueur demande, le MJ approuve/refuse.
 // L'approbation déclenche un increment enduranceTrainings (+1) côté Server Action.
 export const trainingRequests = pgTable("training_request", {
@@ -156,6 +180,17 @@ export const characterSkillsRelations = relations(characterSkills, ({ one }) => 
   }),
 }));
 
+export const publicRollsRelations = relations(publicRolls, ({ one }) => ({
+  character: one(characters, {
+    fields: [publicRolls.characterId],
+    references: [characters.id],
+  }),
+  caster: one(users, {
+    fields: [publicRolls.casterUserId],
+    references: [users.id],
+  }),
+}));
+
 export const trainingRequestsRelations = relations(trainingRequests, ({ one }) => ({
   character: one(characters, {
     fields: [trainingRequests.characterId],
@@ -180,3 +215,4 @@ export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type CharacterSkill = typeof characterSkills.$inferSelect;
 export type TrainingRequest = typeof trainingRequests.$inferSelect;
+export type PublicRoll = typeof publicRolls.$inferSelect;

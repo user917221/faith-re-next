@@ -223,3 +223,10 @@ body::before {
 .sigil-glow {
   animation: sigil-glow 3.2s ease-in-out infinite;
 }
+
+/* Pulse de barre vitale en état critique : reflet qui traverse */
+@keyframes vital-pulse {
+  0% { transform: translateX(-100%); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: translateX(120%); opacity: 0; }
+}

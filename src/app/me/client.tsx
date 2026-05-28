@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import CharacterSheet from "@/components/character-sheet";
@@ -33,6 +34,14 @@ export function MyCharacterClient({
 
   return (
     <main className="relative z-[2] min-h-screen px-6 py-10">
+      <div className="mx-auto mb-4 max-w-6xl">
+        <Link
+          href="/plateau"
+          className="font-display text-[0.7rem] uppercase tracking-[0.18em] text-parchment-dim transition-colors hover:text-gold-aged"
+        >
+          ← Plateau
+        </Link>
+      </div>
       <header className="mx-auto mb-8 max-w-6xl flex items-center justify-between gap-4">
         <div>
           <p className="font-display text-xs uppercase tracking-[0.22em] text-gold-aged">

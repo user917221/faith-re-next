@@ -37,6 +37,9 @@ export default async function HomePage() {
                 Voir ma fiche
               </Link>
             )}
+            <Link href="/plateau" className="btn-ghost w-full text-center">
+              Rejoindre le plateau
+            </Link>
             <form
               action={async () => {
                 "use server";
