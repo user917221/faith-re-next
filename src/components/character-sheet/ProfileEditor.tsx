@@ -30,15 +30,15 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <h3 className="text-sm font-bold uppercase tracking-wider text-white/60">
-            Profil
-          </h3>
-          <p className="mt-0.5 text-xs text-white/40">Identité du personnage</p>
+    <section className="card-grimoire">
+      <header className="mb-4 flex items-baseline justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="label-grimoire">Profil</span>
+          <p className="text-xs text-parchment-mute">Identité du personnage</p>
         </div>
-        {feedback && <span className="text-xs text-cyan-300">{feedback}</span>}
+        {feedback && (
+          <span className="text-xs italic text-gold-bright">{feedback}</span>
+        )}
       </header>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
         <Field label="Prénom" required>
@@ -47,7 +47,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={!onProfileChange}
-            className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/50"
+            className="input-grimoire w-full disabled:opacity-40"
           />
         </Field>
         <Field label="Nom de famille">
@@ -56,7 +56,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             value={nom}
             onChange={(e) => setNom(e.target.value)}
             disabled={!onProfileChange}
-            className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/50"
+            className="input-grimoire w-full disabled:opacity-40"
           />
         </Field>
         <Field label="Âge">
@@ -67,7 +67,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             value={age}
             onChange={(e) => setAge(parseInt(e.target.value, 10) || 0)}
             disabled={!onProfileChange}
-            className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/50"
+            className="input-grimoire tabular w-full disabled:opacity-40"
           />
         </Field>
         <div className="flex items-end">
@@ -75,9 +75,9 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             type="button"
             disabled={!onProfileChange || !dirty || isPending}
             onClick={save}
-            className="h-10 w-full rounded-lg bg-cyan-500 px-4 text-sm font-semibold text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
+            className="btn-grimoire h-10 w-full"
           >
-            {isPending ? "..." : "Enregistrer"}
+            {isPending ? "…" : "Enregistrer"}
           </button>
         </div>
       </div>
@@ -85,12 +85,20 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   );
 }
 
-function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+function Field({
+  label,
+  required,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wider text-white/40">
+      <span className="font-display text-[0.65rem] uppercase tracking-[0.18em] text-parchment-mute">
         {label}
-        {required && <span className="ml-1 text-rose-400">*</span>}
+        {required && <span className="ml-1 text-blood-dried">*</span>}
       </span>
       {children}
     </label>

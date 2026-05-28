@@ -26,23 +26,11 @@ const ACTIONS: ActionConfig[] = [
   { key: "esq_nr", label: "Esquive", sub: "Non-réussie", category: "esq" },
 ];
 
-const CATEGORY_STYLES: Record<ActionConfig["category"], { border: string; cost: string }> = {
-  phy: {
-    border: "hover:border-cyan-400/60 hover:bg-cyan-400/[0.04]",
-    cost: "text-cyan-400",
-  },
-  off: {
-    border: "hover:border-rose-500/60 hover:bg-rose-500/[0.04]",
-    cost: "text-rose-400",
-  },
-  def: {
-    border: "hover:border-violet-400/60 hover:bg-violet-400/[0.04]",
-    cost: "text-violet-300",
-  },
-  esq: {
-    border: "hover:border-amber-400/60 hover:bg-amber-400/[0.04]",
-    cost: "text-amber-300",
-  },
+const CATEGORY_COST: Record<ActionConfig["category"], string> = {
+  phy: "text-celadon",
+  off: "text-blood-dried",
+  def: "text-amethyst",
+  esq: "text-gold-bright",
 };
 
 export function EnduranceActionPanel({ onActionCost }: Props) {
@@ -56,28 +44,28 @@ export function EnduranceActionPanel({ onActionCost }: Props) {
   }
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.01] p-5">
-      <span className="text-sm font-semibold uppercase tracking-wider text-white/60">
-        Comptabiliser dépense d&apos;endurance
-      </span>
+    <section className="card-grimoire flex flex-col gap-4">
+      <span className="label-grimoire">Dépense d&apos;endurance</span>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {ACTIONS.map((a) => {
           const cost = ENDURANCE_COSTS[a.key].cost;
-          const styles = CATEGORY_STYLES[a.category];
+          const costColor = CATEGORY_COST[a.category];
           return (
             <button
               key={a.key}
               type="button"
               disabled={isPending || !onActionCost}
               onClick={() => trigger(a.key)}
-              className={`flex flex-col items-center justify-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] px-2 py-3 text-white/80 transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-none ${styles.border}`}
+              className="group flex flex-col items-center justify-center gap-1 rounded-[--radius-sm] border border-gold-aged/10 bg-ink-far px-2 py-3 text-parchment transition-all hover:border-gold-aged/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-gold-aged/10"
             >
-              <span className="text-xs font-bold uppercase tracking-wider">
+              <span className="font-display text-[0.7rem] font-medium uppercase tracking-[0.15em] text-parchment">
                 {a.label}
               </span>
-              <span className="text-[10px] text-white/50">{a.sub}</span>
-              <span className={`text-base font-extrabold ${styles.cost}`}>
-                -{cost}
+              <span className="text-[0.65rem] italic text-parchment-mute">
+                {a.sub}
+              </span>
+              <span className={`tabular text-2xl font-bold leading-none ${costColor}`}>
+                −{cost}
               </span>
             </button>
           );

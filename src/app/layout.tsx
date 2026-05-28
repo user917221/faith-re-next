@@ -1,21 +1,30 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Cinzel, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const mono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "FAITH : RE — Compagnon de JDR",
+  title: "FAITH : RE — Grimoire de Campagne",
   description:
-    "Table de jeu et fiches dynamiques pour la campagne FAITH : RE — 4 attributs Disco Elysium, système d'évolution, intégration Discord.",
+    "Compagnon de table pour FAITH : RE — fiches dynamiques, jets de dés et carnet de session.",
 };
 
 export default function RootLayout({
@@ -24,9 +33,9 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${inter.variable} ${mono.variable} h-full antialiased`}
+      className={`${inter.variable} ${cinzel.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#0a0c15] text-white">{children}</body>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

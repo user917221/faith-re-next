@@ -117,37 +117,41 @@ export default function PreviewPage() {
   const allocated = countAllocatedPoints(character.skills);
 
   return (
-    <main className="min-h-screen bg-[#0a0c15] px-6 py-10">
+    <main className="relative z-[2] min-h-screen px-6 py-10">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs uppercase tracking-wider text-white/40">
+            <p className="font-display text-xs uppercase tracking-[0.22em] text-gold-aged">
               Preview / dev
             </p>
-            <h1 className="text-xl font-bold text-white">CharacterSheet</h1>
-            <p className="mt-1 text-xs text-white/40">
-              Mock Brad — {allocated} pts alloués
+            <h1 className="font-display mt-1 text-xl font-bold tracking-wide text-parchment">
+              CharacterSheet
+            </h1>
+            <p className="mt-1 text-xs text-parchment-mute">
+              Mock Brad — <span className="tabular">{allocated}</span> pts alloués
             </p>
           </div>
-          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/80">
-            <span>Mode MJ</span>
+          <label className="flex cursor-pointer items-center gap-3 rounded-[--radius-sm] border border-gold-aged/18 bg-ink-near px-4 py-2 text-sm text-parchment-dim">
+            <span className="font-display text-[0.7rem] uppercase tracking-[0.18em]">
+              Mode MJ
+            </span>
             <button
               type="button"
               onClick={() => setIsMJ((v) => !v)}
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                isMJ ? "bg-cyan-500" : "bg-white/15"
+                isMJ ? "bg-gold-aged" : "bg-ink-edge"
               }`}
               aria-pressed={isMJ}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-parchment transition-transform ${
                   isMJ ? "translate-x-4" : "translate-x-0.5"
                 }`}
               />
             </button>
             <span
-              className={`text-xs font-bold ${
-                isMJ ? "text-cyan-400" : "text-white/40"
+              className={`font-display text-[0.7rem] font-bold uppercase tracking-[0.18em] ${
+                isMJ ? "text-gold-aged" : "text-parchment-mute"
               }`}
             >
               {isMJ ? "ON" : "OFF"}

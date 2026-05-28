@@ -63,98 +63,123 @@ export function EvolutionSection({
   }
 
   return (
-    <section className="flex flex-col gap-5 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-      <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-white/70">
-        <span aria-hidden>📈</span>
-        Évolution
-        <span className="ml-1 text-[10px] font-normal normal-case tracking-normal text-white/40">
+    <section className="card-grimoire flex flex-col gap-5">
+      <header className="flex items-baseline gap-3">
+        <span className="label-grimoire">Évolution</span>
+        <span className="text-[0.65rem] italic text-parchment-faint">
           (privé MJ)
         </span>
-      </div>
+      </header>
 
-      {/* XP / Niveau */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
-        <div className="flex flex-1 flex-col gap-2">
-          <label className="text-xs text-white/70">
-            Niveau <strong className="text-cyan-400">{level}</strong> · Bonus
-            PV/MHP : <strong className="text-white">+{bonus}</strong>
-          </label>
-          <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        {/* XP / Niveau */}
+        <div className="flex flex-col gap-3 border-r-0 border-gold-aged/10 md:border-r md:pr-5">
+          <div className="flex items-baseline justify-between gap-3">
+            <div>
+              <p className="font-display text-3xl font-bold leading-none text-gold-aged">
+                Niveau {level}
+              </p>
+              <p className="mt-1.5 text-xs text-parchment-dim">
+                Bonus PV / MHP : <span className="tabular text-parchment">+{bonus}</span>
+              </p>
+            </div>
+            <div className="flex w-28 flex-col gap-1">
+              <label htmlFor="evo-xp" className="font-display text-[0.65rem] uppercase tracking-[0.18em] text-parchment-mute">
+                XP total
+              </label>
+              <input
+                id="evo-xp"
+                type="number"
+                min={0}
+                step={50}
+                value={xpDraft}
+                disabled={isPending || !onXpChange}
+                onChange={(e) => setXpDraft(e.target.value)}
+                onBlur={commitXp}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.currentTarget.blur();
+                }}
+                className="input-grimoire tabular w-full text-right disabled:opacity-40"
+              />
+            </div>
+          </div>
+          <div className="h-px overflow-hidden rounded-full bg-ink-deep">
             <div
-              className="h-full bg-cyan-400 transition-[width]"
+              className="h-full bg-gold-aged transition-[width]"
               style={{ width: `${xpProgress}%` }}
             />
           </div>
-          <span className="text-[11px] text-white/50">
-            {isMaxLevel
-              ? `Niveau max atteint (${character.xp} XP)`
-              : `${character.xp} / ${nextXp} XP — encore ${Math.max(
-                  0,
-                  nextXp - character.xp,
-                )} XP pour Niv. ${level + 1}`}
-          </span>
+          <p className="text-[0.7rem] text-parchment-mute">
+            {isMaxLevel ? (
+              <>Niveau max atteint (<span className="tabular">{character.xp}</span> XP)</>
+            ) : (
+              <>
+                <span className="tabular">{character.xp}</span> /{" "}
+                <span className="tabular">{nextXp}</span> XP — encore{" "}
+                <span className="tabular text-gold-aged">{Math.max(0, nextXp - character.xp)}</span>{" "}
+                XP pour Niv. {level + 1}
+              </>
+            )}
+          </p>
         </div>
-        <div className="flex w-full flex-col gap-1 md:w-40">
-          <label htmlFor="evo-xp" className="text-xs text-white/70">
-            XP total
-          </label>
-          <input
-            id="evo-xp"
-            type="number"
-            min={0}
-            step={50}
-            value={xpDraft}
-            disabled={isPending || !onXpChange}
-            onChange={(e) => setXpDraft(e.target.value)}
-            onBlur={commitXp}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.currentTarget.blur();
-            }}
-            className="rounded-md border border-white/10 bg-black/30 px-3 py-1.5 text-sm text-white outline-none transition-colors focus:border-cyan-400/60 disabled:cursor-not-allowed disabled:opacity-40"
-          />
-        </div>
-      </div>
 
-      {/* Endurance / Entraînements */}
-      <div className="flex flex-col gap-3 md:flex-row md:items-stretch">
-        <div className="flex flex-1 flex-col gap-1">
-          <label className="text-xs text-white/70">
-            Endurance : <strong className="text-cyan-400">{tier.label}</strong>{" "}
-            ({character.maxEndurance} max)
-          </label>
-          <span className="text-[11px] text-white/50">
-            {nextTier
-              ? `${character.enduranceTrainings} entraînement(s) — encore ${
-                  nextTier.trainings - character.enduranceTrainings
-                } pour ${nextTier.label} (${nextTier.max})`
-              : `Palier max atteint (${character.enduranceTrainings} entraînements)`}
-          </span>
-        </div>
-        <div className="flex w-full flex-col gap-1 md:w-40">
-          <label className="text-xs text-white/70">Entraînements</label>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={
-                isPending || !onTrainingChange || character.enduranceTrainings <= 0
-              }
-              onClick={() => adjustTrainings(-1)}
-              className="h-8 w-8 rounded-md border border-white/10 bg-white/[0.03] text-sm font-bold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              −
-            </button>
-            <span className="flex-1 rounded-md border border-white/10 bg-black/30 px-2 py-1 text-center text-sm font-semibold text-white">
-              {character.enduranceTrainings}
-            </span>
-            <button
-              type="button"
-              disabled={isPending || !onTrainingChange}
-              onClick={() => adjustTrainings(1)}
-              className="h-8 w-8 rounded-md border border-white/10 bg-white/[0.03] text-sm font-bold text-white transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              +
-            </button>
+        {/* Endurance / Entraînements */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <div>
+              <p className="font-display text-2xl font-medium leading-none text-celadon">
+                {tier.label}
+              </p>
+              <p className="mt-1.5 text-xs text-parchment-dim">
+                Max : <span className="tabular text-parchment">{character.maxEndurance}</span>
+              </p>
+            </div>
+            <div className="flex w-28 flex-col gap-1">
+              <span className="font-display text-[0.65rem] uppercase tracking-[0.18em] text-parchment-mute">
+                Entraînements
+              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  disabled={
+                    isPending || !onTrainingChange || character.enduranceTrainings <= 0
+                  }
+                  onClick={() => adjustTrainings(-1)}
+                  className="btn-ghost flex h-8 w-7 items-center justify-center !p-0 text-sm font-bold disabled:opacity-35"
+                >
+                  −
+                </button>
+                <span className="tabular flex-1 rounded-[--radius-sm] border border-gold-aged/10 bg-ink-deep px-2 py-1 text-center text-sm font-semibold text-parchment">
+                  {character.enduranceTrainings}
+                </span>
+                <button
+                  type="button"
+                  disabled={isPending || !onTrainingChange}
+                  onClick={() => adjustTrainings(1)}
+                  className="btn-ghost flex h-8 w-7 items-center justify-center !p-0 text-sm font-bold disabled:opacity-35"
+                >
+                  +
+                </button>
+              </div>
+            </div>
           </div>
+          <p className="text-[0.7rem] text-parchment-mute">
+            {nextTier ? (
+              <>
+                <span className="tabular">{character.enduranceTrainings}</span> entraînement(s)
+                — encore{" "}
+                <span className="tabular text-gold-aged">
+                  {nextTier.trainings - character.enduranceTrainings}
+                </span>{" "}
+                pour {nextTier.label} (<span className="tabular">{nextTier.max}</span>)
+              </>
+            ) : (
+              <>
+                Palier max atteint (<span className="tabular">{character.enduranceTrainings}</span>{" "}
+                entraînements)
+              </>
+            )}
+          </p>
         </div>
       </div>
     </section>

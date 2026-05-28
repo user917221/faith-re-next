@@ -25,13 +25,17 @@ export default async function MjDashboardPage({
   const selected = selectedId ? await loadCharacter(selectedId) : null;
 
   return (
-    <main className="min-h-screen bg-[#0a0c15] px-6 py-10 text-white">
-      <header className="mx-auto mb-8 flex max-w-7xl items-center justify-between">
+    <main className="relative z-[2] min-h-screen px-6 py-10">
+      <header className="mx-auto mb-8 flex max-w-7xl items-center justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-cyan-300">Tableau MJ</p>
-          <h1 className="text-2xl font-bold">FAITH : RE — Vue privée</h1>
+          <p className="font-display text-xs uppercase tracking-[0.22em] text-gold-aged">
+            Tableau MJ
+          </p>
+          <h1 className="font-display mt-1 text-2xl font-bold tracking-wide text-parchment">
+            FAITH : RE — Vue privée
+          </h1>
         </div>
-        <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-medium text-purple-300">
+        <span className="font-display flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.22em] text-gold-aged before:inline-block before:h-px before:w-6 before:bg-gold-soft after:inline-block after:h-px after:w-6 after:bg-gold-soft">
           Endurance révélée
         </span>
       </header>
@@ -42,29 +46,38 @@ export default async function MjDashboardPage({
 
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[260px_1fr]">
         <aside className="space-y-2">
-          <p className="text-xs uppercase tracking-wider text-white/40">Roster</p>
+          <p className="label-grimoire mb-2 block">Roster</p>
           {allChars.map((c) => {
             const isActive = c.id === selectedId;
             return (
               <Link
                 key={c.id}
                 href={`/mj?id=${c.id}`}
-                className={`block rounded-xl border p-3 transition ${
+                className={`card-grimoire block transition ${
                   isActive
-                    ? "border-cyan-400/40 bg-cyan-400/[0.06]"
-                    : "border-white/10 bg-white/[0.02] hover:bg-white/5"
+                    ? "!border-gold-aged/50 shadow-[0_0_22px_-8px_rgba(202,161,90,0.4)]"
+                    : "hover:!border-gold-aged/25"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">{c.name}{c.nom && ` ${c.nom}`}</span>
-                  <span className="rounded-md bg-cyan-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-cyan-300">
+                <div className="flex items-center justify-between gap-2">
+                  <span
+                    className={`font-display tracking-wide ${
+                      isActive ? "text-gold-aged" : "text-parchment"
+                    }`}
+                  >
+                    {c.name}
+                    {c.nom && (
+                      <span className="text-parchment-dim"> {c.nom}</span>
+                    )}
+                  </span>
+                  <span className="font-display tabular rounded-[--radius-xs] border border-gold-aged/30 px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.15em] text-gold-aged">
                     Niv. {c.level}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-white/40">
+                <p className="tabular mt-2 text-[0.7rem] text-parchment-mute">
                   HP {c.currentHp}/{c.maxHp} · MHP {c.currentMental}/{c.maxMental}
                 </p>
-                <p className="text-xs text-white/40">
+                <p className="tabular text-[0.7rem] text-parchment-mute">
                   Endu {c.currentEndurance}/{c.maxEndurance}
                 </p>
               </Link>
@@ -76,8 +89,12 @@ export default async function MjDashboardPage({
           {selected ? (
             <MJCharacterClient character={selected} />
           ) : (
-            <div className="rounded-xl border border-white/10 bg-white/[0.02] p-10 text-center text-sm text-white/50">
-              Aucun personnage. Run `pnpm db:seed` pour initialiser le roster.
+            <div className="card-grimoire p-10 text-center text-sm text-parchment-mute">
+              Aucun personnage. Run{" "}
+              <code className="tabular rounded-[--radius-xs] border border-gold-aged/15 bg-ink-deep px-1 py-0.5 text-gold-aged">
+                pnpm db:seed
+              </code>{" "}
+              pour initialiser le roster.
             </div>
           )}
         </section>

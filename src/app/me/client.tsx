@@ -32,16 +32,22 @@ export function MyCharacterClient({
   const refresh = () => startTransition(() => router.refresh());
 
   return (
-    <main className="min-h-screen bg-[#0a0c15] px-6 py-10 text-white">
-      <header className="mx-auto mb-8 max-w-6xl flex items-center justify-between">
+    <main className="relative z-[2] min-h-screen px-6 py-10">
+      <header className="mx-auto mb-8 max-w-6xl flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-white/40">Ma fiche</p>
-          <h1 className="text-2xl font-bold">
+          <p className="font-display text-xs uppercase tracking-[0.22em] text-gold-aged">
+            Ma fiche
+          </p>
+          <h1 className="font-display mt-1 text-2xl font-bold tracking-wide text-parchment">
             {character.name}
-            {character.nom && <span className="text-white/60"> {character.nom}</span>}
+            {character.nom && (
+              <span className="text-parchment-dim"> {character.nom}</span>
+            )}
           </h1>
         </div>
-        <p className="text-sm text-white/40">Connecté : {userName}</p>
+        <p className="text-xs text-parchment-mute">
+          Connecté&nbsp;: <span className="text-parchment-dim">{userName}</span>
+        </p>
       </header>
       <div className="mx-auto max-w-6xl">
         <CharacterSheet

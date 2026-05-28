@@ -1,26 +1,225 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   FAITH : RE — Design tokens
+   Direction : grimoire de campagne moderne
+   Nuit absolue + or vieilli + parchemin, sigils ✦
+   ============================================================ */
+
+@theme {
+  /* Surfaces — élévation par teinte légèrement plus claire que le fond */
+  --color-ink-deep: #0a0a0f;
+  --color-ink-near: #131319;
+  --color-ink-far: #1c1c25;
+  --color-ink-edge: #2a2a36;
+
+  /* Signature : or vieilli */
+  --color-gold-aged: #caa15a;
+  --color-gold-bright: #e8c074;
+  --color-gold-soft: #8a6e3e;
+  --color-gold-deep: #5d4926;
+
+  /* Vitaux */
+  --color-blood-dried: #b35a5a;
+  --color-blood-deep: #7a3a3a;
+  --color-amethyst: #9b7fd0;
+  --color-amethyst-deep: #5a4495;
+  --color-celadon: #8eb091;
+  --color-celadon-deep: #4f7053;
+
+  /* Parchemin (texte) */
+  --color-parchment: #ece1c4;
+  --color-parchment-dim: #aea087;
+  --color-parchment-mute: #6e6555;
+  --color-parchment-faint: #4a4339;
+
+  /* Sémantique fonctionnelle */
+  --color-success: #8eb091;
+  --color-warning: #d4a449;
+  --color-danger: #b35a5a;
+
+  /* Typography */
+  --font-display: "Cinzel", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* Espacement */
+  --spacing: 0.25rem; /* base 4px */
+
+  /* Radius */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ============================================================
+   Body globals
+   ============================================================ */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink-deep);
+  color: var(--color-parchment);
+  font-family: var(--font-sans);
+  font-feature-settings: "kern", "liga", "calt";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================================
+   Grain de parchemin sur le fond (très subtil)
+   Active via la classe `.with-grain` sur body ou un wrapper
+   ============================================================ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================
+   Composants utilitaires
+   ============================================================ */
+
+/* Sigil séparateur ✦ ✧ entre sections */
+.sigil-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-gold-soft);
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin: 2rem 0 1rem;
+}
+.sigil-divider::before,
+.sigil-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-gold-deep) 30%,
+    var(--color-gold-deep) 70%,
+    transparent
+  );
+}
+.sigil-divider .sigil-mark {
+  color: var(--color-gold-aged);
+  font-size: 1rem;
+}
+
+/* Card "parchemin" — fond très légèrement plus clair que ink-deep,
+   bord doré quasi-invisible, padding généreux */
+.card-grimoire {
+  background: var(--color-ink-near);
+  border: 1px solid rgba(202, 161, 90, 0.12);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  position: relative;
+}
+.card-grimoire::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(202, 161, 90, 0.1) 0%,
+    transparent 50%,
+    transparent 100%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+  opacity: 0.4;
+}
+
+/* Label de section — Cinzel small caps */
+.label-grimoire {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-gold-aged);
+}
+
+/* Bouton primaire signature : or, contour fin */
+.btn-grimoire {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+  font-weight: 500;
+  background: linear-gradient(180deg, var(--color-gold-aged) 0%, var(--color-gold-soft) 100%);
+  color: var(--color-ink-deep);
+  border: 1px solid var(--color-gold-aged);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  transition: filter 0.15s ease;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+.btn-grimoire:hover:not(:disabled) {
+  filter: brightness(1.15);
+}
+.btn-grimoire:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Bouton ghost (action secondaire) */
+.btn-ghost {
+  font-family: var(--font-sans);
+  background: transparent;
+  border: 1px solid rgba(202, 161, 90, 0.18);
+  color: var(--color-parchment-dim);
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  transition: all 0.15s ease;
+}
+.btn-ghost:hover:not(:disabled) {
+  border-color: rgba(202, 161, 90, 0.4);
+  color: var(--color-parchment);
+}
+
+/* Input grimoire — fond plus sombre que la card (inset), focus doré */
+.input-grimoire {
+  background: var(--color-ink-deep);
+  border: 1px solid rgba(202, 161, 90, 0.1);
+  border-radius: var(--radius-sm);
+  color: var(--color-parchment);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.input-grimoire:focus {
+  border-color: rgba(202, 161, 90, 0.5);
+}
+
+/* Chiffres vitaux : Mono, tabular */
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Animation discrète de pulse pour les sigils MJ */
+@keyframes sigil-glow {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+.sigil-glow {
+  animation: sigil-glow 3.2s ease-in-out infinite;
 }

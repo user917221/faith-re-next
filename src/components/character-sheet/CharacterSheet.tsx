@@ -11,6 +11,14 @@ import { ProfileEditor } from "./ProfileEditor";
 import { TrainingRequestButton } from "./TrainingRequestButton";
 import type { CharacterSheetProps } from "./types";
 
+function SigilDivider({ mark = "✦" }: { mark?: string }) {
+  return (
+    <div className="sigil-divider">
+      <span className="sigil-mark">{mark}</span>
+    </div>
+  );
+}
+
 export default function CharacterSheet({
   character,
   isMJ,
@@ -28,29 +36,33 @@ export default function CharacterSheet({
   const derivedLevel = calculateLevel(character.xp);
 
   return (
-    <div className="flex flex-col gap-6 text-white">
+    <div className="relative z-[2] flex flex-col gap-2">
       {/* Header identité */}
-      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-white/5 pb-4">
+      <header className="flex flex-wrap items-end justify-between gap-3 pb-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="font-display text-2xl font-bold tracking-wide text-gold-aged">
             {character.name}
             {character.nom ? ` ${character.nom}` : ""}
           </h1>
-          <p className="mt-1 text-sm text-white/50">
+          <p className="mt-1 text-sm text-parchment-mute">
             {character.age || "?"} ans{isMJ ? ` · Niveau ${derivedLevel}` : ""}
           </p>
         </div>
-        <span className="rounded-md border border-cyan-400/30 bg-cyan-400/[0.08] px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
+        <span className="font-display relative flex items-center gap-3 text-[0.65rem] uppercase tracking-[0.22em] text-gold-aged before:inline-block before:h-px before:w-6 before:bg-gold-soft after:inline-block after:h-px after:w-6 after:bg-gold-soft">
           {isMJ ? "Vue MJ" : "Vue joueur"}
         </span>
       </header>
 
+      <SigilDivider mark="✦" />
       <VitalsHeader character={character} onVitalChange={onVitalChange} />
 
+      <SigilDivider mark="✧" />
       <EnduranceActionPanel onActionCost={onActionCost} />
 
+      <SigilDivider mark="✦" />
       <PointAllocatorBar allocated={allocated} />
 
+      <SigilDivider mark="⚜" />
       <AttributesGrid
         character={character}
         isCapped={isCapped}
@@ -58,20 +70,27 @@ export default function CharacterSheet({
       />
 
       {!isMJ && onRequestTraining && (
-        <TrainingRequestButton
-          pending={pendingTraining ?? null}
-          onRequestTraining={onRequestTraining}
-        />
+        <>
+          <SigilDivider mark="✧" />
+          <TrainingRequestButton
+            pending={pendingTraining ?? null}
+            onRequestTraining={onRequestTraining}
+          />
+        </>
       )}
 
+      <SigilDivider mark="✦" />
       <ProfileEditor character={character} onProfileChange={onProfileChange} />
 
       {isMJ && (
-        <EvolutionSection
-          character={character}
-          onXpChange={onXpChange}
-          onTrainingChange={onTrainingChange}
-        />
+        <>
+          <SigilDivider mark="⚜" />
+          <EvolutionSection
+            character={character}
+            onXpChange={onXpChange}
+            onTrainingChange={onTrainingChange}
+          />
+        </>
       )}
     </div>
   );

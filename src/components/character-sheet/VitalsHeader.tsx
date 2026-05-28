@@ -27,15 +27,15 @@ export function VitalsHeader({ character, onVitalChange }: Props) {
       current: character.currentEndurance,
       max: character.maxEndurance,
       step: 10,
-      color: "text-cyan-400",
+      color: "text-celadon",
     },
     {
       type: "hp",
-      label: "Santé (HP)",
+      label: "Santé",
       current: character.currentHp,
       max: character.maxHp,
       step: 1,
-      color: "text-rose-400",
+      color: "text-blood-dried",
     },
     {
       type: "mental",
@@ -43,7 +43,7 @@ export function VitalsHeader({ character, onVitalChange }: Props) {
       current: character.currentMental,
       max: character.maxMental,
       step: 1,
-      color: "text-violet-400",
+      color: "text-amethyst",
     },
   ];
 
@@ -55,33 +55,34 @@ export function VitalsHeader({ character, onVitalChange }: Props) {
   }
 
   return (
-    <section className="grid grid-cols-1 gap-4 rounded-2xl border border-white/10 bg-white/[0.02] p-5 md:grid-cols-3">
+    <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {vitals.map((v) => (
-        <div
-          key={v.type}
-          className="flex flex-col gap-2 rounded-xl border border-white/5 bg-black/20 px-4 py-3"
-        >
-          <span className="text-xs font-bold uppercase tracking-wider text-white/60">
-            {v.label}
-          </span>
+        <div key={v.type} className="card-grimoire flex flex-col gap-3">
+          <span className="label-grimoire">{v.label}</span>
           <div className="flex items-baseline justify-between gap-3">
-            <span className={`text-2xl font-extrabold ${v.color}`}>
-              {v.current}/{v.max}
-            </span>
-            <div className="flex gap-1">
+            <div className="flex items-baseline gap-1.5">
+              <span className={`tabular text-3xl font-bold leading-none ${v.color}`}>
+                {v.current}
+              </span>
+              <span className="text-parchment-mute text-base leading-none">/</span>
+              <span className="tabular text-base font-medium text-parchment-mute leading-none">
+                {v.max}
+              </span>
+            </div>
+            <div className="flex gap-1.5">
               <button
                 type="button"
                 disabled={isPending || !onVitalChange}
                 onClick={() => adjust(v.type, -v.step)}
-                className="flex h-7 w-9 items-center justify-center rounded-md bg-white/10 text-xs font-bold text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-ghost !px-2 !py-1 text-[0.7rem] font-bold disabled:opacity-35"
               >
-                -{v.step}
+                −{v.step}
               </button>
               <button
                 type="button"
                 disabled={isPending || !onVitalChange}
                 onClick={() => adjust(v.type, v.step)}
-                className="flex h-7 w-9 items-center justify-center rounded-md bg-white/10 text-xs font-bold text-white transition-colors hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-ghost !px-2 !py-1 text-[0.7rem] font-bold disabled:opacity-35"
               >
                 +{v.step}
               </button>

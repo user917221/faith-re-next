@@ -72,19 +72,22 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
 
   if (requests.length === 0) {
     return (
-      <div className="mb-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/40">
+      <div className="card-grimoire mb-6 text-sm italic text-parchment-mute">
         Aucune demande d&apos;entraînement en attente.
       </div>
     );
   }
 
   return (
-    <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/[0.05] p-5">
-      <header className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-bold uppercase tracking-wider text-amber-300">
-          🏋️ Demandes d&apos;entraînement en attente
+    <div
+      className="card-grimoire mb-6"
+      style={{ borderColor: "rgba(202, 161, 90, 0.3)" }}
+    >
+      <header className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="label-grimoire !text-gold-bright">
+          ⚜ Demandes d&apos;entraînement en attente
         </h2>
-        <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-xs font-semibold text-amber-200">
+        <span className="font-display tabular rounded-[--radius-xs] border border-gold-aged/30 px-2 py-0.5 text-[0.65rem] text-gold-bright">
           {requests.length}
         </span>
       </header>
@@ -92,21 +95,23 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
         {requests.map((r) => (
           <li
             key={r.id}
-            className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/30 p-4 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-3 rounded-[--radius-sm] border border-gold-aged/10 bg-ink-deep p-4 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
-              <p className="text-sm font-semibold text-white">
+              <p className="font-display text-sm tracking-wide text-parchment">
                 {r.characterName}
                 {r.requesterName && (
-                  <span className="ml-2 text-xs font-normal text-white/40">
+                  <span className="ml-2 text-[0.7rem] font-normal text-parchment-mute">
                     par {r.requesterName}
                   </span>
                 )}
               </p>
               {r.note && (
-                <p className="mt-1 text-xs italic text-white/60">« {r.note} »</p>
+                <p className="mt-1 text-xs italic text-parchment-dim">
+                  «&nbsp;{r.note}&nbsp;»
+                </p>
               )}
-              <p className="mt-1 text-xs text-white/40">
+              <p className="tabular mt-1 text-[0.7rem] text-parchment-mute">
                 {new Date(r.requestedAt).toLocaleString("fr-FR")}
               </p>
             </div>
@@ -115,7 +120,7 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
                 type="button"
                 disabled={isPending}
                 onClick={() => startTransition(async () => { await approveTraining(r.id); refresh(); })}
-                className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-emerald-400 disabled:opacity-40"
+                className="btn-grimoire"
               >
                 Approuver (+1)
               </button>
@@ -123,7 +128,7 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
                 type="button"
                 disabled={isPending}
                 onClick={() => startTransition(async () => { await rejectTraining(r.id); refresh(); })}
-                className="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-white/10 disabled:opacity-40"
+                className="btn-ghost"
               >
                 Refuser
               </button>

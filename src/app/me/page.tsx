@@ -43,15 +43,17 @@ export default async function MePage() {
       where: isNull(characters.ownerUserId),
     });
     return (
-      <main className="min-h-screen bg-[#0a0c15] px-6 py-10 text-white">
+      <main className="relative z-[2] min-h-screen px-6 py-10">
         <div className="mx-auto max-w-2xl">
-          <h1 className="text-3xl font-bold">Bienvenue, {session.user.name}</h1>
-          <p className="mt-2 text-sm text-white/60">
-            Tu n&apos;as pas encore réclamé de personnage. Choisis le tien :
+          <h1 className="font-display text-3xl font-bold tracking-wide text-gold-aged">
+            Bienvenue, {session.user.name}
+          </h1>
+          <p className="mt-2 text-sm text-parchment-dim">
+            Tu n&apos;as pas encore réclamé de personnage. Choisis le tien&nbsp;:
           </p>
           <div className="mt-6 grid gap-3">
             {availableRows.length === 0 ? (
-              <p className="text-sm text-white/50">
+              <p className="text-sm text-parchment-mute">
                 Aucun personnage disponible. Le MJ doit en créer un ou t&apos;assigner manuellement.
               </p>
             ) : (
@@ -59,9 +61,12 @@ export default async function MePage() {
                 <form key={c.id} action={async () => { "use server"; await claimCharacter(c.id); redirect("/me"); }}>
                   <button
                     type="submit"
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.02] p-4 text-left transition hover:bg-white/5"
+                    className="card-grimoire group w-full text-left transition hover:border-gold-aged/30"
                   >
-                    <span className="text-lg font-semibold">{c.name}</span>
+                    <span className="font-display text-lg text-parchment transition-colors group-hover:text-gold-aged">
+                      <span aria-hidden className="mr-2 text-gold-soft">✦</span>
+                      {c.name}
+                    </span>
                   </button>
                 </form>
               ))

@@ -9,10 +9,12 @@ export default function SignInPage({
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#0a0c15] text-white">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.02] p-8 backdrop-blur-sm">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight">FAITH : RE</h1>
-        <p className="mb-8 text-sm text-white/60">
+    <main className="relative z-[2] flex min-h-screen items-center justify-center px-6">
+      <div className="card-grimoire w-full max-w-md">
+        <h1 className="font-display mb-2 text-3xl font-bold tracking-wide text-gold-aged">
+          FAITH : RE
+        </h1>
+        <p className="mb-8 text-sm text-parchment-dim">
           Connecte-toi avec ton compte Discord pour rejoindre la table.
         </p>
         <form
@@ -24,14 +26,17 @@ export default function SignInPage({
         >
           <button
             type="submit"
-            className="w-full rounded-lg bg-[#5865F2] px-6 py-3 font-medium text-white transition hover:bg-[#4752c4]"
+            className="w-full rounded-[--radius-sm] bg-[#5865F2] px-6 py-3 font-medium text-white transition hover:bg-[#4752c4]"
           >
             Connexion avec Discord
           </button>
         </form>
-        <p className="mt-6 text-center text-xs text-white/40">
-          MJ ? Ton rôle est promu automatiquement si ton Discord ID correspond
-          à <code className="rounded bg-white/5 px-1 py-0.5">MJ_DISCORD_ID</code>.
+        <p className="mt-6 text-center text-xs text-parchment-mute">
+          MJ&nbsp;? Ton rôle est promu automatiquement si ton Discord ID correspond à{" "}
+          <code className="tabular rounded-[--radius-xs] border border-gold-aged/15 bg-ink-deep px-1 py-0.5 text-gold-aged">
+            MJ_DISCORD_ID
+          </code>
+          .
         </p>
       </div>
     </main>

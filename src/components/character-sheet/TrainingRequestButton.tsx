@@ -32,17 +32,24 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
 
   if (pending) {
     return (
-      <section className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.04] p-5">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-amber-300">
-          🏋️ Entraînement en attente
-        </h3>
-        <p className="mt-2 text-sm text-white/70">
-          Ta demande est en cours d&apos;examen par le MJ. Demandé{" "}
-          <RelativeTime date={pending.requestedAt} />.
+      <section
+        className="card-grimoire"
+        style={{ borderColor: "rgba(202, 161, 90, 0.3)" }}
+      >
+        <header className="flex items-baseline justify-between gap-3">
+          <span className="label-grimoire !text-gold-bright">
+            ⚜ Entraînement en attente
+          </span>
+          <span className="text-[0.7rem] italic text-parchment-mute">
+            <RelativeTime date={pending.requestedAt} />
+          </span>
+        </header>
+        <p className="mt-2 text-sm text-parchment-dim">
+          Ta demande est en cours d&apos;examen par le MJ.
         </p>
         {pending.note && (
-          <p className="mt-2 rounded-lg border border-white/10 bg-black/20 p-3 text-xs italic text-white/60">
-            « {pending.note} »
+          <p className="mt-3 rounded-[--radius-sm] border border-gold-aged/10 bg-ink-deep p-3 text-xs italic text-parchment-mute">
+            «&nbsp;{pending.note}&nbsp;»
           </p>
         )}
       </section>
@@ -50,14 +57,12 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-      <header className="mb-3">
-        <h3 className="text-sm font-bold uppercase tracking-wider text-white/60">
-          🏋️ Entraînement Endurance
-        </h3>
-        <p className="mt-0.5 text-xs text-white/40">
-          Demande au MJ d&apos;ajouter un entraînement à ton compteur. Si approuvé,
-          ton palier d&apos;endurance évoluera vers le seuil suivant.
+    <section className="card-grimoire">
+      <header className="mb-3 flex flex-col gap-1">
+        <span className="label-grimoire">Entraînement endurance</span>
+        <p className="text-xs text-parchment-mute">
+          Demande au MJ d&apos;ajouter un entraînement à ton compteur. Si approuvé, ton
+          palier évoluera vers le seuil suivant.
         </p>
       </header>
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -66,19 +71,19 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="(Optionnel) Précise pourquoi : course, sparring, méditation…"
-          className="flex-1 rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-cyan-400/50"
+          className="input-grimoire flex-1"
         />
         <button
           type="button"
           disabled={isPending}
           onClick={submit}
-          className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-grimoire"
         >
           {isPending ? "Envoi…" : "Demander un entraînement"}
         </button>
       </div>
       {feedback && (
-        <p className="mt-3 text-xs text-cyan-300">{feedback}</p>
+        <p className="mt-3 text-xs italic text-gold-bright">{feedback}</p>
       )}
     </section>
   );
