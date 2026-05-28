@@ -79,11 +79,18 @@ export function DDPopover({ title, bonus, bonusLabel, trigger, onRoll, align = "
         {trigger}
       </span>
       {open && (
-        <div
-          className={`popover-rise absolute top-full z-30 mt-2 w-[300px] rounded-[--radius-md] border border-gold-aged/30 bg-ink-near p-3.5 shadow-[0_18px_40px_-12px_rgba(0,0,0,0.7)] ${
-            align === "right" ? "right-0" : "left-0"
-          }`}
-        >
+        <>
+          {/* Backdrop subtil pour assombrir le contenu derrière et focaliser le popover */}
+          <div
+            className="fixed inset-0 z-40 bg-ink-deep/40 backdrop-blur-[1px] animate-[crit-overlay-fade_0.18s_ease-out]"
+            onClick={() => setOpen(false)}
+            aria-hidden
+          />
+          <div
+            className={`popover-rise absolute top-full z-50 mt-2 w-[300px] rounded-[--radius-md] border border-gold-aged/40 bg-ink-near p-3.5 shadow-[0_28px_60px_-16px_rgba(0,0,0,0.85),0_0_0_1px_rgba(202,161,90,0.08),0_0_40px_-12px_rgba(202,161,90,0.18)] ${
+              align === "right" ? "right-0" : "left-0"
+            }`}
+          >
           <p className="font-display text-[0.78rem] tracking-[0.06em] text-gold-aged">
             Jet de <span className="text-gold-bright">{title}</span>
           </p>
@@ -183,7 +190,8 @@ export function DDPopover({ title, bonus, bonusLabel, trigger, onRoll, align = "
           >
             {isPending ? "Lancement…" : `Lancer 2d6 + ${bonus}`}
           </button>
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
