@@ -5,7 +5,6 @@ import type { Character, VitalType } from "./types";
 
 type Props = {
   character: Character;
-  isMJ: boolean;
   onVitalChange?: (type: VitalType, delta: number) => Promise<void>;
 };
 
@@ -16,10 +15,9 @@ type Vital = {
   max: number;
   step: number;
   color: string;
-  isPrivate?: boolean;
 };
 
-export function VitalsHeader({ character, isMJ, onVitalChange }: Props) {
+export function VitalsHeader({ character, onVitalChange }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const vitals: Vital[] = [
@@ -30,7 +28,6 @@ export function VitalsHeader({ character, isMJ, onVitalChange }: Props) {
       max: character.maxEndurance,
       step: 10,
       color: "text-cyan-400",
-      isPrivate: !isMJ,
     },
     {
       type: "hp",
@@ -69,13 +66,7 @@ export function VitalsHeader({ character, isMJ, onVitalChange }: Props) {
           </span>
           <div className="flex items-baseline justify-between gap-3">
             <span className={`text-2xl font-extrabold ${v.color}`}>
-              {v.isPrivate ? (
-                <span className="text-base font-semibold text-white/40">
-                  Privé MJ
-                </span>
-              ) : (
-                `${v.current}/${v.max}`
-              )}
+              {v.current}/{v.max}
             </span>
             <div className="flex gap-1">
               <button

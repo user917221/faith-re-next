@@ -30,9 +30,22 @@ export type Character = {
 export type ActionType = keyof typeof ENDURANCE_COSTS;
 export type VitalType = "hp" | "mental" | "endu";
 
+export type ProfilePatch = {
+  name?: string;
+  nom?: string;
+  age?: number;
+};
+
+export type PendingTrainingRequest = {
+  id: string;
+  requestedAt: Date;
+  note: string | null;
+};
+
 export type CharacterSheetProps = {
   character: Character;
   isMJ: boolean;
+  pendingTraining?: PendingTrainingRequest | null;
   onSkillChange?: (skillName: string, delta: 1 | -1) => Promise<void>;
   onVitalChange?: (type: VitalType, delta: number) => Promise<void>;
   onActionCost?: (actionType: ActionType) => Promise<void>;
@@ -40,4 +53,6 @@ export type CharacterSheetProps = {
   onTrainingChange?: (delta: 1 | -1) => Promise<void>;
   onFateChange?: (value: number) => Promise<void>;
   onRuneChange?: (index: number, value: string) => Promise<void>;
+  onProfileChange?: (patch: ProfilePatch) => Promise<void>;
+  onRequestTraining?: (note?: string) => Promise<void>;
 };

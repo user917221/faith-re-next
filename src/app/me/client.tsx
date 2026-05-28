@@ -3,21 +3,29 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import CharacterSheet from "@/components/character-sheet";
-import type { Character } from "@/components/character-sheet/types";
+import type {
+  Character,
+  PendingTrainingRequest,
+  ProfilePatch,
+} from "@/components/character-sheet/types";
 import {
   updateSkill,
   updateVital,
   applyEnduranceAction,
   updateFatePoints,
   updateRunes,
+  updateProfile,
+  requestTraining,
 } from "@/lib/actions";
 
 export function MyCharacterClient({
   character,
   userName,
+  pendingTraining,
 }: {
   character: Character;
   userName: string;
+  pendingTraining: PendingTrainingRequest | null;
 }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -39,6 +47,7 @@ export function MyCharacterClient({
         <CharacterSheet
           character={character}
           isMJ={false}
+          pendingTraining={pendingTraining}
           onSkillChange={async (skillName, delta) => {
             await updateSkill(character.id, skillName, delta);
             refresh();
@@ -59,6 +68,15 @@ export function MyCharacterClient({
             const next = [...character.runes];
             next[index] = value;
             await updateRunes(character.id, next);
+            refresh();
+          }}
+          onProfileChange={async (patch: ProfilePatch) => {
+            await updateProfile(character.id, patch);
+            refresh();
+          }}
+          onRequestTraining={async (note) => {
+            const res = await requestTraining(character.id, note);
+            if (!res.ok) throw new Error(res.reason);
             refresh();
           }}
         />

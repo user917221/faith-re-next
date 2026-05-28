@@ -2,7 +2,8 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { loadAllCharacters, loadCharacter } from "@/lib/load-character";
-import { MJCharacterClient } from "./client";
+import { listTrainingRequestsForMJ } from "@/lib/actions";
+import { MJCharacterClient, PendingTrainingPanel } from "./client";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,11 @@ export default async function MjDashboardPage({
   if (!session?.user) redirect("/signin?callbackUrl=/mj");
   if (session.user.role !== "mj") redirect("/me");
 
-  const allChars = await loadAllCharacters();
-  const params = await searchParams;
+  const [allChars, params, pendingRequests] = await Promise.all([
+    loadAllCharacters(),
+    searchParams,
+    listTrainingRequestsForMJ(),
+  ]);
   const selectedId = params.id ?? allChars[0]?.id;
   const selected = selectedId ? await loadCharacter(selectedId) : null;
 
@@ -31,6 +35,10 @@ export default async function MjDashboardPage({
           Endurance révélée
         </span>
       </header>
+
+      <div className="mx-auto max-w-7xl">
+        <PendingTrainingPanel requests={pendingRequests} />
+      </div>
 
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[260px_1fr]">
         <aside className="space-y-2">

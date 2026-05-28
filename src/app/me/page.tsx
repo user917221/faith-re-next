@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { eq, isNull } from "drizzle-orm";
-import { characters } from "@/db/schema";
+import { and, eq, isNull } from "drizzle-orm";
+import { characters, trainingRequests } from "@/db/schema";
 import { loadCharacterForUser } from "@/lib/load-character";
 import { MyCharacterClient } from "./client";
 import { revalidatePath } from "next/cache";
@@ -72,7 +72,22 @@ export default async function MePage() {
     );
   }
 
+  const pendingRow = await db.query.trainingRequests.findFirst({
+    where: and(
+      eq(trainingRequests.characterId, character.id),
+      eq(trainingRequests.status, "pending"),
+    ),
+  });
+
   return (
-    <MyCharacterClient character={character} userName={session.user.name ?? ""} />
+    <MyCharacterClient
+      character={character}
+      userName={session.user.name ?? ""}
+      pendingTraining={
+        pendingRow
+          ? { id: pendingRow.id, requestedAt: pendingRow.requestedAt, note: pendingRow.note }
+          : null
+      }
+    />
   );
 }

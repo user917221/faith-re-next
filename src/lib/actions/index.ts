@@ -17,3 +17,14 @@ export {
 } from "./character";
 
 export { rollSkillCheck, rollCustomFormula } from "./roll";
+
+export { updateProfile } from "./profile";
+
+export {
+  requestTraining,
+  approveTraining,
+  rejectTraining,
+  listTrainingRequestsForMJ,
+  listTrainingRequestsForCharacter,
+  type TrainingRequestWithChar,
+} from "./training";

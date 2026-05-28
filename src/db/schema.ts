@@ -24,6 +24,7 @@ import { relations } from "drizzle-orm";
 import type { AdapterAccountType } from "next-auth/adapters";
 
 export const userRoleEnum = pgEnum("user_role", ["mj", "player", "spectator"]);
+export const requestStatusEnum = pgEnum("request_status", ["pending", "approved", "rejected"]);
 
 // ---------------- Auth.js tables (drizzle adapter spec) ----------------
 
@@ -118,6 +119,22 @@ export const characterSkills = pgTable(
   (t) => [primaryKey({ columns: [t.characterId, t.skillName] })],
 );
 
+// Requêtes d'entraînement endurance : le joueur demande, le MJ approuve/refuse.
+// L'approbation déclenche un increment enduranceTrainings (+1) côté Server Action.
+export const trainingRequests = pgTable("training_request", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  characterId: uuid("character_id")
+    .notNull()
+    .references(() => characters.id, { onDelete: "cascade" }),
+  requestedBy: text("requested_by")
+    .references(() => users.id, { onDelete: "set null" }),
+  requestedAt: timestamp("requested_at").defaultNow().notNull(),
+  status: requestStatusEnum("status").default("pending").notNull(),
+  decidedBy: text("decided_by").references(() => users.id, { onDelete: "set null" }),
+  decidedAt: timestamp("decided_at"),
+  note: text("note"),
+});
+
 // ---------------- Relations ----------------
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -139,9 +156,27 @@ export const characterSkillsRelations = relations(characterSkills, ({ one }) => 
   }),
 }));
 
+export const trainingRequestsRelations = relations(trainingRequests, ({ one }) => ({
+  character: one(characters, {
+    fields: [trainingRequests.characterId],
+    references: [characters.id],
+  }),
+  requester: one(users, {
+    fields: [trainingRequests.requestedBy],
+    references: [users.id],
+    relationName: "training_requester",
+  }),
+  decider: one(users, {
+    fields: [trainingRequests.decidedBy],
+    references: [users.id],
+    relationName: "training_decider",
+  }),
+}));
+
 // ---------------- Inferred types ----------------
 
 export type User = typeof users.$inferSelect;
 export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type CharacterSkill = typeof characterSkills.$inferSelect;
+export type TrainingRequest = typeof trainingRequests.$inferSelect;
