@@ -1082,31 +1082,29 @@ export function PlateauClient({
     <div className="relative z-[2] flex flex-col gap-4 lg:gap-5">
       <CritOverlay latestRoll={latestRoll} />
 
-      {/* Sous-titre — Session ouverte + présents (le titre est dans la topbar du shell) */}
-      <div className="flex flex-wrap items-center gap-3">
-        <RoundTableGlyph size={28} className="text-muted-foreground" />
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Plateau de jeu
-          </h1>
-          <p className="mt-0.5 text-[0.78rem] text-muted-foreground">
-            Session ouverte · {presentCount}{" "}
-            {presentCount > 1 ? "joueurs" : "joueur"}
-          </p>
-        </div>
+      {/* Sous-titre — le titre "Plateau" vit dans la topbar du shell, on ne le redouble pas. */}
+      <div className="flex items-center gap-2">
+        <span className="presence-led-on mt-px inline-block h-1.5 w-1.5 shrink-0 rounded-full" aria-hidden />
+        <p className="text-[0.78rem] text-muted-foreground">
+          Session ouverte
+          <span className="text-ink-tertiary">
+            {" · "}
+            {presentCount} {presentCount > 1 ? "joueurs" : "joueur"}
+          </span>
+        </p>
       </div>
 
       {/* === lg+ : 3 panneaux resizable (orientation horizontale par défaut) === */}
       <ResizablePanelGroup className="hidden min-h-[560px] lg:flex">
-        <ResizablePanel defaultSize={22} minSize={16} className="pr-3">
+        <ResizablePanel defaultSize={22} minSize={16} className="pr-1.5">
           <Roster characters={characters} isMJ={isMJ} ownedId={ownedCharacterId} />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={50} minSize={32} className="px-3">
+        <ResizablePanel defaultSize={50} minSize={32} className="px-1.5">
           <Scene latest={latestItem} items={initialRolls} />
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={28} minSize={20} className="pl-3">
+        <ResizablePanel defaultSize={28} minSize={20} className="pl-1.5">
           {hasCharacters ? (
             <Launcher characters={characters} defaultCharacterId={defaultCharacterId} />
           ) : (

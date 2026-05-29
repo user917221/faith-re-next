@@ -30,8 +30,8 @@ export default async function HomePage() {
             ============================================================ */}
         <Card className="justify-center border border-border ring-0 lg:col-span-3">
           <CardContent className="flex min-h-[440px] flex-col items-center justify-center gap-8 text-center lg:min-h-[520px]">
-            {/* Glyph hero — seul usage lavande décoratif autorisé, subtil */}
-            <ConstellationGlyph size={160} className="text-primary/70" />
+            {/* Glyph hero — monochrome discret (lavande réservée au CTA) */}
+            <ConstellationGlyph size={160} className="text-ink-tertiary" />
 
             <div className="flex flex-col items-center gap-3">
               <p className="label-grimoire">Grimoire de campagne</p>

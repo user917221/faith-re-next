@@ -43,7 +43,8 @@ export function MyCharacterClient({
       }}
       onVitalChange={async (type, delta) => {
         await updateVital(character.id, type, delta);
-        toast(`${type} ${delta > 0 ? "+" : ""}${delta}`);
+        const vitalLabel = { hp: "PV", mental: "PM", endu: "END" }[type];
+        toast(`${vitalLabel} ${delta > 0 ? "+" : ""}${delta}`);
         refresh();
       }}
       onActionCost={async (actionType) => {

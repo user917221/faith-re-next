@@ -79,7 +79,7 @@ export default async function MePage() {
             <Empty className="border border-border bg-card">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
-                  <Sparkles className="text-primary" />
+                  <Sparkles className="text-ink-tertiary" />
                 </EmptyMedia>
                 <EmptyTitle>Réclame ton personnage</EmptyTitle>
                 <EmptyDescription>

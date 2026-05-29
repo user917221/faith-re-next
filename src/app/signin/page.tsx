@@ -16,8 +16,8 @@ export default function SignInPage({
     <main className="relative z-[2] flex min-h-screen items-center justify-center px-6 py-12">
       <Card className="w-full max-w-md border border-border ring-0">
         <CardContent className="flex flex-col items-center gap-7 text-center">
-          {/* Glyph hero — seul usage lavande décoratif autorisé, subtil */}
-          <ConstellationGlyph size={132} className="text-primary/70" />
+          {/* Glyph hero — monochrome discret (cohérent avec la landing) */}
+          <ConstellationGlyph size={132} className="text-ink-tertiary" />
 
           <div className="flex flex-col items-center gap-2.5">
             <p className="label-grimoire">Convocation</p>

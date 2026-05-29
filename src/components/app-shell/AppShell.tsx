@@ -40,6 +40,7 @@ export function AppShell({
           )}
           <button
             type="button"
+            aria-label="Rechercher (⌘K)"
             onClick={() => {
               document.dispatchEvent(
                 new KeyboardEvent("keydown", { key: "k", metaKey: true }),

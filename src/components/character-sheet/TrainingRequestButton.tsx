@@ -42,7 +42,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
 
   if (pending) {
     return (
-      <Card size="sm">
+      <Card size="sm" className="border border-border ring-0">
         <CardHeader className="grid-cols-[1fr_auto] items-center">
           <div className="flex items-center gap-2">
             <Badge variant="outline">En attente</Badge>
@@ -67,7 +67,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
   }
 
   return (
-    <Card size="sm">
+    <Card size="sm" className="border border-border ring-0">
       <CardHeader>
         <CardTitle className="text-sm">Entraînement endurance</CardTitle>
         <CardDescription>

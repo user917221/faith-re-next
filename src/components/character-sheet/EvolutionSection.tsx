@@ -135,7 +135,7 @@ export function EvolutionSection({
                 <>
                   <span className="tabular">{character.xp}</span> /{" "}
                   <span className="tabular">{nextXp}</span> — encore{" "}
-                  <span className="tabular text-primary">
+                  <span className="tabular font-medium text-foreground">
                     {Math.max(0, nextXp - character.xp)}
                   </span>{" "}
                   XP pour Niv. {level + 1}
@@ -201,7 +201,7 @@ export function EvolutionSection({
                     {character.enduranceTrainings}
                   </span>{" "}
                   entraînement(s) — encore{" "}
-                  <span className="tabular text-primary">
+                  <span className="tabular font-medium text-foreground">
                     {nextTier.trainings - character.enduranceTrainings}
                   </span>{" "}
                   pour {nextTier.label} (
