@@ -28,6 +28,26 @@ export type Character = {
   skills: Record<string, number>;
   isPresent: boolean;
   avatarUrl: string | null;
+  // --- Flux (2e jauge magique) ---
+  fluxTrainings: number;
+  technicalTrainings: number;
+  combatsReal: number;
+  currentFlux: number;
+  maxFlux: number; // dérivé du palier de Flux
+  fluxPalier: number; // -1 = initial, 0..5
+  fluxLabel: string; // "Initial" | "P0".."P5"
+  technicalPalier: number;
+  technicalLabel: string;
+  tier: string; // "T{niveau}"
+  // --- Inventaire de runes ---
+  runesInventory: RuneItem[];
+};
+
+export type RuneItem = {
+  id: string;
+  name: string;
+  type: "utilitaire" | "armement" | "predefinie";
+  description: string | null;
 };
 
 export type ActionType = keyof typeof ENDURANCE_COSTS;

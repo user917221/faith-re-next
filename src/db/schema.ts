@@ -25,6 +25,7 @@ import type { AdapterAccountType } from "next-auth/adapters";
 
 export const userRoleEnum = pgEnum("user_role", ["mj", "player", "spectator"]);
 export const requestStatusEnum = pgEnum("request_status", ["pending", "approved", "rejected"]);
+export const runeTypeEnum = pgEnum("rune_type", ["utilitaire", "armement", "predefinie"]);
 
 // ---------------- Auth.js tables (drizzle adapter spec) ----------------
 
@@ -92,11 +93,17 @@ export const characters = pgTable("character", {
   nom: text("nom").default("").notNull(),
   age: integer("age").default(25).notNull(),
   xp: integer("xp").default(0).notNull(),
+  // entraînements (3 axes) : physique (= endurance, existant), flux, technique
   enduranceTrainings: integer("endurance_trainings").default(2).notNull(),
+  fluxTrainings: integer("flux_trainings").default(0).notNull(),
+  technicalTrainings: integer("technical_trainings").default(0).notNull(),
+  // combats réels (condition de palier de Flux)
+  combatsReal: integer("combats_real").default(0).notNull(),
   // vitals runtime (les max sont dérivés)
   currentHp: integer("current_hp").default(45).notNull(),
   currentMental: integer("current_mental").default(45).notNull(),
   currentEndurance: integer("current_endurance").default(250).notNull(),
+  currentFlux: integer("current_flux").default(100).notNull(),
   // narration
   fatePoints: integer("fate_points").default(2).notNull(),
   runes: jsonb("runes").$type<string[]>().default([]).notNull(),
@@ -122,6 +129,19 @@ export const characterSkills = pgTable(
   },
   (t) => [primaryKey({ columns: [t.characterId, t.skillName] })],
 );
+
+// Inventaire de runes — 3 types (utilitaire / armement / prédéfinie).
+// Distinct des 3 slots équipés (characters.runes jsonb). Add/remove libre.
+export const characterRunes = pgTable("character_rune", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  characterId: uuid("character_id")
+    .notNull()
+    .references(() => characters.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  type: runeTypeEnum("type").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 // Jets publics : tout user connecté lance, snapshot du nom perso + caster.
 // Visibles sur /plateau pour l'ensemble de la table.
@@ -179,6 +199,14 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
     references: [users.id],
   }),
   skills: many(characterSkills),
+  runesInventory: many(characterRunes),
+}));
+
+export const characterRunesRelations = relations(characterRunes, ({ one }) => ({
+  character: one(characters, {
+    fields: [characterRunes.characterId],
+    references: [characters.id],
+  }),
 }));
 
 export const characterSkillsRelations = relations(characterSkills, ({ one }) => ({
@@ -223,4 +251,6 @@ export type Character = typeof characters.$inferSelect;
 export type NewCharacter = typeof characters.$inferInsert;
 export type CharacterSkill = typeof characterSkills.$inferSelect;
 export type TrainingRequest = typeof trainingRequests.$inferSelect;
+export type CharacterRune = typeof characterRunes.$inferSelect;
+export type NewCharacterRune = typeof characterRunes.$inferInsert;
 export type PublicRoll = typeof publicRolls.$inferSelect;

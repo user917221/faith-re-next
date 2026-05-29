@@ -68,3 +68,106 @@ export function nextEnduranceTier(trainings: number) {
   }
   return null;
 }
+
+// ============================================================
+//  FLUX — 2e jauge (ressource magique, gris/blanc "substance")
+//  Le palier de Flux dépend de DEUX conditions : entraînements de Flux
+//  ET combats réels. Le perso atteint le palier le plus haut dont les
+//  deux conditions sont remplies. Le palier fixe la jauge max + débloque
+//  les catégories de sorts.
+// ============================================================
+
+export const FLUX_DEFAULT_MAX = 100; // jauge initiale (avant P0)
+
+/** Paliers de Flux, du plus haut au plus bas. */
+export const FLUX_TIERS = [
+  { palier: 5, fluxTrainings: 15, combats: 6, max: 3000, label: "P5" },
+  { palier: 4, fluxTrainings: 10, combats: 5, max: 2000, label: "P4" },
+  { palier: 3, fluxTrainings: 7,  combats: 4, max: 1000, label: "P3" },
+  { palier: 2, fluxTrainings: 5,  combats: 3, max: 750,  label: "P2" },
+  { palier: 1, fluxTrainings: 3,  combats: 2, max: 500,  label: "P1" },
+  { palier: 0, fluxTrainings: 2,  combats: 1, max: 250,  label: "P0" },
+] as const;
+
+/**
+ * Catégories de sorts débloquées par palier de Flux.
+ * Index = palier minimal requis. Le coût est en points de Flux.
+ */
+export const SPELL_CATEGORIES = [
+  { minPalier: 1, name: "Sorts simples",        cost: 100 },
+  { minPalier: 2, name: "Sorts intermédiaires", cost: 150 },
+  { minPalier: 3, name: "Sorts complexes",      cost: 250 },
+  { minPalier: 4, name: "Sorts uniques",        cost: 350 },
+  { minPalier: 5, name: "Inconnu",              cost: 500 },
+] as const;
+
+export type FluxTier = {
+  palier: number;
+  fluxTrainings: number;
+  combats: number;
+  max: number;
+  label: string;
+};
+
+/**
+ * Palier de Flux atteint : le plus haut dont les DEUX conditions
+ * (entraînements de Flux ET combats réels) sont remplies.
+ */
+export function getFluxTier(fluxTrainings: number, combats: number): FluxTier {
+  for (const tier of FLUX_TIERS) {
+    if ((fluxTrainings ?? 0) >= tier.fluxTrainings && (combats ?? 0) >= tier.combats) {
+      return tier;
+    }
+  }
+  return { palier: -1, fluxTrainings: 0, combats: 0, max: FLUX_DEFAULT_MAX, label: "Initial" };
+}
+
+/** Prochain palier de Flux non atteint (pour la progression UI). */
+export function nextFluxTier(fluxTrainings: number, combats: number): FluxTier | null {
+  const current = getFluxTier(fluxTrainings, combats);
+  const ascending = [...FLUX_TIERS].reverse();
+  for (const tier of ascending) {
+    if (tier.palier > current.palier) return tier;
+  }
+  return null;
+}
+
+/** Catégories de sorts accessibles à un palier de Flux donné. */
+export function unlockedSpells(palier: number) {
+  return SPELL_CATEGORIES.filter((c) => c.minPalier <= palier);
+}
+
+// ============================================================
+//  TECHNIQUE — 3e compteur d'entraînement (paliers techniques).
+//  Effet exact défini par le MJ en jeu ; on fournit la progression.
+// ============================================================
+
+export const TECHNICAL_TIERS = [
+  { trainings: 15, palier: 5, label: "Maîtrise" },
+  { trainings: 10, palier: 4, label: "Expert" },
+  { trainings: 7,  palier: 3, label: "Avancé" },
+  { trainings: 5,  palier: 2, label: "Confirmé" },
+  { trainings: 3,  palier: 1, label: "Initié" },
+  { trainings: 2,  palier: 0, label: "Novice" },
+] as const;
+
+export function getTechnicalTier(trainings: number) {
+  for (const tier of TECHNICAL_TIERS) {
+    if ((trainings ?? 0) >= tier.trainings) return tier;
+  }
+  return { trainings: 0, palier: -1, label: "Aucun" } as const;
+}
+
+// --- Tier global (alias du niveau XP, affiché "T{n}") ---
+export function tierLabel(xp: number): string {
+  return `T${calculateLevel(xp)}`;
+}
+
+// --- Types de runes (inventaire) ---
+export const RUNE_TYPES = ["utilitaire", "armement", "predefinie"] as const;
+export type RuneType = (typeof RUNE_TYPES)[number];
+export const RUNE_TYPE_LABEL: Record<RuneType, string> = {
+  utilitaire: "Utilitaire",
+  armement: "Armement",
+  predefinie: "Prédéfinie",
+};

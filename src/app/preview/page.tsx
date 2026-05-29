@@ -30,6 +30,22 @@ function buildMockBrad(): Character {
     avatarUrl: null,
     runes: ["Rune Physique (Feu)", "", ""],
     skills: Object.fromEntries(ALL_SKILLS.map((s) => [s, 1])),
+    // Flux (mock palier P2)
+    fluxTrainings: 5,
+    technicalTrainings: 3,
+    combatsReal: 3,
+    currentFlux: 600,
+    maxFlux: 750,
+    fluxPalier: 2,
+    fluxLabel: "P2",
+    technicalPalier: 1,
+    technicalLabel: "Initié",
+    tier: "T3",
+    runesInventory: [
+      { id: "r1", name: "Brasier mineur", type: "armement", description: "Inflige 1d6 feu." },
+      { id: "r2", name: "Pas-léger", type: "utilitaire", description: null },
+      { id: "r3", name: "Sceau de garde", type: "predefinie", description: null },
+    ],
   };
 }
 

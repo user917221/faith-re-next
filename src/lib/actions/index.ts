@@ -27,6 +27,15 @@ export { togglePresence } from "./presence";
 export { rollSkillWithDD } from "./roll-skill-dd";
 
 export {
+  updateFluxTrainings,
+  updateCombats,
+  updateTechnicalTrainings,
+  updateFlux,
+} from "./flux";
+
+export { addRune, removeRune } from "./runes";
+
+export {
   requestTraining,
   approveTraining,
   rejectTraining,
