@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * Overlay full-screen pour les crits — Linear sobre mais impactant.
@@ -25,21 +25,25 @@ type Mode = "succ" | "fail" | null;
 
 export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
   const [mode, setMode] = useState<Mode>(null);
-  const seenId = useRef<string | null>(null);
+  // `prevId` mémorise le dernier jet vu, en state (pattern React « ajuster un
+  // state pendant le rendu »). `undefined` = jamais vu encore.
+  const [prevId, setPrevId] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    if (!latestRoll) return;
-    // 1er render : on note l'id sans déclencher d'animation (le crit éventuel
-    // a déjà été joué dans une session précédente).
-    if (seenId.current === null) {
-      seenId.current = latestRoll.id;
-      return;
+  // Détection au render : on compare l'id reçu au dernier vu. 1er render → on
+  // note l'id sans animer (le crit éventuel a déjà été joué dans une session
+  // précédente). Nouvel id de crit → on arme le mode. Aucun setState dans un effet.
+  if (latestRoll && latestRoll.id !== prevId) {
+    const first = prevId === undefined;
+    setPrevId(latestRoll.id);
+    if (!first) {
+      const next: Mode = latestRoll.isCritSucc
+        ? "succ"
+        : latestRoll.isCritFail
+          ? "fail"
+          : null;
+      if (next) setMode(next);
     }
-    if (latestRoll.id === seenId.current) return;
-    seenId.current = latestRoll.id;
-    if (latestRoll.isCritSucc) setMode("succ");
-    else if (latestRoll.isCritFail) setMode("fail");
-  }, [latestRoll]);
+  }
 
   useEffect(() => {
     if (!mode) return;

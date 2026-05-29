@@ -1,12 +1,31 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useTransition } from "react";
 import CharacterSheet from "@/components/character-sheet";
 import type { Character, ProfilePatch } from "@/components/character-sheet/types";
-import { GrimoireGlyph } from "@/components/glyphs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+import { ScrollText } from "lucide-react";
+import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 import {
   updateSkill,
   updateVital,
@@ -25,6 +44,211 @@ import {
   type TrainingRequestWithChar,
 } from "@/lib/actions";
 
+function pct(current: number, max: number): number {
+  if (max <= 0) return 0;
+  return Math.max(0, Math.min(100, (current / max) * 100));
+}
+
+/* ============================================================
+ * RosterNav — sidebar interne du MJ (distincte de la sidebar shell).
+ * Ligne dense : Avatar + LED présence + nom + barre HP + Badge Niv.
+ * HoverCard : preview synthétique (vitaux tabular, niveau, nb compétences).
+ * ============================================================ */
+export function RosterNav({
+  characters,
+  selectedId,
+}: {
+  characters: Character[];
+  selectedId?: string;
+}) {
+  const presentCount = characters.filter((c) => c.isPresent).length;
+
+  return (
+    <div className="sticky top-[4.5rem] overflow-hidden rounded-lg border border-border bg-card">
+      <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <p className="label-grimoire">Roster</p>
+        <span className="tabular text-xs text-ink-tertiary">
+          <span className="text-foreground">{characters.length}</span> / 4
+        </span>
+      </header>
+
+      <ScrollArea className="max-h-[calc(100vh-13rem)]">
+        <nav className="list-portfolio" aria-label="Liste des personnages">
+          {characters.map((c) => {
+            const isActive = c.id === selectedId;
+            const hpPct = pct(c.currentHp, c.maxHp);
+            const hpCritical = hpPct < 25;
+            const skillCount = Object.values(c.skills).filter((p) => p > 0).length;
+
+            return (
+              <HoverCard key={c.id} openDelay={120} closeDelay={60}>
+                <HoverCardTrigger asChild>
+                  <Link
+                    href={`/mj?id=${c.id}`}
+                    className={`group block !py-3 !px-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                      isActive ? "!border-l-primary bg-muted" : ""
+                    }`}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {/* Row 1 — Avatar + LED + name + Niv badge */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span className="relative shrink-0">
+                          <Avatar size="sm" className="rounded-md">
+                            <AvatarImage src={c.avatarUrl ?? undefined} alt={c.name} />
+                            <AvatarFallback
+                              className="rounded-md text-[0.65rem]"
+                              style={avatarFallbackStyle(c.name)}
+                            >
+                              {initialsOf(c.name, c.nom)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span
+                            aria-hidden
+                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-card ${
+                              c.isPresent ? "presence-led-on" : "presence-led-off"
+                            }`}
+                          />
+                        </span>
+                        <span
+                          className={`truncate text-sm font-medium tracking-tight ${
+                            isActive
+                              ? "text-foreground"
+                              : "text-ink-muted group-hover:text-foreground"
+                          }`}
+                        >
+                          {c.name}
+                        </span>
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 tabular tracking-wide text-muted-foreground"
+                      >
+                        Niv. {c.level}
+                      </Badge>
+                    </div>
+
+                    {/* Row 2 — mini HP bar + numeric */}
+                    <div className="mt-2 flex items-center gap-2">
+                      <Progress
+                        value={hpPct}
+                        className={`flex-1 [&_[data-slot=progress-indicator]]:transition-[transform,width] [&_[data-slot=progress-indicator]]:duration-300 ${
+                          hpCritical
+                            ? "[&_[data-slot=progress-indicator]]:bg-hp"
+                            : "[&_[data-slot=progress-indicator]]:bg-hp/80"
+                        }`}
+                      />
+                      <span className="tabular shrink-0 text-[0.62rem] text-ink-tertiary">
+                        <span className={hpCritical ? "text-hp" : "text-muted-foreground"}>
+                          {c.currentHp}
+                        </span>
+                        <span className="text-ink-tertiary">/{c.maxHp}</span>
+                      </span>
+                    </div>
+                  </Link>
+                </HoverCardTrigger>
+
+                {/* Preview synthétique au survol */}
+                <HoverCardContent side="right" align="start" className="w-60 p-0">
+                  <div className="flex items-center gap-3 border-b border-border px-3 py-2.5">
+                    <Avatar size="default" className="rounded-md">
+                      <AvatarImage src={c.avatarUrl ?? undefined} alt={c.name} />
+                      <AvatarFallback
+                        className="rounded-md text-xs"
+                        style={avatarFallbackStyle(c.name)}
+                      >
+                        {initialsOf(c.name, c.nom)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium tracking-tight text-foreground">
+                        {c.name}
+                        {c.nom ? (
+                          <span className="font-normal text-ink-tertiary"> {c.nom}</span>
+                        ) : null}
+                      </p>
+                      <p className="flex items-center gap-1.5 text-[0.65rem] text-ink-tertiary">
+                        <span
+                          aria-hidden
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            c.isPresent ? "presence-led-on" : "presence-led-off"
+                          }`}
+                        />
+                        {c.isPresent ? "Présent" : "Absent"}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="shrink-0 tabular text-muted-foreground">
+                      Niv. {c.level}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-3 divide-x divide-border">
+                    <PreviewStat label="PV" value={c.currentHp} max={c.maxHp} tone="text-hp" />
+                    <PreviewStat
+                      label="PM"
+                      value={c.currentMental}
+                      max={c.maxMental}
+                      tone="text-mhp"
+                    />
+                    <PreviewStat
+                      label="END"
+                      value={c.currentEndurance}
+                      max={c.maxEndurance}
+                      tone="text-endu"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2 text-[0.65rem]">
+                    <span className="text-ink-tertiary">Compétences acquises</span>
+                    <span className="tabular text-foreground">{skillCount}</span>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
+            );
+          })}
+        </nav>
+      </ScrollArea>
+
+      {/* Footer — présents */}
+      <footer className="border-t border-border px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="label-grimoire">Présents</span>
+          <span className="tabular text-xs text-foreground">
+            <span className="text-endu">{presentCount}</span>
+            <span className="text-ink-tertiary"> / {characters.length}</span>
+          </span>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function PreviewStat({
+  label,
+  value,
+  max,
+  tone,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  tone: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-0.5 px-2 py-2.5">
+      <span className="label-grimoire">{label}</span>
+      <span className="tabular text-sm text-foreground">
+        <span className={tone}>{value}</span>
+        <span className="text-ink-tertiary">/{max}</span>
+      </span>
+    </div>
+  );
+}
+
+/* ============================================================
+ * MJCharacterClient — fiche complète + feedback toasts.
+ * Les signatures de CharacterSheet restent intactes.
+ * ============================================================ */
 export function MJCharacterClient({ character }: { character: Character }) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -36,6 +260,9 @@ export function MJCharacterClient({ character }: { character: Character }) {
       isMJ={true}
       onSkillChange={async (skillName, delta) => {
         await updateSkill(character.id, skillName, delta);
+        toast.success(
+          delta > 0 ? `${skillName} +1` : `${skillName} −1`,
+        );
         refresh();
       }}
       onVitalChange={async (type, delta) => {
@@ -48,10 +275,14 @@ export function MJCharacterClient({ character }: { character: Character }) {
       }}
       onXpChange={async (newXp) => {
         await updateXp(character.id, newXp);
+        toast.success("XP mise à jour", { description: `${newXp} XP` });
         refresh();
       }}
       onTrainingChange={async (delta) => {
         await updateTrainings(character.id, delta);
+        toast.success(
+          delta > 0 ? "Entraînement +1" : "Entraînement −1",
+        );
         refresh();
       }}
       onFateChange={async (value) => {
@@ -66,24 +297,36 @@ export function MJCharacterClient({ character }: { character: Character }) {
       }}
       onProfileChange={async (patch: ProfilePatch) => {
         await updateProfile(character.id, patch);
+        toast.success("Profil enregistré");
         refresh();
       }}
       onRecoverHp={async () => {
         const res = await recoverHp(character.id);
-        if (!res.ok) throw new Error(res.reason);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
         refresh();
         const { gain, d1, d2, ecaille, newHp, maxHp } = res;
+        toast.success(`+${gain} PV`, { description: `${newHp} / ${maxHp}` });
         return { gain, d1, d2, ecaille, newHp, maxHp };
       }}
       onRecoverEndurance={async () => {
         const res = await recoverEndurance(character.id);
-        if (!res.ok) throw new Error(res.reason);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
         refresh();
         const { gain, roll, newEndurance, maxEndurance } = res;
+        toast.success(`+${gain} END`, {
+          description: `${newEndurance} / ${maxEndurance}`,
+        });
         return { gain, roll, newEndurance, maxEndurance };
       }}
       onTogglePresence={async () => {
         await togglePresence(character.id);
+        toast(character.isPresent ? "Marqué absent" : "Marqué présent");
         refresh();
       }}
       onRollSkill={async ({ attrName, skillName, dd }) => {
@@ -99,25 +342,50 @@ export function MJCharacterClient({ character }: { character: Character }) {
   );
 }
 
-export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWithChar[] }) {
+/* ============================================================
+ * PendingTrainingPanel — file d'approbation en Card, Empty si vide.
+ * ============================================================ */
+export function PendingTrainingPanel({
+  requests,
+}: {
+  requests: TrainingRequestWithChar[];
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const refresh = () => startTransition(() => router.refresh());
 
+  const handleApprove = (id: string) =>
+    startTransition(async () => {
+      const res = await approveTraining(id);
+      if (!res.ok) {
+        toast.error(res.reason);
+        return;
+      }
+      toast.success("Entraînement approuvé (+1)", {
+        description: res.tierChanged
+          ? `Nouveau palier — ${res.newLabel} (END max ${res.newMax})`
+          : `${res.trainings} entraînement${res.trainings > 1 ? "s" : ""}`,
+      });
+      refresh();
+    });
+
+  const handleReject = (id: string) =>
+    startTransition(async () => {
+      const res = await rejectTraining(id);
+      if (!res.ok) {
+        toast.error(res.reason);
+        return;
+      }
+      toast("Demande refusée");
+      refresh();
+    });
+
   return (
-    <div className="h-full overflow-hidden rounded-lg border border-border bg-card">
-      <header className="flex items-center gap-4 border-b border-border px-5 py-4">
-        <GrimoireGlyph
-          size={36}
-          className={`shrink-0 ${
-            requests.length > 0 ? "text-muted-foreground" : "text-ink-tertiary"
-          }`}
-        />
-        <div className="min-w-0 flex-1">
+    <Card className="h-full gap-0 py-0">
+      <CardHeader className="flex items-center justify-between gap-4 border-b border-border py-4">
+        <div className="min-w-0">
           <p className="label-grimoire">Entraînements en attente</p>
-          <h2 className="mt-0.5 text-base font-medium tracking-tight text-foreground">
-            File d&apos;approbation
-          </h2>
+          <CardTitle className="mt-0.5">File d&apos;approbation</CardTitle>
         </div>
         <Badge
           variant={requests.length > 0 ? "default" : "outline"}
@@ -125,67 +393,77 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
         >
           {requests.length}
         </Badge>
-      </header>
+      </CardHeader>
 
-      {requests.length === 0 ? (
-        <div className="px-5 py-8 text-center">
-          <p className="label-grimoire">File vide</p>
-          <p className="mt-2 text-sm text-ink-tertiary">
-            Aucune demande d&apos;entraînement en attente.
-          </p>
-        </div>
-      ) : (
-        <ul className="list-portfolio" aria-label="Demandes d'entraînement">
-          {requests.map((r) => (
-            <li key={r.id} className="!py-3 !px-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-baseline gap-2 text-sm font-medium tracking-tight text-foreground">
-                    <span>{r.characterName}</span>
-                    {r.requesterName && (
-                      <span className="text-xs font-normal text-ink-tertiary">
-                        par <span className="text-muted-foreground">{r.requesterName}</span>
-                      </span>
-                    )}
-                  </p>
-                  {r.note && (
-                    <p className="mt-1 truncate text-xs italic text-muted-foreground">
-                      «&nbsp;{r.note}&nbsp;»
+      <CardContent className="p-0">
+        {requests.length === 0 ? (
+          <Empty className="border-0 py-10">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ScrollText />
+              </EmptyMedia>
+              <EmptyTitle>File vide</EmptyTitle>
+              <EmptyDescription>
+                Aucune demande d&apos;entraînement en attente.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <ul className="list-portfolio" aria-label="Demandes d'entraînement">
+            {requests.map((r) => (
+              <li key={r.id} className="!py-3 !px-5">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="flex flex-wrap items-baseline gap-2 text-sm font-medium tracking-tight text-foreground">
+                      <span>{r.characterName}</span>
+                      {r.requesterName && (
+                        <span className="text-xs font-normal text-ink-tertiary">
+                          par{" "}
+                          <span className="text-muted-foreground">
+                            {r.requesterName}
+                          </span>
+                        </span>
+                      )}
                     </p>
-                  )}
-                  <p className="tabular mt-1 text-[0.62rem] text-ink-tertiary">
-                    {new Date(r.requestedAt).toLocaleString("fr-FR", {
-                      day: "2-digit",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                    {r.note && (
+                      <p className="mt-1 truncate text-xs italic text-muted-foreground">
+                        «&nbsp;{r.note}&nbsp;»
+                      </p>
+                    )}
+                    <p className="tabular mt-1 text-[0.62rem] text-ink-tertiary">
+                      {new Date(r.requestedAt).toLocaleString("fr-FR", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      disabled={isPending}
+                      onClick={() => handleApprove(r.id)}
+                    >
+                      Approuver +1
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      disabled={isPending}
+                      onClick={() => handleReject(r.id)}
+                    >
+                      Refuser
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex shrink-0 gap-2">
-                  <Button
-                    type="button"
-                    size="sm"
-                    disabled={isPending}
-                    onClick={() => startTransition(async () => { await approveTraining(r.id); refresh(); })}
-                  >
-                    Approuver +1
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    disabled={isPending}
-                    onClick={() => startTransition(async () => { await rejectTraining(r.id); refresh(); })}
-                  >
-                    Refuser
-                  </Button>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
   );
 }

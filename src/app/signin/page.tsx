@@ -21,10 +21,10 @@ export default function SignInPage({
 
           <div className="flex flex-col items-center gap-2.5">
             <p className="label-grimoire">Convocation</p>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
               FAITH&nbsp;:&nbsp;RE
             </h1>
-            <p className="max-w-xs text-sm text-muted-foreground">
+            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
               Connecte-toi pour rejoindre la table.
             </p>
           </div>

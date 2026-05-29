@@ -17,6 +17,7 @@ import { db } from "@/db";
 import { characters as charactersTable } from "@/db/schema";
 import { loadAllCharacters } from "@/lib/load-character";
 import { listRecentPublicRolls } from "@/lib/actions/plateau";
+import { AppShell } from "@/components/app-shell/AppShell";
 import { PlateauClient } from "./client";
 
 export const dynamic = "force-dynamic";
@@ -44,14 +45,24 @@ export default async function PlateauPage() {
   const defaultCharacterId = ownedRow?.id ?? characters[0]?.id ?? "";
 
   return (
-    <PlateauClient
-      characters={characters}
-      initialRolls={recentRolls}
-      defaultCharacterId={defaultCharacterId}
-      currentUserName={session.user.name ?? ""}
-      currentUserId={session.user.id ?? ""}
-      ownedCharacterId={ownedRow?.id ?? null}
-      isMJ={isMJ}
-    />
+    <AppShell
+      user={{
+        name: session.user.name ?? "",
+        role: session.user.role,
+        image: session.user.image ?? null,
+      }}
+      active="plateau"
+      title="Plateau"
+    >
+      <PlateauClient
+        characters={characters}
+        initialRolls={recentRolls}
+        defaultCharacterId={defaultCharacterId}
+        currentUserName={session.user.name ?? ""}
+        currentUserId={session.user.id ?? ""}
+        ownedCharacterId={ownedRow?.id ?? null}
+        isMJ={isMJ}
+      />
+    </AppShell>
   );
 }

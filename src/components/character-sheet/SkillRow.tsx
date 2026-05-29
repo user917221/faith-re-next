@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { Dices, Minus, Plus } from "lucide-react";
 import { SKILL_DESCRIPTIONS, SKILL_TO_ATTRIBUTE, type AttributeName } from "@/lib/skills";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { RollContext } from "./DDDrawer";
 
 type Props = {
@@ -45,12 +46,20 @@ export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onOp
 
   return (
     <div className="group -mx-1.5 flex items-center justify-between gap-3 rounded-md px-1.5 py-1 text-sm transition-colors hover:bg-muted">
-      <span
-        title={description}
-        className="cursor-help truncate font-medium text-ink-muted transition-colors group-hover:text-foreground"
-      >
-        {name}
-      </span>
+      {description ? (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="cursor-help truncate font-medium text-ink-muted transition-colors group-hover:text-foreground">
+              {name}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>{description}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <span className="truncate font-medium text-ink-muted transition-colors group-hover:text-foreground">
+          {name}
+        </span>
+      )}
       <div className="flex items-center gap-1">
         <Button
           type="button"

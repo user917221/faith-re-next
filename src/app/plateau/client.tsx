@@ -1,27 +1,35 @@
 "use client";
 
 /**
- * PlateauClient — dashboard Linear (issue list / project view) pour la table partagée.
+ * PlateauClient — table de jeu cinématique dans l'App Shell.
  *
- * Layout 3 colonnes dense + carnet pleine largeur :
- *  - Header (12) : RoundTableGlyph discret + titre + sub "Session ouverte" + nav ghost
- *  - Roster compagnons (gauche, ~280px) : Card + ScrollArea, lignes denses
- *    Avatar + nom + LED présence + 3 mini barres vitaux (Progress h-1, hp/mhp/endu)
- *  - Hero "Dernier acte" (centre, flex-1) : Card, big-number lavande/hp du total
- *  - Lanceur (droite, ~320px) : Card, Select perso, attributs en boutons, DD chips
- *  - Carnet des jets (12) : Card header sticky + ScrollArea, lignes list-portfolio
+ * Layout resizable (lg+) via ResizablePanelGroup :
+ *   Roster (~22) │ Scène centrale (~50, onglets Acte / Stats) │ Lanceur (~28)
+ *   Sous le groupe : Carnet des jets pleine largeur.
+ * En dessous de lg : stack vertical non-resizable (fallback).
  *
- * Polling 5s — propagation cross-clients des vitals + nouveaux jets.
- * CritOverlay z-50 au-dessus de tout en cas de double-6 / double-1.
+ * Scène "Acte" : dernier jet en BIG NUMBER (lavande si réussite, hp si crit fail),
+ * breakdown tabular + badges DD/réussite/échec, Empty shadcn si vide.
+ * Scène "Stats" : histogramme recharts des totaux des 30 derniers jets (lavande chart-1).
  *
- * Hiérarchie Linear : surface ladder (canvas → card → popover) + hairlines 1px,
- * accent lavande SCARCE (un CTA "Lancer" par section, focus ring). Le BIG NUMBER
- * du dernier jet est l'élément le plus imprégnant — lisible à 2m sur l'écran partagé.
+ * Temps réel : polling 5s → router.refresh(). On compare le 1er id entre deux
+ * renders (useRef) et on émet un toast Sonner par nouveau jet (jamais au 1er render).
+ * CritOverlay z-[60] au-dessus de tout en cas de double-6 / double-1.
+ *
+ * Hiérarchie Linear : surface ladder + hairlines, lavande SCARCE (un CTA "Lancer"
+ * par section, focus ring), dense. Le BIG NUMBER du dernier jet est le foyer visuel.
  */
 
-import { useEffect, useMemo, useState, useTransition } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
 import type { Character } from "@/components/character-sheet/types";
 import {
   rollPublicSkill,
@@ -33,6 +41,7 @@ import {
   type AttributeName,
 } from "@/lib/skills";
 import { RoundTableGlyph } from "@/components/glyphs";
+import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +49,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -48,6 +57,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 import { CritOverlay } from "./CritOverlay";
 
 type FeedItem = {
@@ -98,13 +126,6 @@ function formatRelative(date: Date): string {
   return `il y a ${d} j`;
 }
 
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
-}
-
 function buildBreakdown(item: FeedItem): string[] {
   const pieces: string[] = [];
   if (item.rolls.length > 0) {
@@ -117,6 +138,15 @@ function buildBreakdown(item: FeedItem): string[] {
     pieces.push(`+ ${item.skillName}(${item.skillScore})`);
   }
   return pieces;
+}
+
+/** Classe couleur du total — accent SCARCE (lavande crit succ / réussite, hp crit fail). */
+function totalColorClass(item: FeedItem): string {
+  if (item.isCritSucc) return "text-primary";
+  if (item.isCritFail) return "text-hp";
+  if (item.success === true) return "text-endu";
+  if (item.success === false) return "text-muted-foreground";
+  return "text-foreground";
 }
 
 /* -------------------------- Mini bar vital (roster, Progress h-1) -------------------------- */
@@ -173,8 +203,12 @@ function RosterItem({
           aria-hidden
         />
         <Avatar size="sm" className="mt-0.5 shrink-0">
-          <AvatarFallback className="bg-secondary text-[0.62rem] font-medium text-muted-foreground">
-            {initials(character.name)}
+          <AvatarImage src={character.avatarUrl ?? undefined} alt="" />
+          <AvatarFallback
+            className="text-[0.62rem] font-medium"
+            style={avatarFallbackStyle(character.name)}
+          >
+            {initialsOf(character.name, character.nom)}
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
@@ -233,7 +267,7 @@ function Roster({
   const presentCount = sorted.length;
 
   return (
-    <Card className="gap-0 py-0 lg:sticky lg:top-6 lg:self-start">
+    <Card className="h-full min-h-0 gap-0 overflow-hidden py-0">
       <CardHeader className="flex flex-row items-center justify-between gap-2 border-b px-4 py-3">
         <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Compagnons à la table
@@ -252,7 +286,7 @@ function Roster({
           </p>
         </div>
       ) : (
-        <ScrollArea className="max-h-[560px]">
+        <ScrollArea className="min-h-0 flex-1">
           <div className="flex flex-col">
             {sorted.map((c, idx) => (
               <div
@@ -275,55 +309,51 @@ function Roster({
   );
 }
 
-/* -------------------------- Hero — Dernier acte -------------------------- */
+/* -------------------------- Scène — Dernier acte -------------------------- */
 
 function LastActHero({ item }: { item: FeedItem | null }) {
   if (!item) {
     return (
-      <Card className="min-h-[280px] justify-center lg:min-h-[340px]">
-        <CardContent className="flex flex-col items-center justify-center gap-4 text-center">
-          <RoundTableGlyph size={132} className="text-ink-tertiary" />
-          <p className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
-            Dernier acte
-          </p>
-          <p className="text-sm text-ink-tertiary">
-            Aucun jet inscrit — lance le premier.
-          </p>
-        </CardContent>
-      </Card>
+      <Empty className="h-full min-h-[260px] border-0">
+        <EmptyHeader>
+          <EmptyMedia>
+            <RoundTableGlyph size={120} className="text-ink-tertiary" />
+          </EmptyMedia>
+          <EmptyTitle>Dernier acte</EmptyTitle>
+          <EmptyDescription>Aucun jet inscrit — lance le premier.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
   const breakdownPieces = buildBreakdown(item);
-
-  // Couleur du big number — accent SCARCE : lavande réservé au crit succ, hp au crit
-  // fail, endu/gris pour réussite/échec. Jet neutre (sans DD) = foreground monochrome.
-  let totalClass = "text-foreground";
-  if (item.isCritSucc) {
-    totalClass = "text-primary";
-  } else if (item.isCritFail) {
-    totalClass = "text-hp";
-  } else if (item.success === true) {
-    totalClass = "text-endu";
-  } else if (item.success === false) {
-    totalClass = "text-muted-foreground";
-  }
+  const totalClass = totalColorClass(item);
 
   return (
-    <Card className="min-h-[280px] lg:min-h-[340px]">
-      <CardHeader className="flex flex-row items-baseline justify-between gap-2">
-        <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+    <div className="flex h-full flex-col">
+      <div className="flex items-baseline justify-between gap-2 px-1">
+        <span className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Dernier acte
-        </CardTitle>
+        </span>
         <span className="tabular text-[0.62rem] uppercase tracking-[0.06em] text-ink-tertiary">
           {formatRelative(item.createdAt)}
         </span>
-      </CardHeader>
+      </div>
 
-      <CardContent className="flex flex-1 flex-col items-center justify-center gap-3 py-2 text-center">
-        <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          {item.characterName}
-        </h2>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 py-4 text-center">
+        <div className="flex items-center gap-2.5">
+          <Avatar size="sm" className="shrink-0">
+            <AvatarFallback
+              className="text-[0.62rem] font-medium"
+              style={avatarFallbackStyle(item.characterName)}
+            >
+              {initialsOf(item.characterName)}
+            </AvatarFallback>
+          </Avatar>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            {item.characterName}
+          </h2>
+        </div>
         {item.casterName && item.casterName !== item.characterName && (
           <p className="text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground">
             Lancé par {item.casterName}
@@ -373,6 +403,118 @@ function LastActHero({ item }: { item: FeedItem | null }) {
             </Badge>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------- Scène — Stats (histogramme totaux) -------------------------- */
+
+const STATS_CHART_CONFIG = {
+  count: { label: "Jets", color: "var(--chart-1)" },
+} satisfies ChartConfig;
+
+function StatsChart({ items }: { items: FeedItem[] }) {
+  // Histogramme : bins de largeur 2 sur les totaux des 30 derniers jets.
+  const data = useMemo(() => {
+    if (items.length === 0) return [];
+    const totals = items.map((i) => i.total);
+    const min = Math.min(...totals);
+    const max = Math.max(...totals);
+    const binSize = 2;
+    const start = Math.floor(min / binSize) * binSize;
+    const buckets = new Map<number, number>();
+    for (let b = start; b <= max; b += binSize) buckets.set(b, 0);
+    for (const t of totals) {
+      const b = Math.floor(t / binSize) * binSize;
+      buckets.set(b, (buckets.get(b) ?? 0) + 1);
+    }
+    return Array.from(buckets.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([bin, count]) => ({
+        bin: `${bin}–${bin + binSize - 1}`,
+        count,
+      }));
+  }, [items]);
+
+  if (data.length === 0) {
+    return (
+      <Empty className="h-full min-h-[260px] border-0">
+        <EmptyHeader>
+          <EmptyMedia>
+            <RoundTableGlyph size={120} className="text-ink-tertiary" />
+          </EmptyMedia>
+          <EmptyTitle>Distribution des totaux</EmptyTitle>
+          <EmptyDescription>
+            La courbe se dessinera après les premiers jets.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex items-baseline justify-between gap-2 px-1">
+        <span className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          Distribution des totaux
+        </span>
+        <span className="tabular text-[0.62rem] uppercase tracking-[0.06em] text-ink-tertiary">
+          {items.length} jets
+        </span>
+      </div>
+      <ChartContainer config={STATS_CHART_CONFIG} className="min-h-0 w-full flex-1">
+        <BarChart data={data} margin={{ top: 12, right: 4, left: -16, bottom: 0 }}>
+          <CartesianGrid vertical={false} strokeDasharray="3 3" />
+          <XAxis
+            dataKey="bin"
+            tickLine={false}
+            axisLine={false}
+            tickMargin={8}
+            fontSize={10}
+          />
+          <YAxis
+            allowDecimals={false}
+            tickLine={false}
+            axisLine={false}
+            width={28}
+            fontSize={10}
+          />
+          <ChartTooltip
+            cursor={false}
+            content={<ChartTooltipContent labelKey="bin" nameKey="count" />}
+          />
+          <Bar dataKey="count" fill="var(--color-count)" radius={[4, 4, 0, 0]} maxBarSize={48} />
+        </BarChart>
+      </ChartContainer>
+    </div>
+  );
+}
+
+/* -------------------------- Scène centrale (onglets) -------------------------- */
+
+function Scene({
+  latest,
+  items,
+}: {
+  latest: FeedItem | null;
+  items: FeedItem[];
+}) {
+  return (
+    <Card className="h-full min-h-0 overflow-hidden">
+      <CardContent className="flex h-full min-h-0 flex-col p-4 lg:p-5">
+        <Tabs defaultValue="acte" className="flex h-full min-h-0 flex-1 flex-col">
+          <TabsList variant="line" className="self-start">
+            <TabsTrigger value="acte">Acte</TabsTrigger>
+            <TabsTrigger value="stats">Stats</TabsTrigger>
+          </TabsList>
+          <TabsContent value="acte" className="mt-3 min-h-0 flex-1">
+            <LastActHero item={latest} />
+          </TabsContent>
+          <TabsContent value="stats" className="mt-3 min-h-0 flex-1">
+            <StatsChart items={items} />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
@@ -599,7 +741,7 @@ function Launcher({
   };
 
   return (
-    <Card className="gap-0 py-0 lg:sticky lg:top-6 lg:self-start">
+    <Card className="h-full min-h-0 gap-0 overflow-hidden py-0">
       <CardHeader className="border-b px-4 py-3">
         <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Lanceur
@@ -609,129 +751,131 @@ function Launcher({
         </p>
       </CardHeader>
 
-      <CardContent className="flex flex-col gap-4 py-4">
-        {/* Section 1 — Jet d'attribut/skill */}
-        <div className="flex flex-col gap-3">
-          <label className="flex flex-col gap-1.5">
-            <FieldLabel>Personnage</FieldLabel>
-            <Select value={charA} onValueChange={setCharA}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Personnage" />
-              </SelectTrigger>
-              <SelectContent>
-                {characters.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                    {c.nom ? ` ${c.nom}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </label>
+      <ScrollArea className="min-h-0 flex-1">
+        <CardContent className="flex flex-col gap-4 py-4">
+          {/* Section 1 — Jet d'attribut/skill */}
+          <div className="flex flex-col gap-3">
+            <label className="flex flex-col gap-1.5">
+              <FieldLabel>Personnage</FieldLabel>
+              <Select value={charA} onValueChange={setCharA}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Personnage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {characters.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                      {c.nom ? ` ${c.nom}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </label>
 
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Attribut</FieldLabel>
-            <AttrRadioGrid
-              value={attr}
-              onChange={(a) => {
-                setAttr(a);
-                setSkill("");
-              }}
-            />
-          </div>
+            <div className="flex flex-col gap-1.5">
+              <FieldLabel>Attribut</FieldLabel>
+              <AttrRadioGrid
+                value={attr}
+                onChange={(a) => {
+                  setAttr(a);
+                  setSkill("");
+                }}
+              />
+            </div>
 
-          <label className="flex flex-col gap-1.5">
-            <FieldLabel>Compétence (optionnelle)</FieldLabel>
-            <Select
-              value={skill || "__none__"}
-              onValueChange={(v) => setSkill(v === "__none__" ? "" : v)}
+            <label className="flex flex-col gap-1.5">
+              <FieldLabel>Compétence (optionnelle)</FieldLabel>
+              <Select
+                value={skill || "__none__"}
+                onValueChange={(v) => setSkill(v === "__none__" ? "" : v)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Attribut seul" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">— Attribut seul —</SelectItem>
+                  {availableSkills.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </label>
+
+            <div className="flex flex-col gap-1.5">
+              <FieldLabel>Difficulté</FieldLabel>
+              <DDChipsRow
+                value={ddMode}
+                onChange={setDdMode}
+                customDD={customDD}
+                onCustomChange={setCustomDD}
+              />
+            </div>
+
+            <Button
+              type="button"
+              disabled={isPending || !charA}
+              onClick={submitSkill}
+              className="mt-1 w-full"
             >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Attribut seul" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">— Attribut seul —</SelectItem>
-                {availableSkills.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </label>
+              Lancer 2d6 + {attrShort[attr]}
+              {skill ? " + skill" : ""}
+            </Button>
 
-          <div className="flex flex-col gap-1.5">
-            <FieldLabel>Difficulté</FieldLabel>
-            <DDChipsRow
-              value={ddMode}
-              onChange={setDdMode}
-              customDD={customDD}
-              onCustomChange={setCustomDD}
-            />
+            {errorA && <p className="text-[0.72rem] text-hp">{errorA}</p>}
           </div>
 
-          <Button
-            type="button"
-            disabled={isPending || !charA}
-            onClick={submitSkill}
-            className="mt-1 w-full"
-          >
-            Lancer 2d6 + {attrShort[attr]}
-            {skill ? " + skill" : ""}
-          </Button>
+          <Separator />
 
-          {errorA && <p className="text-[0.72rem] text-hp">{errorA}</p>}
-        </div>
+          {/* Section 2 — Formule libre */}
+          <div className="flex flex-col gap-3">
+            <p className="text-[0.66rem] font-medium uppercase tracking-[0.14em] text-ink-muted">
+              Formule libre
+            </p>
 
-        <Separator />
+            <label className="flex flex-col gap-1.5">
+              <FieldLabel>Personnage</FieldLabel>
+              <Select value={charB} onValueChange={setCharB}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Personnage" />
+                </SelectTrigger>
+                <SelectContent>
+                  {characters.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                      {c.nom ? ` ${c.nom}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </label>
 
-        {/* Section 2 — Formule libre */}
-        <div className="flex flex-col gap-3">
-          <p className="text-[0.66rem] font-medium uppercase tracking-[0.14em] text-ink-muted">
-            Formule libre
-          </p>
+            <label className="flex flex-col gap-1.5">
+              <FieldLabel>Formule</FieldLabel>
+              <Input
+                type="text"
+                value={formula}
+                onChange={(e) => setFormula(e.target.value)}
+                placeholder="2d6+5, 2d6+INT, 1d100+PSY"
+                className="tabular"
+              />
+            </label>
 
-          <label className="flex flex-col gap-1.5">
-            <FieldLabel>Personnage</FieldLabel>
-            <Select value={charB} onValueChange={setCharB}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Personnage" />
-              </SelectTrigger>
-              <SelectContent>
-                {characters.map((c) => (
-                  <SelectItem key={c.id} value={c.id}>
-                    {c.name}
-                    {c.nom ? ` ${c.nom}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </label>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={isPending || !formula.trim() || !charB}
+              onClick={submitFormula}
+              className="w-full"
+            >
+              Lancer la formule
+            </Button>
 
-          <label className="flex flex-col gap-1.5">
-            <FieldLabel>Formule</FieldLabel>
-            <Input
-              type="text"
-              value={formula}
-              onChange={(e) => setFormula(e.target.value)}
-              placeholder="2d6+5, 2d6+INT, 1d100+PSY"
-              className="tabular"
-            />
-          </label>
-
-          <Button
-            type="button"
-            variant="secondary"
-            disabled={isPending || !formula.trim() || !charB}
-            onClick={submitFormula}
-            className="w-full"
-          >
-            Lancer la formule
-          </Button>
-
-          {errorB && <p className="text-[0.72rem] text-hp">{errorB}</p>}
-        </div>
-      </CardContent>
+            {errorB && <p className="text-[0.72rem] text-hp">{errorB}</p>}
+          </div>
+        </CardContent>
+      </ScrollArea>
     </Card>
   );
 }
@@ -740,42 +884,41 @@ function Launcher({
 
 function CarnetRow({ item }: { item: FeedItem }) {
   const breakdownPieces = buildBreakdown(item);
-
-  // Couleur du total
-  let totalClass = "text-foreground";
-  if (item.isCritSucc) {
-    totalClass = "text-primary";
-  } else if (item.isCritFail) {
-    totalClass = "text-hp italic";
-  } else if (item.success === true) {
-    totalClass = "text-endu";
-  } else if (item.success === false) {
-    totalClass = "text-muted-foreground";
-  }
+  const totalClass = totalColorClass(item) + (item.isCritFail ? " italic" : "");
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      {/* Gauche : perso + formule + breakdown */}
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-baseline gap-2">
-          <h4 className="truncate text-sm font-medium tracking-tight text-foreground">
-            {item.characterName}
-          </h4>
-          {item.casterName && item.casterName !== item.characterName && (
-            <span className="text-[0.6rem] uppercase tracking-[0.12em] text-ink-tertiary">
-              · {item.casterName}
+      {/* Gauche : avatar + perso + formule + breakdown */}
+      <div className="flex min-w-0 flex-1 items-start gap-2.5">
+        <Avatar size="sm" className="mt-0.5 shrink-0">
+          <AvatarFallback
+            className="text-[0.6rem] font-medium"
+            style={avatarFallbackStyle(item.characterName)}
+          >
+            {initialsOf(item.characterName)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-2">
+            <h4 className="truncate text-sm font-medium tracking-tight text-foreground">
+              {item.characterName}
+            </h4>
+            {item.casterName && item.casterName !== item.characterName && (
+              <span className="text-[0.6rem] uppercase tracking-[0.12em] text-ink-tertiary">
+                · {item.casterName}
+              </span>
+            )}
+            <span className="tabular ml-auto text-[0.6rem] uppercase tracking-[0.1em] text-ink-tertiary">
+              {formatRelative(item.createdAt)}
             </span>
-          )}
-          <span className="tabular ml-auto text-[0.6rem] uppercase tracking-[0.1em] text-ink-tertiary">
-            {formatRelative(item.createdAt)}
-          </span>
+          </div>
+          <p className="tabular mt-0.5 text-[0.72rem] text-muted-foreground">
+            {item.formula}
+            {breakdownPieces.length > 0 && (
+              <span className="text-ink-tertiary"> · {breakdownPieces.join(" ")}</span>
+            )}
+          </p>
         </div>
-        <p className="tabular mt-0.5 text-[0.72rem] text-muted-foreground">
-          {item.formula}
-          {breakdownPieces.length > 0 && (
-            <span className="text-ink-tertiary"> · {breakdownPieces.join(" ")}</span>
-          )}
-        </p>
       </div>
 
       {/* Droite : total + badge */}
@@ -877,6 +1020,52 @@ export function PlateauClient({
     return () => clearInterval(id);
   }, [router]);
 
+  // Sonner temps réel — détecte les nouveaux jets entre deux renders en comparant
+  // le 1er id. Le sentinel `null` empêche d'émettre au tout premier render (load).
+  const seenTopId = useRef<string | null>(null);
+  useEffect(() => {
+    const topId = initialRolls[0]?.id ?? null;
+    if (seenTopId.current === null) {
+      seenTopId.current = topId;
+      return;
+    }
+    if (topId === seenTopId.current) return;
+
+    // Émet pour chaque jet plus récent que le dernier id vu (ordre chrono pour Sonner).
+    const lastSeen = seenTopId.current;
+    const fresh: FeedItem[] = [];
+    for (const r of initialRolls) {
+      if (r.id === lastSeen) break;
+      fresh.push(r);
+    }
+    seenTopId.current = topId;
+
+    for (const r of fresh.reverse()) {
+      const headline = `${r.characterName} — ${r.total}${
+        r.dd !== null ? ` vs DD ${r.dd}` : ""
+      }`;
+      const description = r.isCritSucc
+        ? "Réussite critique ✦"
+        : r.isCritFail
+          ? "Échec catastrophique"
+          : r.success === true
+            ? "Réussite"
+            : r.success === false
+              ? "Échec"
+              : r.casterName && r.casterName !== r.characterName
+                ? `Lancé par ${r.casterName}`
+                : r.formula;
+
+      if (r.isCritSucc) {
+        toast.success(headline, { description });
+      } else if (r.isCritFail || r.success === false) {
+        toast.error(headline, { description });
+      } else {
+        toast(headline, { description });
+      }
+    }
+  }, [initialRolls]);
+
   const latestRoll = initialRolls.length > 0
     ? {
         id: initialRolls[0].id,
@@ -885,65 +1074,68 @@ export function PlateauClient({
       }
     : null;
 
+  const latestItem = initialRolls[0] ?? null;
   const presentCount = characters.filter((c) => c.isPresent).length;
+  const hasCharacters = characters.length > 0;
 
   return (
-    <main className="relative z-[2] min-h-screen px-6 py-8">
+    <div className="relative z-[2] flex flex-col gap-4 lg:gap-5">
       <CritOverlay latestRoll={latestRoll} />
 
-      <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6">
-        {/* Header */}
-        <header className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <RoundTableGlyph size={40} className="text-muted-foreground" />
-            <div>
-              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-                Plateau de jeu
-              </h1>
-              <p className="mt-0.5 text-[0.78rem] text-muted-foreground">
-                Session ouverte · {presentCount} {presentCount > 1 ? "joueurs" : "joueur"}
-              </p>
-            </div>
-          </div>
-          <nav className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link href={isMJ ? "/mj" : "/me"}>
-                {isMJ ? "Tableau MJ →" : "Ma fiche →"}
-              </Link>
-            </Button>
-          </nav>
-        </header>
+      {/* Sous-titre — Session ouverte + présents (le titre est dans la topbar du shell) */}
+      <div className="flex flex-wrap items-center gap-3">
+        <RoundTableGlyph size={28} className="text-muted-foreground" />
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Plateau de jeu
+          </h1>
+          <p className="mt-0.5 text-[0.78rem] text-muted-foreground">
+            Session ouverte · {presentCount}{" "}
+            {presentCount > 1 ? "joueurs" : "joueur"}
+          </p>
+        </div>
+      </div>
 
-        {/* Grille principale 3 colonnes */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)_320px] lg:gap-6">
-          {/* Roster — gauche */}
-          <Roster
-            characters={characters}
-            isMJ={isMJ}
-            ownedId={ownedCharacterId}
-          />
-
-          {/* Hero "Dernier acte" — centre */}
-          <LastActHero item={initialRolls[0] ?? null} />
-
-          {/* Lanceur — droite */}
-          {characters.length > 0 ? (
-            <Launcher
-              characters={characters}
-              defaultCharacterId={defaultCharacterId}
-            />
+      {/* === lg+ : 3 panneaux resizable (orientation horizontale par défaut) === */}
+      <ResizablePanelGroup className="hidden min-h-[560px] lg:flex">
+        <ResizablePanel defaultSize={22} minSize={16} className="pr-3">
+          <Roster characters={characters} isMJ={isMJ} ownedId={ownedCharacterId} />
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={50} minSize={32} className="px-3">
+          <Scene latest={latestItem} items={initialRolls} />
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={28} minSize={20} className="pl-3">
+          {hasCharacters ? (
+            <Launcher characters={characters} defaultCharacterId={defaultCharacterId} />
           ) : (
-            <Card className="min-h-[200px] items-center justify-center">
+            <Card className="flex h-full items-center justify-center">
               <CardContent className="text-center text-sm text-muted-foreground">
                 Aucun personnage à la table.
               </CardContent>
             </Card>
           )}
-        </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
 
-        {/* Carnet des jets — pleine largeur */}
-        <Carnet items={initialRolls} />
+      {/* === < lg : stack non-resizable (fallback) === */}
+      <div className="flex flex-col gap-4 lg:hidden">
+        <Scene latest={latestItem} items={initialRolls} />
+        {hasCharacters ? (
+          <Launcher characters={characters} defaultCharacterId={defaultCharacterId} />
+        ) : (
+          <Card className="items-center justify-center">
+            <CardContent className="py-8 text-center text-sm text-muted-foreground">
+              Aucun personnage à la table.
+            </CardContent>
+          </Card>
+        )}
+        <Roster characters={characters} isMJ={isMJ} ownedId={ownedCharacterId} />
       </div>
-    </main>
+
+      {/* Carnet des jets — pleine largeur */}
+      <Carnet items={initialRolls} />
+    </div>
   );
 }

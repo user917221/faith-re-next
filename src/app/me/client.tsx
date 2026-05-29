@@ -1,14 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+import { toast } from "sonner";
 import CharacterSheet from "@/components/character-sheet";
 import type {
   Character,
   PendingTrainingRequest,
   ProfilePatch,
 } from "@/components/character-sheet/types";
+import { ENDURANCE_COSTS } from "@/lib/faith-system";
 import {
   updateSkill,
   updateVital,
@@ -21,11 +22,9 @@ import {
 
 export function MyCharacterClient({
   character,
-  userName,
   pendingTraining,
 }: {
   character: Character;
-  userName: string;
   pendingTraining: PendingTrainingRequest | null;
 }) {
   const router = useRouter();
@@ -33,62 +32,53 @@ export function MyCharacterClient({
   const refresh = () => startTransition(() => router.refresh());
 
   return (
-    <main className="relative z-[2] min-h-screen px-6 py-8">
-      {/* Nav top */}
-      <div className="mx-auto mb-6 flex max-w-7xl items-center justify-between gap-4">
-        <Link
-          href="/plateau"
-          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← Plateau
-        </Link>
-        <p className="text-xs text-ink-tertiary">
-          Connecté&nbsp;:{" "}
-          <span className="text-muted-foreground">{userName}</span>
-        </p>
-      </div>
-
-      <div className="mx-auto max-w-7xl">
-        <CharacterSheet
-          character={character}
-          isMJ={false}
-          pendingTraining={pendingTraining}
-          onSkillChange={async (skillName, delta) => {
-            await updateSkill(character.id, skillName, delta);
-            refresh();
-          }}
-          onVitalChange={async (type, delta) => {
-            await updateVital(character.id, type, delta);
-            refresh();
-          }}
-          onActionCost={async (actionType) => {
-            await applyEnduranceAction(character.id, actionType);
-            refresh();
-          }}
-          onProfileChange={async (patch: ProfilePatch) => {
-            await updateProfile(character.id, patch);
-            refresh();
-          }}
-          onRequestTraining={async (note) => {
-            const res = await requestTraining(character.id, note);
-            if (!res.ok) throw new Error(res.reason);
-            refresh();
-          }}
-          onTogglePresence={async () => {
-            await togglePresence(character.id);
-            refresh();
-          }}
-          onRollSkill={async ({ attrName, skillName, dd }) => {
-            await rollSkillWithDD({
-              characterId: character.id,
-              attrName,
-              skillName: skillName ?? null,
-              dd,
-            });
-            refresh();
-          }}
-        />
-      </div>
-    </main>
+    <CharacterSheet
+      character={character}
+      isMJ={false}
+      pendingTraining={pendingTraining}
+      onSkillChange={async (skillName, delta) => {
+        await updateSkill(character.id, skillName, delta);
+        toast.success(`${skillName} ${delta > 0 ? "+1" : "-1"}`);
+        refresh();
+      }}
+      onVitalChange={async (type, delta) => {
+        await updateVital(character.id, type, delta);
+        toast(`${type} ${delta > 0 ? "+" : ""}${delta}`);
+        refresh();
+      }}
+      onActionCost={async (actionType) => {
+        await applyEnduranceAction(character.id, actionType);
+        toast("Endurance dépensée", {
+          description: ENDURANCE_COSTS[actionType].label,
+        });
+        refresh();
+      }}
+      onProfileChange={async (patch: ProfilePatch) => {
+        await updateProfile(character.id, patch);
+        toast.success("Profil enregistré");
+        refresh();
+      }}
+      onRequestTraining={async (note) => {
+        const res = await requestTraining(character.id, note);
+        if (!res.ok) throw new Error(res.reason);
+        toast.success("Demande envoyée au MJ");
+        refresh();
+      }}
+      onTogglePresence={async () => {
+        const wasPresent = character.isPresent;
+        await togglePresence(character.id);
+        toast(wasPresent ? "Tu quittes la table" : "Tu rejoins la table");
+        refresh();
+      }}
+      onRollSkill={async ({ attrName, skillName, dd }) => {
+        await rollSkillWithDD({
+          characterId: character.id,
+          attrName,
+          skillName: skillName ?? null,
+          dd,
+        });
+        refresh();
+      }}
+    />
   );
 }

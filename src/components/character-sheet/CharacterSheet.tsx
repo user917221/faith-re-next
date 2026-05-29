@@ -8,11 +8,13 @@ import {
   type AttributeName,
 } from "@/lib/skills";
 import { SKILL_CAP, calculateLevel } from "@/lib/faith-system";
-import { CrestGlyph, GrimoireGlyph } from "@/components/glyphs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { GrimoireGlyph } from "@/components/glyphs";
+import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VitalsHeader } from "./VitalsHeader";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
@@ -20,6 +22,7 @@ import { SkillRow } from "./SkillRow";
 import { EvolutionSection } from "./EvolutionSection";
 import { ProfileEditor } from "./ProfileEditor";
 import { TrainingRequestButton } from "./TrainingRequestButton";
+import { PresenceBadge } from "./PresenceBadge";
 import { RecoveryPanel } from "./RecoveryPanel";
 import { DDDrawer, type RollContext } from "./DDDrawer";
 import type { CharacterSheetProps } from "./types";
@@ -73,27 +76,24 @@ export default function CharacterSheet({
     : undefined;
 
   const attributes = Object.keys(SKILL_GROUPS) as AttributeName[];
-  const initials =
-    `${character.name?.[0] ?? "?"}${character.nom?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <div className="relative z-[2] flex flex-col gap-8">
+    <div className="relative z-[2] flex flex-col gap-6">
       {/* ─── Identité — bandeau header dense ─── */}
       <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-center gap-4">
-          <Avatar
-            size="lg"
-            className="size-14 rounded-lg border border-border bg-card"
-          >
-            <AvatarFallback className="rounded-lg bg-card text-muted-foreground">
-              <span className="text-ink-tertiary">
-                <CrestGlyph size={40} />
-              </span>
+          <Avatar size="lg" className="size-14">
+            <AvatarImage src={character.avatarUrl ?? undefined} alt="" />
+            <AvatarFallback
+              className="text-base font-medium"
+              style={avatarFallbackStyle(character.name)}
+            >
+              {initialsOf(character.name, character.nom)}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-1.5">
             <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-3xl font-semibold leading-none tracking-tight text-foreground">
+              <h1 className="text-2xl font-semibold leading-none tracking-tight text-foreground sm:text-3xl">
                 {character.name}
               </h1>
               <Badge variant="outline" className="font-normal">
@@ -149,164 +149,183 @@ export default function CharacterSheet({
         )}
       </header>
 
-      <Separator />
+      {/* ─── Onglets de la fiche ─── */}
+      <Tabs defaultValue="vitaux" className="gap-6">
+        <TabsList className="sticky top-0 z-10 w-full justify-start">
+          <TabsTrigger value="vitaux">Vitaux</TabsTrigger>
+          <TabsTrigger value="competences">Compétences</TabsTrigger>
+          {isMJ && <TabsTrigger value="evolution">Évolution</TabsTrigger>}
+          <TabsTrigger value="profil">Profil</TabsTrigger>
+        </TabsList>
 
-      {/* ─── Vitaux + actions ─── colonnes denses ─── */}
-      <section>
-        <SectionLabel>Vitaux</SectionLabel>
-        <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-          {/* Trio vitaux */}
-          <div className="xl:col-span-7">
-            <VitalsHeader character={character} onVitalChange={onVitalChange} />
-          </div>
-
-          {/* Récup + actions endurance, empilés */}
-          <div className="flex flex-col gap-4 xl:col-span-5">
-            {(onRecoverHp || onRecoverEndurance) && (
-              <RecoveryPanel
-                onRecoverHp={onRecoverHp}
-                onRecoverEndurance={onRecoverEndurance}
+        {/* ─── Vitaux + actions ─── colonnes denses ─── */}
+        <TabsContent value="vitaux">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+            {/* Trio vitaux */}
+            <div className="xl:col-span-7">
+              <VitalsHeader
+                character={character}
+                onVitalChange={onVitalChange}
               />
-            )}
-            <EnduranceActionPanel onActionCost={onActionCost} />
+            </div>
+
+            {/* Récup + actions endurance, empilés */}
+            <div className="flex flex-col gap-4 xl:col-span-5">
+              {(onRecoverHp || onRecoverEndurance) && (
+                <RecoveryPanel
+                  onRecoverHp={onRecoverHp}
+                  onRecoverEndurance={onRecoverEndurance}
+                />
+              )}
+              <EnduranceActionPanel onActionCost={onActionCost} />
+            </div>
           </div>
-        </div>
-      </section>
+        </TabsContent>
 
-      <Separator />
+        {/* ─── Attributs & compétences ─── */}
+        <TabsContent value="competences">
+          <SectionLabel
+            trailing={
+              <span className="tabular text-xs text-ink-tertiary">
+                {allocated}/{SKILL_CAP} pts
+              </span>
+            }
+          >
+            Attributs &amp; compétences
+          </SectionLabel>
 
-      {/* ─── Attributs & compétences ─── */}
-      <section>
-        <SectionLabel
-          trailing={
-            <span className="tabular text-xs text-ink-tertiary">
-              {allocated}/{SKILL_CAP} pts
-            </span>
-          }
-        >
-          Attributs &amp; compétences
-        </SectionLabel>
+          <div className="mb-4">
+            <PointAllocatorBar allocated={allocated} />
+          </div>
 
-        <div className="mb-4">
-          <PointAllocatorBar allocated={allocated} />
-        </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {attributes.map((attr) => {
+              const score = calculateAttribute(character.skills, attr);
+              const openAttrRoll = openRollDrawer
+                ? () =>
+                    openRollDrawer({
+                      title: attr,
+                      bonus: score,
+                      bonusLabel: `${attr} (${score}) seul`,
+                      attrName: attr,
+                      skillName: null,
+                    })
+                : null;
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {attributes.map((attr) => {
-            const score = calculateAttribute(character.skills, attr);
-            const openAttrRoll = openRollDrawer
-              ? () =>
-                  openRollDrawer({
-                    title: attr,
-                    bonus: score,
-                    bonusLabel: `${attr} (${score}) seul`,
-                    attrName: attr,
-                    skillName: null,
-                  })
-              : null;
-
-            return (
-              <Card
-                key={attr}
-                className="border border-border ring-0 transition-colors hover:border-hairline-strong"
-              >
-                <CardContent className="flex flex-col gap-4">
-                  <header className="flex items-start justify-between gap-3">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[0.62rem] font-medium uppercase tracking-[0.08em] text-ink-tertiary">
-                        Attribut
-                      </span>
-                      <span className="text-lg font-semibold tracking-tight text-foreground">
-                        {attr}
-                      </span>
-                    </div>
-                    {openAttrRoll ? (
-                      <button
-                        type="button"
-                        onClick={openAttrRoll}
-                        title={`Lancer un jet d'attribut ${attr}`}
-                        aria-label={`Lancer un jet d'attribut ${attr}`}
-                        className="focus-grimoire group flex flex-col items-end rounded-md transition-colors"
-                      >
-                        <span
-                          className="big-number text-foreground transition-colors group-hover:text-primary-hover"
-                          style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
-                        >
-                          {score}
+              return (
+                <Card
+                  key={attr}
+                  className="border border-border ring-0 transition-colors hover:border-hairline-strong"
+                >
+                  <CardContent className="flex flex-col gap-4">
+                    <header className="flex items-start justify-between gap-3">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[0.62rem] font-medium uppercase tracking-[0.08em] text-ink-tertiary">
+                          Attribut
                         </span>
-                        <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary transition-colors group-hover:text-muted-foreground">
-                          Jet
-                        </span>
-                      </button>
-                    ) : (
-                      <div className="flex flex-col items-end">
-                        <span
-                          className="big-number text-foreground"
-                          style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
-                        >
-                          {score}
-                        </span>
-                        <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary">
-                          Score
+                        <span className="text-lg font-semibold tracking-tight text-foreground">
+                          {attr}
                         </span>
                       </div>
-                    )}
-                  </header>
-                  <Separator />
-                  <div className="flex flex-col gap-2.5">
-                    {SKILL_GROUPS[attr].map((skill) => (
-                      <SkillRow
-                        key={skill}
-                        name={skill}
-                        value={character.skills[skill] ?? 0}
-                        attrScore={score}
-                        isCapped={isCapped}
-                        onSkillChange={onSkillChange}
-                        onOpenRollDrawer={openRollDrawer}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
+                      {openAttrRoll ? (
+                        <button
+                          type="button"
+                          onClick={openAttrRoll}
+                          title={`Lancer un jet d'attribut ${attr}`}
+                          aria-label={`Lancer un jet d'attribut ${attr}`}
+                          className="focus-grimoire group flex flex-col items-end rounded-md transition-colors"
+                        >
+                          <span
+                            className="big-number text-foreground transition-colors group-hover:text-primary-hover"
+                            style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
+                          >
+                            {score}
+                          </span>
+                          <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary transition-colors group-hover:text-muted-foreground">
+                            Jet
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="flex flex-col items-end">
+                          <span
+                            className="big-number text-foreground"
+                            style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
+                          >
+                            {score}
+                          </span>
+                          <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary">
+                            Score
+                          </span>
+                        </div>
+                      )}
+                    </header>
+                    <Separator />
+                    <div className="flex flex-col gap-2.5">
+                      {SKILL_GROUPS[attr].map((skill) => (
+                        <SkillRow
+                          key={skill}
+                          name={skill}
+                          value={character.skills[skill] ?? 0}
+                          attrScore={score}
+                          isCapped={isCapped}
+                          onSkillChange={onSkillChange}
+                          onOpenRollDrawer={openRollDrawer}
+                        />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
 
-      <Separator />
-
-      {/* ─── Évolution (MJ) / Entraînement (joueur) + Profil ─── */}
-      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        {/* ─── Évolution (MJ seulement) ─── */}
         {isMJ && (
-          <div className="xl:col-span-7">
+          <TabsContent value="evolution">
             <EvolutionSection
               character={character}
               onXpChange={onXpChange}
               onTrainingChange={onTrainingChange}
             />
-          </div>
+          </TabsContent>
         )}
 
-        {!isMJ && onRequestTraining && (
-          <div className="xl:col-span-7">
-            <Card className="relative overflow-hidden border border-border ring-0">
-              <span className="pointer-events-none absolute right-3 top-3 text-ink-tertiary/40">
-                <GrimoireGlyph size={64} />
-              </span>
-              <CardContent className="relative z-[1]">
-                <TrainingRequestButton
-                  pending={pendingTraining ?? null}
-                  onRequestTraining={onRequestTraining}
+        {/* ─── Profil — édition perso + présence + entraînement (joueur) ─── */}
+        <TabsContent value="profil">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+            <div className="flex flex-col gap-4 xl:col-span-7">
+              <ProfileEditor
+                character={character}
+                onProfileChange={onProfileChange}
+              />
+
+              {!isMJ && onRequestTraining && (
+                <Card className="relative overflow-hidden border border-border ring-0">
+                  <span className="pointer-events-none absolute right-3 top-3 text-ink-tertiary/40">
+                    <GrimoireGlyph size={64} />
+                  </span>
+                  <CardContent className="relative z-[1]">
+                    <TrainingRequestButton
+                      pending={pendingTraining ?? null}
+                      onRequestTraining={onRequestTraining}
+                    />
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {onTogglePresence && (
+              <div className="xl:col-span-5">
+                <PresenceBadge
+                  isPresent={character.isPresent}
+                  onToggle={onTogglePresence}
                 />
-              </CardContent>
-            </Card>
+              </div>
+            )}
           </div>
-        )}
-
-        <div className="xl:col-span-5">
-          <ProfileEditor character={character} onProfileChange={onProfileChange} />
-        </div>
-      </section>
+        </TabsContent>
+      </Tabs>
 
       {/* Drawer de jet (rendered once) */}
       {onRollSkill && (

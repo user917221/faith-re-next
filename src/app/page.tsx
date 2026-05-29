@@ -5,9 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 
 // Lit la session côté serveur — rendu dynamique.
 export const dynamic = "force-dynamic";
+
+// Libellés de rôle — alignés sur la sidebar du shell.
+const ROLE_LABEL: Record<"mj" | "player" | "spectator", string> = {
+  mj: "Meneur de jeu",
+  player: "Joueur",
+  spectator: "Spectateur",
+};
 
 export default async function HomePage() {
   const session = await auth();
@@ -26,10 +35,10 @@ export default async function HomePage() {
 
             <div className="flex flex-col items-center gap-3">
               <p className="label-grimoire">Grimoire de campagne</p>
-              <h1 className="text-4xl font-semibold tracking-tight text-foreground">
+              <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
                 FAITH&nbsp;:&nbsp;RE
               </h1>
-              <p className="max-w-md text-sm text-muted-foreground">
+              <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
                 Compagnon de jeu &amp; fiches de personnage.
               </p>
             </div>
@@ -44,12 +53,30 @@ export default async function HomePage() {
             <CardContent className="flex h-full flex-col gap-5">
               <header className="flex flex-col gap-3">
                 <p className="label-grimoire">Compagnon</p>
-                <p className="text-2xl font-medium tracking-tight text-foreground">
-                  {user.name}
-                </p>
-                <Badge variant="outline" className="w-fit uppercase tracking-[0.12em]">
-                  Rôle&nbsp;: {user.role}
-                </Badge>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 rounded-md">
+                    {user.image && (
+                      <AvatarImage src={user.image} alt={user.name ?? ""} />
+                    )}
+                    <AvatarFallback
+                      className="rounded-md text-sm"
+                      style={avatarFallbackStyle(user.name ?? "")}
+                    >
+                      {initialsOf(user.name ?? "")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p className="truncate text-lg font-medium leading-tight tracking-tight text-foreground">
+                      {user.name}
+                    </p>
+                    <Badge
+                      variant="outline"
+                      className="w-fit uppercase tracking-[0.12em]"
+                    >
+                      {ROLE_LABEL[user.role]}
+                    </Badge>
+                  </div>
+                </div>
               </header>
 
               <Separator />
@@ -113,7 +140,12 @@ export default async function HomePage() {
 
               <p className="text-xs leading-relaxed text-ink-tertiary">
                 Les invitations sont accordées par le MJ. Demande l&apos;accès
-                à la table avant de tenter ta première convocation.
+                à la table avant de tenter ta première convocation. Ton rôle
+                est promu MJ si ton Discord ID correspond à{" "}
+                <code className="tabular rounded-sm border border-border bg-popover px-1 py-0.5 text-muted-foreground">
+                  MJ_DISCORD_ID
+                </code>
+                .
               </p>
             </CardContent>
           </Card>
