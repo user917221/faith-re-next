@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { auth, signIn, signOut } from "@/lib/auth";
 import { ConstellationGlyph } from "@/components/glyphs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 // Lit la session côté serveur — rendu dynamique.
 export const dynamic = "force-dynamic";
@@ -11,117 +15,108 @@ export default async function HomePage() {
 
   return (
     <main className="relative z-[2] min-h-screen px-6 py-10 md:py-16">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-5 lg:grid-cols-10 lg:items-stretch">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 lg:grid-cols-5 lg:items-stretch">
         {/* ============================================================
-            HERO — col-span-6 (60%) : glyph dominant + titre rituel
+            HERO — col-span-3 : glyph lavande discret + titre Linear
             ============================================================ */}
-        <section className="card-hero relative flex min-h-[480px] flex-col items-center justify-center gap-9 text-center lg:col-span-6 lg:min-h-[560px]">
-          {/* Glyph dominant — rotation lente + halo pulse */}
-          <div className="text-gold-aged glyph-rotate">
-            <div className="sigil-glow">
-              <ConstellationGlyph size={200} />
+        <Card className="justify-center lg:col-span-3">
+          <CardContent className="flex min-h-[440px] flex-col items-center justify-center gap-8 text-center lg:min-h-[520px]">
+            {/* Glyph hero — seul usage lavande décoratif autorisé, subtil */}
+            <ConstellationGlyph size={176} className="text-primary/70" />
+
+            <div className="flex flex-col items-center gap-3">
+              <p className="label-grimoire">Grimoire de campagne</p>
+              <h1 className="text-6xl font-semibold tracking-tight text-foreground">
+                FAITH&nbsp;:&nbsp;RE
+              </h1>
+              <p className="max-w-md text-sm text-muted-foreground">
+                Compagnon de jeu &amp; fiches de personnage.
+              </p>
             </div>
-          </div>
-
-          {/* Titre + tagline */}
-          <div className="flex flex-col items-center gap-4">
-            <p className="label-grimoire">Grimoire de campagne</p>
-            <h1 className="font-display text-7xl font-bold leading-none tracking-[0.04em] text-gold-aged drop-shadow-[0_0_28px_rgba(202,161,90,0.22)]">
-              FAITH&nbsp;:&nbsp;RE
-            </h1>
-            <p className="font-display max-w-md text-sm uppercase tracking-[0.18em] text-parchment-dim">
-              Compagnon de jeu &amp; fiches rituelles
-            </p>
-          </div>
-
-          {/* Mini sigil — mark de séparation contemplatif */}
-          <div className="flex items-center gap-3 text-gold-soft">
-            <span className="h-px w-12 bg-gold-soft/60" />
-            <span className="text-base">✦</span>
-            <span className="h-px w-12 bg-gold-soft/60" />
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
         {/* ============================================================
-            AUTH — col-span-4 (40%) : convocation ou identité
+            AUTH — col-span-2 : convocation ou identité
             ============================================================ */}
         {user ? (
-          <section className="card-hero flex flex-col gap-6 lg:col-span-4">
-            <header className="flex flex-col gap-3">
-              <p className="label-grimoire">Compagnon</p>
-              <p className="font-display text-2xl tracking-wide text-parchment">
-                {user.name}
-              </p>
-              <p className="font-display inline-block w-fit rounded-[--radius-xs] border border-gold-aged/35 bg-gold-aged/10 px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.18em] text-gold-aged">
-                Rôle&nbsp;: {user.role}
-              </p>
-            </header>
+          <Card className="lg:col-span-2">
+            <CardContent className="flex h-full flex-col gap-5">
+              <header className="flex flex-col gap-3">
+                <p className="label-grimoire">Compagnon</p>
+                <p className="text-2xl font-medium tracking-tight text-foreground">
+                  {user.name}
+                </p>
+                <Badge variant="outline" className="w-fit uppercase tracking-[0.12em]">
+                  Rôle&nbsp;: {user.role}
+                </Badge>
+              </header>
 
-            <div className="sigil-divider !my-0">
-              <span className="sigil-mark">✧</span>
-            </div>
+              <Separator />
 
-            <div className="flex flex-col gap-2.5">
-              <Link href="/plateau" className="btn-grimoire text-center">
-                Rejoindre le plateau
-              </Link>
-              {user.role === "mj" ? (
-                <Link href="/mj" className="btn-ghost text-center">
-                  Tableau MJ
-                </Link>
-              ) : (
-                <Link href="/me" className="btn-ghost text-center">
-                  Ma fiche
-                </Link>
-              )}
+              <div className="mt-auto flex flex-col gap-2.5">
+                <Button asChild className="w-full">
+                  <Link href="/plateau">Rejoindre le plateau</Link>
+                </Button>
+                {user.role === "mj" ? (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/mj">Tableau MJ</Link>
+                  </Button>
+                ) : (
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/me">Ma fiche</Link>
+                  </Button>
+                )}
+                <form
+                  action={async () => {
+                    "use server";
+                    await signOut({ redirectTo: "/" });
+                  }}
+                >
+                  <Button type="submit" variant="ghost" className="w-full">
+                    Quitter
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="lg:col-span-2">
+            <CardContent className="flex h-full flex-col gap-5">
+              <header className="flex flex-col gap-3">
+                <p className="label-grimoire">Convocation</p>
+                <p className="text-2xl font-medium leading-tight tracking-tight text-foreground">
+                  Rejoins la table.
+                </p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Identifie-toi avec ton compte Discord pour réclamer ta fiche
+                  et participer aux jets de session.
+                </p>
+              </header>
+
+              <Separator />
+
               <form
+                className="mt-auto"
                 action={async () => {
                   "use server";
-                  await signOut({ redirectTo: "/" });
+                  await signIn("discord", { redirectTo: "/me" });
                 }}
               >
-                <button type="submit" className="btn-ghost w-full">
-                  Quitter
+                <button
+                  type="submit"
+                  className="w-full rounded-md bg-[#5865F2] px-6 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[#4752c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  Connexion avec Discord
                 </button>
               </form>
-            </div>
-          </section>
-        ) : (
-          <section className="card-hero flex flex-col gap-6 lg:col-span-4">
-            <header className="flex flex-col gap-3">
-              <p className="label-grimoire">Convocation</p>
-              <p className="font-display text-2xl leading-tight tracking-wide text-parchment">
-                Rejoins la table.
+
+              <p className="text-xs leading-relaxed text-ink-tertiary">
+                Les invitations sont accordées par le MJ. Demande l&apos;accès
+                à la table avant de tenter ta première convocation.
               </p>
-              <p className="text-[0.78rem] leading-relaxed text-parchment-dim">
-                Identifie-toi avec ton compte Discord pour réclamer ta fiche
-                et participer aux jets de session.
-              </p>
-            </header>
-
-            <div className="sigil-divider !my-0">
-              <span className="sigil-mark">✧</span>
-            </div>
-
-            <form
-              action={async () => {
-                "use server";
-                await signIn("discord", { redirectTo: "/me" });
-              }}
-            >
-              <button
-                type="submit"
-                className="w-full rounded-[--radius-sm] bg-[#5865F2] px-6 py-3 text-center text-sm font-medium text-white transition hover:bg-[#4752c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-aged/40"
-              >
-                Connexion avec Discord
-              </button>
-            </form>
-
-            <p className="text-[0.68rem] italic leading-relaxed text-parchment-mute">
-              Les invitations sont accordées par le MJ. Demande l&apos;accès
-              à la table avant de tenter ta première convocation.
-            </p>
-          </section>
+            </CardContent>
+          </Card>
         )}
       </div>
     </main>

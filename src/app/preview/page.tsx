@@ -122,37 +122,33 @@ export default function PreviewPage() {
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-display text-xs uppercase tracking-[0.22em] text-gold-aged">
-              Preview / dev
-            </p>
-            <h1 className="font-display mt-1 text-xl font-bold tracking-wide text-parchment">
+            <p className="label-grimoire">Preview / dev</p>
+            <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-foreground">
               CharacterSheet
             </h1>
-            <p className="mt-1 text-xs text-parchment-mute">
+            <p className="mt-1 text-xs text-ink-tertiary">
               Mock Brad — <span className="tabular">{allocated}</span> pts alloués
             </p>
           </div>
-          <label className="flex cursor-pointer items-center gap-3 rounded-[--radius-sm] border border-gold-aged/18 bg-ink-near px-4 py-2 text-sm text-parchment-dim">
-            <span className="font-display text-[0.7rem] uppercase tracking-[0.18em]">
-              Mode MJ
-            </span>
+          <label className="flex cursor-pointer items-center gap-3 rounded-md border border-border bg-card px-4 py-2 text-sm text-muted-foreground">
+            <span className="label-grimoire">Mode MJ</span>
             <button
               type="button"
               onClick={() => setIsMJ((v) => !v)}
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                isMJ ? "bg-gold-aged" : "bg-ink-edge"
+                isMJ ? "bg-primary" : "bg-secondary"
               }`}
               aria-pressed={isMJ}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-parchment transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-foreground transition-transform ${
                   isMJ ? "translate-x-4" : "translate-x-0.5"
                 }`}
               />
             </button>
             <span
-              className={`font-display text-[0.7rem] font-bold uppercase tracking-[0.18em] ${
-                isMJ ? "text-gold-aged" : "text-parchment-mute"
+              className={`tabular text-[0.7rem] font-semibold uppercase tracking-[0.12em] ${
+                isMJ ? "text-primary" : "text-ink-tertiary"
               }`}
             >
               {isMJ ? "ON" : "OFF"}

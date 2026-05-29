@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import {
   SKILL_GROUPS,
   calculateAttribute,
@@ -8,10 +8,11 @@ import {
   type AttributeName,
 } from "@/lib/skills";
 import { SKILL_CAP, calculateLevel } from "@/lib/faith-system";
-import {
-  CrestGlyph,
-  GrimoireGlyph,
-} from "@/components/glyphs";
+import { CrestGlyph, GrimoireGlyph } from "@/components/glyphs";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { VitalsHeader } from "./VitalsHeader";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
@@ -27,6 +28,24 @@ type DrawerCtx = RollContext & {
   attrName: AttributeName;
   skillName: string | null;
 };
+
+/* Eyebrow de section — Linear : uppercase, tracking +, ink-subtle, hairline accolé */
+function SectionLabel({
+  children,
+  trailing,
+}: {
+  children: React.ReactNode;
+  trailing?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-3 flex items-baseline justify-between gap-3">
+      <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+        {children}
+      </span>
+      {trailing}
+    </div>
+  );
+}
 
 export default function CharacterSheet({
   character,
@@ -54,109 +73,124 @@ export default function CharacterSheet({
     : undefined;
 
   const attributes = Object.keys(SKILL_GROUPS) as AttributeName[];
-  const initials = `${character.name?.[0] ?? "?"}${character.nom?.[0] ?? ""}`.toUpperCase();
+  const initials =
+    `${character.name?.[0] ?? "?"}${character.nom?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <div className="relative z-[2] grid grid-cols-12 gap-4">
-      {/* ─── ROW 1 ─── Identite (5) + Vitaux trio (7) ─── */}
-
-      {/* Identité — card-hero col-span-5 */}
-      <section className="card-hero col-span-12 lg:col-span-5">
-        <div className="flex h-full flex-col gap-5">
-          <header className="flex items-start gap-4">
-            <span className="shrink-0 text-gold-aged">
-              <CrestGlyph size={80} initials={initials} />
-            </span>
-            <div className="flex flex-col gap-1">
-              <span className="label-grimoire">Personnage</span>
-              <h1 className="font-display text-5xl font-bold leading-none tracking-[0.02em] text-gold-aged">
+    <div className="relative z-[2] flex flex-col gap-8">
+      {/* ─── Identité — bandeau header dense ─── */}
+      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-4">
+          <Avatar
+            size="lg"
+            className="size-14 rounded-lg border border-border bg-card"
+          >
+            <AvatarFallback className="rounded-lg bg-card text-muted-foreground">
+              <span className="text-ink-tertiary">
+                <CrestGlyph size={40} />
+              </span>
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <h1 className="text-3xl font-semibold leading-none tracking-tight text-foreground">
                 {character.name}
               </h1>
-              {character.nom && (
-                <p className="font-display mt-1 text-base text-parchment-dim tracking-wide">
-                  {character.nom}
-                </p>
+              <Badge variant="outline" className="font-normal">
+                {isMJ ? "MJ" : "Joueur"}
+              </Badge>
+            </div>
+            {character.nom && (
+              <p className="text-sm text-muted-foreground">{character.nom}</p>
+            )}
+            <p className="flex items-center gap-1.5 text-xs uppercase tracking-[0.06em] text-ink-tertiary">
+              {isMJ && (
+                <>
+                  <span>
+                    Niv.{" "}
+                    <span className="tabular text-muted-foreground">
+                      {derivedLevel}
+                    </span>
+                  </span>
+                  <span aria-hidden>·</span>
+                </>
               )}
-              <p className="mt-2 font-display text-[0.72rem] uppercase tracking-[0.16em] text-parchment-mute">
-                {isMJ && (
-                  <>
-                    Niv. <span className="tabular text-parchment-dim">{derivedLevel}</span>
-                    {" · "}
-                  </>
-                )}
-                <span className="tabular">{character.age || "?"}</span> ans
-              </p>
-            </div>
-          </header>
+              <span>
+                <span className="tabular text-muted-foreground">
+                  {character.age || "?"}
+                </span>{" "}
+                ans
+              </span>
+            </p>
+          </div>
+        </div>
 
-          {/* Présence + bouton rejoindre/quitter */}
-          {onTogglePresence && (
-            <div className="mt-auto flex items-center justify-between gap-3 rounded-[--radius-sm] border border-gold-aged/12 bg-ink-deep/60 px-4 py-3">
-              <div className="flex items-center gap-3">
-                <span
-                  className={`inline-block h-2.5 w-2.5 rounded-full ${
-                    character.isPresent ? "presence-led-on" : "presence-led-off"
-                  }`}
-                  aria-hidden
-                />
-                <span
-                  className={`font-display text-[0.7rem] uppercase tracking-[0.18em] ${
-                    character.isPresent ? "text-celadon" : "text-parchment-dim"
-                  }`}
-                >
-                  {character.isPresent ? "À la table" : "Absent"}
-                </span>
-              </div>
-              <PresenceToggle
-                isPresent={character.isPresent}
-                onToggle={onTogglePresence}
+        {/* Présence — chip aligné à droite */}
+        {onTogglePresence && (
+          <div className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2">
+            <span
+              className={`inline-block h-2 w-2 rounded-full ${
+                character.isPresent ? "presence-led-on" : "presence-led-off"
+              }`}
+              aria-hidden
+            />
+            <span
+              className={`text-xs uppercase tracking-[0.08em] ${
+                character.isPresent ? "text-endu" : "text-ink-tertiary"
+              }`}
+            >
+              {character.isPresent ? "À la table" : "Absent"}
+            </span>
+            <PresenceToggle
+              isPresent={character.isPresent}
+              onToggle={onTogglePresence}
+            />
+          </div>
+        )}
+      </header>
+
+      <Separator />
+
+      {/* ─── Vitaux + actions ─── colonnes denses ─── */}
+      <section>
+        <SectionLabel>Vitaux</SectionLabel>
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+          {/* Trio vitaux */}
+          <div className="xl:col-span-7">
+            <VitalsHeader character={character} onVitalChange={onVitalChange} />
+          </div>
+
+          {/* Récup + actions endurance, empilés */}
+          <div className="flex flex-col gap-4 xl:col-span-5">
+            {(onRecoverHp || onRecoverEndurance) && (
+              <RecoveryPanel
+                onRecoverHp={onRecoverHp}
+                onRecoverEndurance={onRecoverEndurance}
               />
-            </div>
-          )}
+            )}
+            <EnduranceActionPanel onActionCost={onActionCost} />
+          </div>
         </div>
       </section>
 
-      {/* Vitaux trio — col-span-7 — 3 cards verticales */}
-      <section className="col-span-12 lg:col-span-7">
-        <VitalsHeader character={character} onVitalChange={onVitalChange} />
-      </section>
+      <Separator />
 
-      {/* ─── ROW 2 ─── Récup (5) + Endurance Actions (7) ─── */}
+      {/* ─── Attributs & compétences ─── */}
+      <section>
+        <SectionLabel
+          trailing={
+            <span className="tabular text-xs text-ink-tertiary">
+              {allocated}/{SKILL_CAP} pts
+            </span>
+          }
+        >
+          Attributs &amp; compétences
+        </SectionLabel>
 
-      {/* Récup HP + Endu — col-span-5 */}
-      {(onRecoverHp || onRecoverEndurance) && (
-        <section className="col-span-12 lg:col-span-5">
-          <RecoveryPanel
-            onRecoverHp={onRecoverHp}
-            onRecoverEndurance={onRecoverEndurance}
-          />
-        </section>
-      )}
-
-      {/* Endurance Actions — col-span-7 (ou 12 si pas de recup) */}
-      <section
-        className={
-          onRecoverHp || onRecoverEndurance
-            ? "col-span-12 lg:col-span-7"
-            : "col-span-12"
-        }
-      >
-        <EnduranceActionPanel onActionCost={onActionCost} />
-      </section>
-
-      {/* ─── ROW 3 ─── Allocation (12) ─── */}
-      <section className="col-span-12">
-        <PointAllocatorBar allocated={allocated} />
-      </section>
-
-      {/* ─── ROW 4 ─── Attributs grid 4 bento (12) ─── */}
-      <section className="col-span-12">
-        <div className="mb-3 flex items-baseline justify-between">
-          <span className="label-grimoire">⚜ Attributs &amp; compétences</span>
-          <span className="font-display tabular text-[0.65rem] uppercase tracking-[0.16em] text-parchment-mute">
-            {allocated}/{SKILL_CAP} pts
-          </span>
+        <div className="mb-4">
+          <PointAllocatorBar allocated={allocated} />
         </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {attributes.map((attr) => {
             const score = calculateAttribute(character.skills, attr);
@@ -172,104 +206,106 @@ export default function CharacterSheet({
               : null;
 
             return (
-              <div
+              <Card
                 key={attr}
-                className="card-grimoire transition-all hover:-translate-y-px hover:border-gold-aged/35"
+                className="border border-border ring-0 transition-colors hover:border-hairline-strong"
               >
-                <header className="mb-4 flex items-start justify-between gap-3">
-                  <div className="flex flex-col gap-1">
-                    <span className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute">
-                      Attribut
-                    </span>
-                    <span className="font-display text-2xl font-medium uppercase tracking-[0.12em] text-gold-aged">
-                      {attr}
-                    </span>
-                  </div>
-                  {openAttrRoll ? (
-                    <button
-                      type="button"
-                      onClick={openAttrRoll}
-                      title={`Lancer un jet d'attribut ${attr}`}
-                      aria-label={`Lancer un jet d'attribut ${attr}`}
-                      className="focus-grimoire flex flex-col items-end transition-colors hover:text-gold-bright"
-                    >
-                      <span
-                        className="big-number text-gold-aged"
-                        style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}
-                      >
-                        {score}
+                <CardContent className="flex flex-col gap-4">
+                  <header className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[0.62rem] font-medium uppercase tracking-[0.08em] text-ink-tertiary">
+                        Attribut
                       </span>
-                      <span className="font-display text-[0.6rem] uppercase tracking-[0.16em] text-parchment-mute">
-                        Jet
-                      </span>
-                    </button>
-                  ) : (
-                    <div className="flex flex-col items-end">
-                      <span
-                        className="big-number text-gold-aged"
-                        style={{ fontSize: "clamp(2rem, 3.5vw, 3rem)" }}
-                      >
-                        {score}
-                      </span>
-                      <span className="font-display text-[0.6rem] uppercase tracking-[0.16em] text-parchment-mute">
-                        Score
+                      <span className="text-lg font-semibold tracking-tight text-foreground">
+                        {attr}
                       </span>
                     </div>
-                  )}
-                </header>
-                <div className="flex flex-col gap-2.5 border-t border-gold-aged/10 pt-3">
-                  {SKILL_GROUPS[attr].map((skill) => (
-                    <SkillRow
-                      key={skill}
-                      name={skill}
-                      value={character.skills[skill] ?? 0}
-                      attrScore={score}
-                      isCapped={isCapped}
-                      onSkillChange={onSkillChange}
-                      onOpenRollDrawer={openRollDrawer}
-                    />
-                  ))}
-                </div>
-              </div>
+                    {openAttrRoll ? (
+                      <button
+                        type="button"
+                        onClick={openAttrRoll}
+                        title={`Lancer un jet d'attribut ${attr}`}
+                        aria-label={`Lancer un jet d'attribut ${attr}`}
+                        className="focus-grimoire group flex flex-col items-end rounded-md transition-colors"
+                      >
+                        <span
+                          className="big-number text-foreground transition-colors group-hover:text-primary-hover"
+                          style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
+                        >
+                          {score}
+                        </span>
+                        <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary transition-colors group-hover:text-muted-foreground">
+                          Jet
+                        </span>
+                      </button>
+                    ) : (
+                      <div className="flex flex-col items-end">
+                        <span
+                          className="big-number text-foreground"
+                          style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
+                        >
+                          {score}
+                        </span>
+                        <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary">
+                          Score
+                        </span>
+                      </div>
+                    )}
+                  </header>
+                  <Separator />
+                  <div className="flex flex-col gap-2.5">
+                    {SKILL_GROUPS[attr].map((skill) => (
+                      <SkillRow
+                        key={skill}
+                        name={skill}
+                        value={character.skills[skill] ?? 0}
+                        attrScore={score}
+                        isCapped={isCapped}
+                        onSkillChange={onSkillChange}
+                        onOpenRollDrawer={openRollDrawer}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
       </section>
 
-      {/* ─── ROW 5 ─── Evolution (7) + Profil (5)  OU  Training (7) + Profil (5) ─── */}
+      <Separator />
 
-      {isMJ && (
-        <section className="col-span-12 lg:col-span-7">
-          <EvolutionSection
-            character={character}
-            onXpChange={onXpChange}
-            onTrainingChange={onTrainingChange}
-          />
-        </section>
-      )}
-
-      {!isMJ && onRequestTraining && (
-        <section className="col-span-12 lg:col-span-7">
-          <div className="card-grimoire relative overflow-hidden">
-            <div className="pointer-events-none absolute right-3 top-3 text-gold-soft opacity-[0.16]">
-              <GrimoireGlyph size={72} />
-            </div>
-            <div className="relative z-[1]">
-              <TrainingRequestButton
-                pending={pendingTraining ?? null}
-                onRequestTraining={onRequestTraining}
-              />
-            </div>
+      {/* ─── Évolution (MJ) / Entraînement (joueur) + Profil ─── */}
+      <section className="grid grid-cols-1 gap-4 xl:grid-cols-12">
+        {isMJ && (
+          <div className="xl:col-span-7">
+            <EvolutionSection
+              character={character}
+              onXpChange={onXpChange}
+              onTrainingChange={onTrainingChange}
+            />
           </div>
-        </section>
-      )}
+        )}
 
-      {/* Profil col-span-5 */}
-      <section className="col-span-12 lg:col-span-5">
-        <ProfileEditor
-          character={character}
-          onProfileChange={onProfileChange}
-        />
+        {!isMJ && onRequestTraining && (
+          <div className="xl:col-span-7">
+            <Card className="relative overflow-hidden">
+              <span className="pointer-events-none absolute right-3 top-3 text-ink-tertiary/40">
+                <GrimoireGlyph size={64} />
+              </span>
+              <CardContent className="relative z-[1]">
+                <TrainingRequestButton
+                  pending={pendingTraining ?? null}
+                  onRequestTraining={onRequestTraining}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className="xl:col-span-5">
+          <ProfileEditor character={character} onProfileChange={onProfileChange} />
+        </div>
       </section>
 
       {/* Drawer de jet (rendered once) */}
@@ -292,7 +328,7 @@ export default function CharacterSheet({
   );
 }
 
-/* Petit toggle de présence inline pour la card-hero */
+/* Petit toggle de présence inline — variante texte Linear (lien lavande/ghost) */
 function PresenceToggle({
   isPresent,
   onToggle,
@@ -300,14 +336,17 @@ function PresenceToggle({
   isPresent: boolean;
   onToggle: () => Promise<void>;
 }) {
+  const [isPending, startTransition] = useTransition();
+
   return (
     <button
       type="button"
-      onClick={() => onToggle()}
+      disabled={isPending}
+      onClick={() => startTransition(() => onToggle())}
       className={
         isPresent
-          ? "font-display rounded-[--radius-sm] border border-gold-aged/20 px-3 py-1.5 text-[0.62rem] uppercase tracking-[0.16em] text-parchment-dim transition-colors hover:border-gold-aged/40 hover:text-gold-aged"
-          : "btn-grimoire !py-1.5 !px-3 !text-[0.62rem]"
+          ? "focus-grimoire rounded-md px-1.5 text-xs text-ink-tertiary transition-colors hover:text-foreground disabled:opacity-40"
+          : "focus-grimoire rounded-md px-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover disabled:opacity-40"
       }
     >
       {isPresent ? "Quitter" : "Rejoindre"}

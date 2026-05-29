@@ -2,6 +2,16 @@
 
 import { useState, useTransition } from "react";
 import { CrestGlyph } from "@/components/glyphs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { Character, ProfilePatch } from "./types";
 
 type Props = {
@@ -31,82 +41,66 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   }
 
   return (
-    <section className="card-grimoire">
-      <header className="mb-4 flex items-start justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span className="shrink-0 text-gold-soft">
-            <CrestGlyph size={42} />
-          </span>
-          <div className="flex flex-col gap-0.5">
-            <span className="label-grimoire">Profil</span>
-            <p className="text-xs text-parchment-mute">
-              Identité du personnage
-            </p>
-          </div>
+    <Card>
+      <CardHeader className="grid-cols-[auto_1fr_auto] items-center gap-3">
+        <span className="shrink-0 text-ink-tertiary">
+          <CrestGlyph size={36} />
+        </span>
+        <div className="flex flex-col gap-0.5">
+          <CardTitle>Profil</CardTitle>
+          <CardDescription>Identité du personnage</CardDescription>
         </div>
         {feedback && (
-          <span className="text-xs italic text-gold-bright">{feedback}</span>
+          <span className="self-start text-xs text-primary">{feedback}</span>
         )}
-      </header>
-      <div className="flex flex-col gap-3">
-        <Field label="Prénom" required>
-          <input
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="profile-name">
+            Prénom
+            <span className="text-hp">*</span>
+          </Label>
+          <Input
+            id="profile-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             disabled={!onProfileChange}
-            className="input-grimoire w-full disabled:opacity-40"
           />
-        </Field>
-        <Field label="Nom de famille">
-          <input
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="profile-nom">Nom de famille</Label>
+          <Input
+            id="profile-nom"
             type="text"
             value={nom}
             onChange={(e) => setNom(e.target.value)}
             disabled={!onProfileChange}
-            className="input-grimoire w-full disabled:opacity-40"
           />
-        </Field>
-        <Field label="Âge">
-          <input
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="profile-age">Âge</Label>
+          <Input
+            id="profile-age"
             type="number"
             min={1}
             max={999}
             value={age}
             onChange={(e) => setAge(parseInt(e.target.value, 10) || 0)}
             disabled={!onProfileChange}
-            className="input-grimoire tabular w-full disabled:opacity-40"
+            className="tabular"
           />
-        </Field>
-        <button
+        </div>
+        <Button
           type="button"
+          size="lg"
+          className="w-full"
           disabled={!onProfileChange || !dirty || isPending}
           onClick={save}
-          className="btn-grimoire h-10 w-full"
         >
           {isPending ? "…" : "Enregistrer"}
-        </button>
-      </div>
-    </section>
-  );
-}
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="font-display text-[0.65rem] uppercase tracking-[0.18em] text-parchment-mute">
-        {label}
-        {required && <span className="ml-1 text-blood-dried">*</span>}
-      </span>
-      {children}
-    </label>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

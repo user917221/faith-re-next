@@ -1,7 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
+import { Dices, Minus, Plus } from "lucide-react";
 import { SKILL_DESCRIPTIONS, SKILL_TO_ATTRIBUTE, type AttributeName } from "@/lib/skills";
+import { Button } from "@/components/ui/button";
 import type { RollContext } from "./DDDrawer";
 
 type Props = {
@@ -12,19 +14,6 @@ type Props = {
   onSkillChange?: (skillName: string, delta: 1 | -1) => Promise<void>;
   onOpenRollDrawer?: (ctx: RollContext & { attrName: AttributeName; skillName: string }) => void;
 };
-
-function DieIcon() {
-  return (
-    <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <rect x="2.5" y="2.5" width="11" height="11" rx="1.5" />
-      <circle cx="5.5" cy="5.5" r="0.6" fill="currentColor" />
-      <circle cx="10.5" cy="5.5" r="0.6" fill="currentColor" />
-      <circle cx="8" cy="8" r="0.6" fill="currentColor" />
-      <circle cx="5.5" cy="10.5" r="0.6" fill="currentColor" />
-      <circle cx="10.5" cy="10.5" r="0.6" fill="currentColor" />
-    </svg>
-  );
-}
 
 export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onOpenRollDrawer }: Props) {
   const [isPending, startTransition] = useTransition();
@@ -55,48 +44,49 @@ export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onOp
   const minusDisabled = isPending || !onSkillChange || value <= 0;
 
   return (
-    <div className="group flex items-center justify-between gap-3 text-sm">
+    <div className="group -mx-1.5 flex items-center justify-between gap-3 rounded-md px-1.5 py-1 text-sm transition-colors hover:bg-muted">
       <span
         title={description}
-        className="flex cursor-help items-center gap-2 font-medium text-parchment transition-colors hover:text-gold-bright"
+        className="cursor-help truncate font-medium text-ink-muted transition-colors group-hover:text-foreground"
       >
-        <span aria-hidden className="text-gold-soft text-xs">
-          ✦
-        </span>
         {name}
       </span>
-      <div className="flex items-center gap-2">
-        <button
+      <div className="flex items-center gap-1">
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           aria-label={`Retirer un point de ${name}`}
           disabled={minusDisabled}
           onClick={() => adjust(-1)}
-          className="btn-ghost focus-grimoire flex h-6 w-6 items-center justify-center !p-0 text-xs font-bold disabled:opacity-35"
         >
-          −
-        </button>
-        <span className="tabular w-5 text-center font-semibold text-gold-aged">
+          <Minus className="size-3" />
+        </Button>
+        <span className="tabular w-5 text-center font-semibold text-foreground">
           {value}
         </span>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon-xs"
           aria-label={`Ajouter un point à ${name}`}
           disabled={plusDisabled}
           onClick={() => adjust(1)}
-          className="btn-ghost focus-grimoire flex h-6 w-6 items-center justify-center !p-0 text-xs font-bold disabled:opacity-35"
         >
-          +
-        </button>
+          <Plus className="size-3" />
+        </Button>
         {onOpenRollDrawer && attrName && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon-xs"
             aria-label={`Lancer 2d6 + ${name}`}
             title={`Lancer 2d6 + ${attrName} + ${name}`}
             onClick={openRoll}
-            className="focus-grimoire flex h-6 w-6 items-center justify-center rounded-[--radius-xs] border border-gold-aged/18 text-gold-aged transition-all hover:-translate-y-px hover:border-gold-aged/45 hover:bg-gold-aged/10 hover:text-gold-bright"
+            className="ml-0.5 text-muted-foreground hover:text-primary-hover"
           >
-            <DieIcon />
-          </button>
+            <Dices className="size-3.5" />
+          </Button>
         )}
       </div>
     </div>

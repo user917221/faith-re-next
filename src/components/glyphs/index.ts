@@ -1,16 +1,17 @@
 /**
  * Bibliothèque des glyphes signature FAITH : RE.
  *
- * Style commun :
- *  - SVG inline custom dessiné à la ligne fine gold-aged
- *  - stroke="currentColor", strokeWidth 1.2-1.4, fill="none"
+ * Style commun (direction Linear — accent MONOCHROME discret) :
+ *  - SVG inline custom dessiné à la ligne fine
+ *  - stroke="currentColor", strokeWidth 1.2, fill="none"
  *  - viewBox carré 120x120 (sauf CrestGlyph en 120x140)
- *  - hérite la couleur du parent → utiliser text-gold-aged / text-gold-bright
+ *  - hérite la couleur du parent → text-muted-foreground / text-ink-tertiary
+ *    (jamais de lavande décoratif ; petite taille, sobre, pas tape-à-l'œil)
  *  - lignes fluides, arcs et courbes (jamais d'angles vifs)
  *  - quelques points fill currentColor (1-2px) pour accents
  *
- * Usage typique dans hero card :
- *   <ConstellationGlyph className="text-gold-aged" size={200} />
+ * Usage typique :
+ *   <ConstellationGlyph className="text-ink-tertiary" size={64} />
  */
 export { ConstellationGlyph } from "./ConstellationGlyph";
 export { CalvaryGlyph } from "./CalvaryGlyph";

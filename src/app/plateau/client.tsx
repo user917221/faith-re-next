@@ -1,20 +1,22 @@
 "use client";
 
 /**
- * PlateauClient — bento industrial-mystique inspiré Petronex Oil & Gas.
+ * PlateauClient — dashboard Linear (issue list / project view) pour la table partagée.
  *
- * Layout grid-cols-12 :
- *  - Header (12) : RoundTableGlyph + titre Plateau + nav
- *  - Roster (3) : sticky list-portfolio des compagnons à la table
- *  - Hero "Dernier acte" (6) : card-hero, big-number gold-bright pour le total
- *  - Lanceur (3) : sticky, attribut/skill switchable, formule libre
- *  - Carnet des jets (12) : list-portfolio scrollable des 30 derniers jets
+ * Layout 3 colonnes dense + carnet pleine largeur :
+ *  - Header (12) : RoundTableGlyph discret + titre + sub "Session ouverte" + nav ghost
+ *  - Roster compagnons (gauche, ~280px) : Card + ScrollArea, lignes denses
+ *    Avatar + nom + LED présence + 3 mini barres vitaux (Progress h-1, hp/mhp/endu)
+ *  - Hero "Dernier acte" (centre, flex-1) : Card, big-number lavande/hp du total
+ *  - Lanceur (droite, ~320px) : Card, Select perso, attributs en boutons, DD chips
+ *  - Carnet des jets (12) : Card header sticky + ScrollArea, lignes list-portfolio
  *
  * Polling 5s — propagation cross-clients des vitals + nouveaux jets.
  * CritOverlay z-50 au-dessus de tout en cas de double-6 / double-1.
  *
- * Hiérarchie visuelle : le BIG NUMBER du dernier jet est l'élément le plus
- * imprégnant — visible à 2m sur l'écran partagé d'une table.
+ * Hiérarchie Linear : surface ladder (canvas → card → popover) + hairlines 1px,
+ * accent lavande SCARCE (un CTA "Lancer" par section, focus ring). Le BIG NUMBER
+ * du dernier jet est l'élément le plus imprégnant — lisible à 2m sur l'écran partagé.
  */
 
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -30,7 +32,22 @@ import {
   SKILL_GROUPS,
   type AttributeName,
 } from "@/lib/skills";
-import { RoundTableGlyph, GrimoireGlyph } from "@/components/glyphs";
+import { RoundTableGlyph } from "@/components/glyphs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CritOverlay } from "./CritOverlay";
 
 type FeedItem = {
@@ -81,15 +98,34 @@ function formatRelative(date: Date): string {
   return `il y a ${d} j`;
 }
 
-function SigilDivider({ mark = "✦" }: { mark?: string }) {
-  return (
-    <div className="sigil-divider !my-3">
-      <span className="sigil-mark">{mark}</span>
-    </div>
-  );
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
+  return (parts[0]![0]! + parts[parts.length - 1]![0]!).toUpperCase();
 }
 
-/* -------------------------- Mini bar vital (roster, 8px) -------------------------- */
+function buildBreakdown(item: FeedItem): string[] {
+  const pieces: string[] = [];
+  if (item.rolls.length > 0) {
+    pieces.push(`[${item.rolls.join(", ")}]`);
+  }
+  if (item.attrName && item.attrScore !== null) {
+    pieces.push(`+ ${item.attrName}(${item.attrScore})`);
+  }
+  if (item.skillName && item.skillScore !== null) {
+    pieces.push(`+ ${item.skillName}(${item.skillScore})`);
+  }
+  return pieces;
+}
+
+/* -------------------------- Mini bar vital (roster, Progress h-1) -------------------------- */
+
+const VITAL_META = {
+  hp: { indicator: "[&_[data-slot=progress-indicator]]:bg-hp", text: "text-hp" },
+  mhp: { indicator: "[&_[data-slot=progress-indicator]]:bg-mhp", text: "text-mhp" },
+  endu: { indicator: "[&_[data-slot=progress-indicator]]:bg-endu", text: "text-endu" },
+} as const;
 
 function MiniBar({
   kind,
@@ -101,25 +137,16 @@ function MiniBar({
   max: number;
 }) {
   const pct = max > 0 ? Math.max(0, Math.min(100, (current / max) * 100)) : 0;
-  const palette = {
-    hp: { from: "#d57272", to: "#7a3a3a", text: "text-blood-dried" },
-    mhp: { from: "#b9a4e3", to: "#5a4495", text: "text-amethyst" },
-    endu: { from: "#a9c8ac", to: "#4f7053", text: "text-celadon" },
-  }[kind];
+  const meta = VITAL_META[kind];
   return (
-    <div className="flex items-center gap-1.5">
-      <div className="relative h-2 flex-1 overflow-hidden rounded-[--radius-xs] border border-gold-aged/12 bg-ink-deep">
-        <div
-          className="absolute inset-y-0 left-0 transition-[width] duration-500 ease-out"
-          style={{
-            width: `${pct}%`,
-            background: `linear-gradient(180deg, ${palette.from} 0%, ${palette.to} 100%)`,
-          }}
-        />
-      </div>
-      <span className={`tabular text-[0.62rem] tracking-tight ${palette.text} w-12 text-right`}>
+    <div className="flex items-center gap-2">
+      <Progress
+        value={pct}
+        className={`h-1 flex-1 bg-secondary ${meta.indicator}`}
+      />
+      <span className={`tabular w-12 shrink-0 text-right text-[0.62rem] ${meta.text}`}>
         {current}
-        <span className="text-parchment-faint">/{max}</span>
+        <span className="text-ink-tertiary">/{max}</span>
       </span>
     </div>
   );
@@ -140,43 +167,41 @@ function RosterItem({
     <div className="flex flex-col gap-2.5">
       <div className="flex items-start gap-2.5">
         <span
-          className={`mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full ${
+          className={`mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full ${
             character.isPresent ? "presence-led-on" : "presence-led-off"
           }`}
           aria-hidden
         />
-        <div
-          className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-gold-aged/40 bg-gold-aged/15"
-          aria-hidden
-          title={character.name}
-        >
-          <span className="font-display text-[0.85rem] leading-none text-gold-aged">✦</span>
-        </div>
+        <Avatar size="sm" className="mt-0.5 shrink-0">
+          <AvatarFallback className="bg-secondary text-[0.62rem] font-medium text-muted-foreground">
+            {initials(character.name)}
+          </AvatarFallback>
+        </Avatar>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h4 className="font-display text-[0.95rem] leading-tight tracking-[0.02em] text-gold-aged truncate">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+            <h4 className="truncate text-sm font-medium tracking-tight text-foreground">
               {character.name}
               {character.nom && (
-                <span className="ml-1 text-[0.7rem] font-normal text-parchment-dim">
+                <span className="ml-1 text-[0.72rem] font-normal text-muted-foreground">
                   {character.nom}
                 </span>
               )}
             </h4>
             {showLevel && (
-              <span className="font-display tabular rounded-[--radius-xs] border border-gold-aged/30 px-1.5 py-0.5 text-[0.52rem] uppercase tracking-[0.16em] text-gold-aged">
+              <Badge variant="outline" className="tabular shrink-0 text-ink-tertiary">
                 Niv. {character.level}
-              </span>
+              </Badge>
             )}
           </div>
           {isOwner && (
-            <p className="font-display mt-0.5 text-[0.55rem] uppercase tracking-[0.18em] text-gold-bright">
+            <p className="mt-0.5 text-[0.6rem] font-medium uppercase tracking-[0.14em] text-primary">
               Toi
             </p>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 pl-[3.25rem]">
+      <div className="flex flex-col gap-1.5 pl-[2.75rem]">
         <MiniBar kind="hp" current={character.currentHp} max={character.maxHp} />
         <MiniBar kind="mhp" current={character.currentMental} max={character.maxMental} />
         <MiniBar kind="endu" current={character.currentEndurance} max={character.maxEndurance} />
@@ -208,37 +233,45 @@ function Roster({
   const presentCount = sorted.length;
 
   return (
-    <section className="card-grimoire flex flex-col gap-3 lg:sticky lg:top-6 lg:self-start">
-      <header className="flex items-baseline justify-between gap-2">
-        <p className="label-grimoire">Compagnons à la table</p>
-        <span className="font-display tabular text-[0.6rem] uppercase tracking-[0.16em] text-parchment-mute">
-          {presentCount}
-        </span>
-      </header>
+    <Card className="gap-0 py-0 lg:sticky lg:top-6 lg:self-start">
+      <CardHeader className="flex flex-row items-center justify-between gap-2 border-b px-4 py-3">
+        <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          Compagnons à la table
+        </CardTitle>
+        <span className="tabular text-xs text-ink-tertiary">{presentCount}</span>
+      </CardHeader>
 
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-10 text-center text-parchment-faint">
-          <RoundTableGlyph size={100} className="opacity-60" />
-          <p className="font-display text-[0.7rem] uppercase tracking-[0.18em] text-parchment-mute">
+        <div className="flex flex-col items-center gap-3 px-4 py-10 text-center">
+          <RoundTableGlyph size={88} className="text-ink-tertiary" />
+          <p className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
             La table est encore vide
           </p>
-          <p className="text-[0.7rem] italic text-parchment-faint">
+          <p className="text-[0.78rem] text-ink-tertiary">
             En attente des compagnons.
           </p>
         </div>
       ) : (
-        <div className="list-portfolio -mx-5 -mb-5">
-          {sorted.map((c) => (
-            <RosterItem
-              key={c.id}
-              character={c}
-              isOwner={c.id === ownedId}
-              showLevel={isMJ}
-            />
-          ))}
-        </div>
+        <ScrollArea className="max-h-[560px]">
+          <div className="flex flex-col">
+            {sorted.map((c, idx) => (
+              <div
+                key={c.id}
+                className={`px-4 py-3 transition-colors hover:bg-popover ${
+                  idx > 0 ? "border-t border-border" : ""
+                }`}
+              >
+                <RosterItem
+                  character={c}
+                  isOwner={c.id === ownedId}
+                  showLevel={isMJ}
+                />
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -247,118 +280,100 @@ function Roster({
 function LastActHero({ item }: { item: FeedItem | null }) {
   if (!item) {
     return (
-      <section className="card-hero flex min-h-[260px] flex-col items-center justify-center gap-4 text-center lg:min-h-[320px]">
-        <div className="text-parchment-faint">
-          <RoundTableGlyph size={150} className="opacity-60" />
-        </div>
-        <p className="label-grimoire">Dernier acte</p>
-        <p className="font-display text-[0.85rem] uppercase tracking-[0.22em] text-parchment-dim">
-          Aucun jet inscrit
-        </p>
-        <p className="max-w-md text-[0.78rem] italic text-parchment-mute">
-          Lance le premier — l&apos;Impôt Divin observe.
-        </p>
-      </section>
+      <Card className="min-h-[280px] justify-center lg:min-h-[340px]">
+        <CardContent className="flex flex-col items-center justify-center gap-4 text-center">
+          <RoundTableGlyph size={132} className="text-ink-tertiary" />
+          <p className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+            Dernier acte
+          </p>
+          <p className="text-sm text-ink-tertiary">
+            Aucun jet inscrit — lance le premier.
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
-  // Breakdown : [1, 5] + INTELLECT(8) + Logique(3)
-  const breakdownPieces: string[] = [];
-  if (item.rolls.length > 0) {
-    breakdownPieces.push(`[${item.rolls.join(", ")}]`);
-  }
-  if (item.attrName && item.attrScore !== null) {
-    breakdownPieces.push(`+ ${item.attrName}(${item.attrScore})`);
-  }
-  if (item.skillName && item.skillScore !== null) {
-    breakdownPieces.push(`+ ${item.skillName}(${item.skillScore})`);
-  }
+  const breakdownPieces = buildBreakdown(item);
 
-  // Couleur du big number
-  let totalClass = "text-gold-bright";
-  let totalShadow = "drop-shadow-[0_0_28px_rgba(232,192,116,0.4)]";
+  // Couleur du big number : lavande si réussite/crit succ, hp si échec crit, ink sinon.
+  let totalClass = "text-primary";
   if (item.isCritSucc) {
-    totalClass = "text-gold-bright";
-    totalShadow = "drop-shadow-[0_0_42px_rgba(232,192,116,0.7)]";
+    totalClass = "text-primary";
   } else if (item.isCritFail) {
-    totalClass = "text-blood-dried italic";
-    totalShadow = "drop-shadow-[0_0_28px_rgba(179,90,90,0.55)]";
+    totalClass = "text-hp";
   } else if (item.success === true) {
-    totalClass = "text-celadon";
-    totalShadow = "drop-shadow-[0_0_28px_rgba(142,176,145,0.45)]";
+    totalClass = "text-endu";
   } else if (item.success === false) {
-    totalClass = "text-parchment-dim";
-    totalShadow = "";
+    totalClass = "text-muted-foreground";
   }
 
   return (
-    <section className="card-hero flex min-h-[260px] flex-col gap-4 lg:min-h-[320px]">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="label-grimoire">Dernier acte</p>
-        <span className="font-display tabular text-[0.62rem] uppercase tracking-[0.14em] text-parchment-mute">
+    <Card className="min-h-[280px] lg:min-h-[340px]">
+      <CardHeader className="flex flex-row items-baseline justify-between gap-2">
+        <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          Dernier acte
+        </CardTitle>
+        <span className="tabular text-[0.62rem] uppercase tracking-[0.06em] text-ink-tertiary">
           {formatRelative(item.createdAt)}
         </span>
-      </header>
+      </CardHeader>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
-        <h2 className="font-display text-2xl tracking-[0.04em] text-gold-aged sm:text-3xl">
+      <CardContent className="flex flex-1 flex-col items-center justify-center gap-3 py-2 text-center">
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {item.characterName}
         </h2>
         {item.casterName && item.casterName !== item.characterName && (
-          <p className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute">
+          <p className="text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground">
             Lancé par {item.casterName}
           </p>
         )}
 
-        <p className="tabular text-[0.85rem] text-parchment-dim">{item.formula}</p>
+        <p className="tabular text-sm text-muted-foreground">{item.formula}</p>
 
         <div className="flex items-end justify-center gap-3">
           <span
             key={item.id}
-            className={`big-number font-display ${totalClass} ${totalShadow}`}
+            className={`big-number ${totalClass} ${item.isCritFail ? "italic" : ""}`}
             style={{ animation: "vital-flash 0.35s ease-out" }}
           >
             {item.total}
           </span>
           {item.dd !== null && (
-            <span className="font-display tabular mb-2 text-base uppercase tracking-[0.16em] text-parchment-mute sm:text-lg">
+            <span className="tabular mb-2 text-base uppercase tracking-[0.06em] text-ink-tertiary sm:text-lg">
               / DD {item.dd}
             </span>
           )}
         </div>
 
         {breakdownPieces.length > 0 && (
-          <p className="tabular text-[0.72rem] text-parchment-mute">
+          <p className="tabular text-[0.72rem] text-muted-foreground">
             {breakdownPieces.join(" ")}
           </p>
         )}
 
         <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
           {item.isCritSucc && (
-            <span className="font-display sigil-glow inline-flex items-center gap-1.5 rounded-[--radius-xs] border border-gold-aged/50 bg-gold-aged/10 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.16em] text-gold-bright">
-              <span aria-hidden>✦</span>
-              Réussite critique
-            </span>
+            <Badge className="uppercase tracking-[0.08em]">Réussite critique</Badge>
           )}
           {item.isCritFail && (
-            <span className="font-display inline-flex items-center gap-1.5 rounded-[--radius-xs] border border-blood-dried/40 bg-blood-dried/10 px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.16em] italic text-blood-dried">
+            <Badge variant="destructive" className="uppercase tracking-[0.08em] italic">
               Échec catastrophique
-            </span>
+            </Badge>
           )}
           {item.dd !== null && !item.isCritSucc && !item.isCritFail && (
-            <span
-              className={`font-display inline-flex items-center rounded-[--radius-xs] border px-2.5 py-1 text-[0.62rem] uppercase tracking-[0.16em] ${
-                item.success
-                  ? "border-celadon/40 bg-celadon/10 text-celadon"
-                  : "border-blood-dried/35 bg-blood-dried/10 text-blood-dried"
+            <Badge
+              variant={item.success ? "outline" : "destructive"}
+              className={`uppercase tracking-[0.08em] ${
+                item.success ? "border-endu/40 text-endu" : ""
               }`}
             >
               {item.success ? "Réussite" : "Échec"}
-            </span>
+            </Badge>
           )}
         </div>
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -376,23 +391,57 @@ function AttrRadioGrid({
       {ATTRIBUTES.map((a) => {
         const active = value === a;
         return (
-          <button
+          <Button
             key={a}
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => onChange(a)}
-            className={`focus-grimoire rounded-[--radius-sm] border px-2 py-2 text-center transition-all hover:-translate-y-px ${
+            data-active={active}
+            className={
               active
-                ? "border-gold-aged/60 bg-gold-aged/15 text-gold-bright"
-                : "border-gold-aged/15 text-parchment-dim hover:border-gold-aged/35 hover:text-parchment"
-            }`}
+                ? "border-primary bg-primary/15 text-primary-hover hover:bg-primary/20 hover:text-primary-hover"
+                : ""
+            }
           >
-            <span className="font-display text-[0.6rem] uppercase tracking-[0.14em]">
+            <span className="text-[0.62rem] font-medium uppercase tracking-[0.1em]">
               {a}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>
+  );
+}
+
+function DDChip({
+  active,
+  onClick,
+  label,
+  value,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  value: string | number;
+}) {
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      onClick={onClick}
+      className={`h-auto flex-col gap-0 py-1 ${
+        active
+          ? "border-primary bg-primary/15 text-primary-hover hover:bg-primary/20 hover:text-primary-hover"
+          : ""
+      }`}
+    >
+      <span className="text-[0.55rem] font-medium uppercase tracking-[0.1em]">
+        {label}
+      </span>
+      <span className="tabular text-[0.72rem]">{value}</span>
+    </Button>
   );
 }
 
@@ -410,61 +459,34 @@ function DDChipsRow({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-1.5">
-        {DD_PRESETS.map((p) => {
-          const active = value === p.value;
-          return (
-            <button
-              key={p.value}
-              type="button"
-              onClick={() => onChange(p.value)}
-              className={`focus-grimoire flex flex-col items-center rounded-[--radius-xs] border px-2 py-1 transition-colors ${
-                active
-                  ? "dd-chip-active"
-                  : "border-gold-aged/15 text-parchment-dim hover:border-gold-aged/35 hover:text-parchment"
-              }`}
-            >
-              <span className="font-display text-[0.55rem] uppercase tracking-[0.12em]">
-                {p.label}
-              </span>
-              <span className="tabular text-[0.72rem]">{p.value}</span>
-            </button>
-          );
-        })}
-        <button
-          type="button"
+        {DD_PRESETS.map((p) => (
+          <DDChip
+            key={p.value}
+            active={value === p.value}
+            onClick={() => onChange(p.value)}
+            label={p.label}
+            value={p.value}
+          />
+        ))}
+        <DDChip
+          active={value === "free"}
           onClick={() => onChange("free")}
-          className={`focus-grimoire flex flex-col items-center rounded-[--radius-xs] border px-2 py-1 transition-colors ${
-            value === "free"
-              ? "dd-chip-active"
-              : "border-gold-aged/15 text-parchment-dim hover:border-gold-aged/35 hover:text-parchment"
-          }`}
-        >
-          <span className="font-display text-[0.55rem] uppercase tracking-[0.12em]">
-            DD
-          </span>
-          <span className="tabular text-[0.72rem]">{customDD}</span>
-        </button>
-        <button
-          type="button"
+          label="DD"
+          value={customDD}
+        />
+        <DDChip
+          active={value === "libre"}
           onClick={() => onChange("libre")}
-          className={`focus-grimoire flex flex-col items-center rounded-[--radius-xs] border px-2 py-1 transition-colors ${
-            value === "libre"
-              ? "dd-chip-active"
-              : "border-gold-aged/15 text-parchment-dim hover:border-gold-aged/35 hover:text-parchment"
-          }`}
-        >
-          <span className="font-display text-[0.55rem] uppercase tracking-[0.12em]">
-            Libre
-          </span>
-          <span className="text-[0.72rem]">∞</span>
-        </button>
+          label="Libre"
+          value="∞"
+        />
       </div>
       {value === "free" && (
         <div className="flex items-center gap-2">
-          <span className="font-display text-[0.6rem] uppercase tracking-[0.14em] text-parchment-mute">
+          <span className="text-[0.6rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
             DD perso
           </span>
-          <input
+          <Input
             type="number"
             min={1}
             max={30}
@@ -473,11 +495,19 @@ function DDChipsRow({
               onCustomChange(Math.max(1, Math.min(30, parseInt(e.target.value || "0", 10) || 1)))
             }
             onFocus={(e) => e.currentTarget.select()}
-            className="tabular h-7 w-16 rounded-[--radius-xs] border border-gold-aged/18 bg-ink-deep px-2 text-center text-[0.85rem] text-parchment outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-aged/40"
+            className="tabular h-7 w-16 text-center"
           />
         </div>
       )}
     </div>
+  );
+}
+
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[0.58rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+      {children}
+    </span>
   );
 }
 
@@ -568,178 +598,158 @@ function Launcher({
   };
 
   return (
-    <section className="card-grimoire flex flex-col gap-4 lg:sticky lg:top-6 lg:self-start">
-      <header className="flex items-center gap-3">
-        <div className="text-gold-aged">
-          <GrimoireGlyph size={40} />
-        </div>
-        <div>
-          <p className="label-grimoire">Lanceur</p>
-          <p className="font-display mt-0.5 text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute">
-            Jet d&apos;attribut · 2d6
-          </p>
-        </div>
-      </header>
-
-      {/* Section 1 — Jet d'attribut/skill */}
-      <div className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="font-display text-[0.58rem] uppercase tracking-[0.14em] text-parchment-mute">
-            Personnage
-          </span>
-          <select
-            value={charA}
-            onChange={(e) => setCharA(e.target.value)}
-            className="select-grimoire"
-          >
-            {characters.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-                {c.nom ? ` ${c.nom}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="flex flex-col gap-1">
-          <span className="font-display text-[0.58rem] uppercase tracking-[0.14em] text-parchment-mute">
-            Attribut
-          </span>
-          <AttrRadioGrid
-            value={attr}
-            onChange={(a) => {
-              setAttr(a);
-              setSkill("");
-            }}
-          />
-        </div>
-
-        <label className="flex flex-col gap-1">
-          <span className="font-display text-[0.58rem] uppercase tracking-[0.14em] text-parchment-mute">
-            Compétence (optionnelle)
-          </span>
-          <select
-            value={skill}
-            onChange={(e) => setSkill(e.target.value)}
-            className="select-grimoire"
-          >
-            <option value="">— Attribut seul —</option>
-            {availableSkills.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="flex flex-col gap-1">
-          <span className="font-display text-[0.58rem] uppercase tracking-[0.14em] text-parchment-mute">
-            Difficulté
-          </span>
-          <DDChipsRow
-            value={ddMode}
-            onChange={setDdMode}
-            customDD={customDD}
-            onCustomChange={setCustomDD}
-          />
-        </div>
-
-        <button
-          type="button"
-          disabled={isPending || !charA}
-          onClick={submitSkill}
-          className="btn-grimoire mt-1 tracking-[0.12em]"
-        >
-          Lancer 2d6 + {attrShort[attr]}
-          {skill ? " + skill" : ""}
-        </button>
-
-        {errorA && (
-          <p className="text-[0.7rem] italic text-blood-dried">{errorA}</p>
-        )}
-      </div>
-
-      <SigilDivider mark="✧" />
-
-      {/* Section 2 — Formule libre */}
-      <div className="flex flex-col gap-3">
-        <p className="font-display text-[0.66rem] uppercase tracking-[0.18em] text-parchment-dim">
-          Formule libre
+    <Card className="gap-0 py-0 lg:sticky lg:top-6 lg:self-start">
+      <CardHeader className="border-b px-4 py-3">
+        <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          Lanceur
+        </CardTitle>
+        <p className="text-[0.62rem] uppercase tracking-[0.14em] text-ink-tertiary">
+          Jet d&apos;attribut · 2d6
         </p>
+      </CardHeader>
 
-        <label className="flex flex-col gap-1">
-          <span className="font-display text-[0.58rem] uppercase tracking-[0.14em] text-parchment-mute">
-            Personnage
-          </span>
-          <select
-            value={charB}
-            onChange={(e) => setCharB(e.target.value)}
-            className="select-grimoire"
+      <CardContent className="flex flex-col gap-4 py-4">
+        {/* Section 1 — Jet d'attribut/skill */}
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1.5">
+            <FieldLabel>Personnage</FieldLabel>
+            <Select value={charA} onValueChange={setCharA}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Personnage" />
+              </SelectTrigger>
+              <SelectContent>
+                {characters.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                    {c.nom ? ` ${c.nom}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Attribut</FieldLabel>
+            <AttrRadioGrid
+              value={attr}
+              onChange={(a) => {
+                setAttr(a);
+                setSkill("");
+              }}
+            />
+          </div>
+
+          <label className="flex flex-col gap-1.5">
+            <FieldLabel>Compétence (optionnelle)</FieldLabel>
+            <Select
+              value={skill || "__none__"}
+              onValueChange={(v) => setSkill(v === "__none__" ? "" : v)}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Attribut seul" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">— Attribut seul —</SelectItem>
+                {availableSkills.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+
+          <div className="flex flex-col gap-1.5">
+            <FieldLabel>Difficulté</FieldLabel>
+            <DDChipsRow
+              value={ddMode}
+              onChange={setDdMode}
+              customDD={customDD}
+              onCustomChange={setCustomDD}
+            />
+          </div>
+
+          <Button
+            type="button"
+            disabled={isPending || !charA}
+            onClick={submitSkill}
+            className="mt-1 w-full"
           >
-            {characters.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-                {c.nom ? ` ${c.nom}` : ""}
-              </option>
-            ))}
-          </select>
-        </label>
+            Lancer 2d6 + {attrShort[attr]}
+            {skill ? " + skill" : ""}
+          </Button>
 
-        <label className="flex flex-col gap-1">
-          <span className="font-display text-[0.58rem] uppercase tracking-[0.14em] text-parchment-mute">
-            Formule
-          </span>
-          <input
-            type="text"
-            value={formula}
-            onChange={(e) => setFormula(e.target.value)}
-            placeholder="2d6+5, 2d6+INT, 1d100+PSY"
-            className="input-grimoire tabular"
-          />
-        </label>
+          {errorA && <p className="text-[0.72rem] text-hp">{errorA}</p>}
+        </div>
 
-        <button
-          type="button"
-          disabled={isPending || !formula.trim() || !charB}
-          onClick={submitFormula}
-          className="btn-grimoire"
-        >
-          Lancer la formule
-        </button>
+        <Separator />
 
-        {errorB && (
-          <p className="text-[0.7rem] italic text-blood-dried">{errorB}</p>
-        )}
-      </div>
-    </section>
+        {/* Section 2 — Formule libre */}
+        <div className="flex flex-col gap-3">
+          <p className="text-[0.66rem] font-medium uppercase tracking-[0.14em] text-ink-muted">
+            Formule libre
+          </p>
+
+          <label className="flex flex-col gap-1.5">
+            <FieldLabel>Personnage</FieldLabel>
+            <Select value={charB} onValueChange={setCharB}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Personnage" />
+              </SelectTrigger>
+              <SelectContent>
+                {characters.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                    {c.nom ? ` ${c.nom}` : ""}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </label>
+
+          <label className="flex flex-col gap-1.5">
+            <FieldLabel>Formule</FieldLabel>
+            <Input
+              type="text"
+              value={formula}
+              onChange={(e) => setFormula(e.target.value)}
+              placeholder="2d6+5, 2d6+INT, 1d100+PSY"
+              className="tabular"
+            />
+          </label>
+
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={isPending || !formula.trim() || !charB}
+            onClick={submitFormula}
+            className="w-full"
+          >
+            Lancer la formule
+          </Button>
+
+          {errorB && <p className="text-[0.72rem] text-hp">{errorB}</p>}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 /* -------------------------- Carnet des jets — list-portfolio -------------------------- */
 
 function CarnetRow({ item }: { item: FeedItem }) {
-  const breakdownPieces: string[] = [];
-  if (item.rolls.length > 0) {
-    breakdownPieces.push(`[${item.rolls.join(", ")}]`);
-  }
-  if (item.attrName && item.attrScore !== null) {
-    breakdownPieces.push(`+ ${item.attrName}(${item.attrScore})`);
-  }
-  if (item.skillName && item.skillScore !== null) {
-    breakdownPieces.push(`+ ${item.skillName}(${item.skillScore})`);
-  }
+  const breakdownPieces = buildBreakdown(item);
 
   // Couleur du total
-  let totalClass = "text-gold-aged";
+  let totalClass = "text-foreground";
   if (item.isCritSucc) {
-    totalClass =
-      "text-gold-bright drop-shadow-[0_0_14px_rgba(232,192,116,0.5)]";
+    totalClass = "text-primary";
   } else if (item.isCritFail) {
-    totalClass = "text-blood-dried italic";
+    totalClass = "text-hp italic";
   } else if (item.success === true) {
-    totalClass = "text-celadon";
+    totalClass = "text-endu";
   } else if (item.success === false) {
-    totalClass = "text-parchment-dim";
+    totalClass = "text-muted-foreground";
   }
 
   return (
@@ -747,22 +757,22 @@ function CarnetRow({ item }: { item: FeedItem }) {
       {/* Gauche : perso + formule + breakdown */}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline gap-2">
-          <h4 className="font-display truncate text-base tracking-[0.02em] text-gold-aged">
+          <h4 className="truncate text-sm font-medium tracking-tight text-foreground">
             {item.characterName}
           </h4>
           {item.casterName && item.casterName !== item.characterName && (
-            <span className="font-display text-[0.58rem] uppercase tracking-[0.16em] text-parchment-faint">
+            <span className="text-[0.6rem] uppercase tracking-[0.12em] text-ink-tertiary">
               · {item.casterName}
             </span>
           )}
-          <span className="ml-auto font-display tabular text-[0.58rem] uppercase tracking-[0.14em] text-parchment-mute">
+          <span className="tabular ml-auto text-[0.6rem] uppercase tracking-[0.1em] text-ink-tertiary">
             {formatRelative(item.createdAt)}
           </span>
         </div>
-        <p className="tabular mt-0.5 text-[0.7rem] text-parchment-dim">
+        <p className="tabular mt-0.5 text-[0.72rem] text-muted-foreground">
           {item.formula}
           {breakdownPieces.length > 0 && (
-            <span className="text-parchment-mute"> · {breakdownPieces.join(" ")}</span>
+            <span className="text-ink-tertiary"> · {breakdownPieces.join(" ")}</span>
           )}
         </p>
       </div>
@@ -770,37 +780,31 @@ function CarnetRow({ item }: { item: FeedItem }) {
       {/* Droite : total + badge */}
       <div className="flex shrink-0 items-baseline gap-3">
         <div className="flex items-baseline gap-1">
-          <span className={`font-display tabular text-2xl leading-none sm:text-3xl ${totalClass}`}>
+          <span className={`tabular text-2xl font-semibold leading-none sm:text-3xl ${totalClass}`}>
             {item.total}
           </span>
           {item.dd !== null && (
-            <span className="tabular text-[0.65rem] text-parchment-mute">
-              / {item.dd}
-            </span>
+            <span className="tabular text-[0.65rem] text-ink-tertiary">/ {item.dd}</span>
           )}
         </div>
-        <div className="flex flex-col items-end gap-0.5">
+        <div className="flex flex-col items-end gap-1">
           {item.isCritSucc && (
-            <span className="font-display inline-flex items-center gap-1 rounded-[--radius-xs] border border-gold-aged/50 bg-gold-aged/10 px-1.5 py-0.5 text-[0.55rem] uppercase tracking-[0.14em] text-gold-bright">
-              <span aria-hidden>✦</span>
-              Crit
-            </span>
+            <Badge className="uppercase tracking-[0.06em]">Crit</Badge>
           )}
           {item.isCritFail && (
-            <span className="font-display inline-flex items-center rounded-[--radius-xs] border border-blood-dried/40 bg-blood-dried/10 px-1.5 py-0.5 text-[0.55rem] uppercase tracking-[0.14em] italic text-blood-dried">
+            <Badge variant="destructive" className="uppercase tracking-[0.06em] italic">
               Désastre
-            </span>
+            </Badge>
           )}
           {item.dd !== null && !item.isCritSucc && !item.isCritFail && (
-            <span
-              className={`font-display inline-flex items-center rounded-[--radius-xs] border px-1.5 py-0.5 text-[0.55rem] uppercase tracking-[0.14em] ${
-                item.success
-                  ? "border-celadon/40 bg-celadon/10 text-celadon"
-                  : "border-blood-dried/35 bg-blood-dried/10 text-blood-dried"
+            <Badge
+              variant={item.success ? "outline" : "destructive"}
+              className={`uppercase tracking-[0.06em] ${
+                item.success ? "border-endu/40 text-endu" : ""
               }`}
             >
               {item.success ? "Réussite" : "Échec"}
-            </span>
+            </Badge>
           )}
         </div>
       </div>
@@ -810,41 +814,40 @@ function CarnetRow({ item }: { item: FeedItem }) {
 
 function Carnet({ items }: { items: FeedItem[] }) {
   return (
-    <section className="card-grimoire flex min-w-0 flex-col">
-      <header className="-mx-5 -mt-5 mb-3 flex items-baseline justify-between gap-2 border-b border-gold-aged/15 bg-ink-near px-5 py-3">
-        <p className="label-grimoire">Carnet des jets</p>
-        <span className="font-display tabular text-[0.6rem] uppercase tracking-[0.14em] text-parchment-mute">
+    <Card className="min-w-0 gap-0 py-0">
+      <CardHeader className="sticky top-0 z-10 flex flex-row items-baseline justify-between gap-2 rounded-t-xl border-b bg-card px-4 py-3">
+        <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          Carnet des jets
+        </CardTitle>
+        <span className="tabular text-[0.62rem] uppercase tracking-[0.06em] text-ink-tertiary">
           {items.length} / 30
         </span>
-      </header>
+      </CardHeader>
 
       {items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-          <span className="font-display text-5xl text-parchment-faint">✦</span>
-          <p className="text-sm italic text-parchment-mute">
+        <div className="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
+          <RoundTableGlyph size={88} className="text-ink-tertiary" />
+          <p className="text-sm text-ink-tertiary">
             Aucun jet n&apos;a été inscrit. Lance le premier.
           </p>
         </div>
       ) : (
-        <div className="scrollbar-grimoire -mx-5 -mb-5 max-h-[600px] overflow-y-auto">
-          <div className="list-portfolio">
-            {items.map((it, idx) => {
-              const showSigil = idx > 0 && idx % 5 === 0;
-              return (
-                <div key={it.id}>
-                  {showSigil && (
-                    <div className="sigil-divider !my-2 !mx-5">
-                      <span className="sigil-mark">✧</span>
-                    </div>
-                  )}
-                  <CarnetRow item={it} />
-                </div>
-              );
-            })}
+        <ScrollArea className="max-h-[600px]">
+          <div className="flex flex-col">
+            {items.map((it, idx) => (
+              <div
+                key={it.id}
+                className={`px-4 py-3 transition-colors hover:bg-popover ${
+                  idx > 0 ? "border-t border-border" : ""
+                }`}
+              >
+                <CarnetRow item={it} />
+              </div>
+            ))}
           </div>
-        </div>
+        </ScrollArea>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -887,65 +890,58 @@ export function PlateauClient({
     <main className="relative z-[2] min-h-screen px-6 py-8">
       <CritOverlay latestRoll={latestRoll} />
 
-      <div className="mx-auto grid max-w-7xl grid-cols-12 gap-4 lg:gap-6">
-        {/* Header — col-span-12 */}
-        <header className="col-span-12 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="text-gold-aged">
-              <RoundTableGlyph size={60} className="sigil-glow" />
-            </div>
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 lg:gap-6">
+        {/* Header */}
+        <header className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <RoundTableGlyph size={40} className="text-muted-foreground" />
             <div>
-              <p className="label-grimoire">Table ouverte</p>
-              <h1 className="font-display mt-1 text-[clamp(2rem,4vw,3rem)] font-bold tracking-[0.02em] text-gold-aged">
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground">
                 Plateau de jeu
               </h1>
-              <p className="font-display mt-1 text-[0.7rem] uppercase tracking-[0.2em] text-parchment-dim">
+              <p className="mt-0.5 text-[0.78rem] text-muted-foreground">
                 Session ouverte · {presentCount} {presentCount > 1 ? "joueurs" : "joueur"}
               </p>
             </div>
           </div>
-          <nav className="flex items-center gap-4 text-xs">
-            <Link
-              href={isMJ ? "/mj" : "/me"}
-              className="font-display rounded-[--radius-sm] border border-gold-aged/20 px-3 py-2 uppercase tracking-[0.18em] text-parchment-dim transition-all hover:-translate-y-px hover:border-gold-aged/40 hover:text-gold-aged focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-aged/40"
-            >
-              {isMJ ? "Tableau MJ →" : "Ma fiche →"}
-            </Link>
+          <nav className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="sm">
+              <Link href={isMJ ? "/mj" : "/me"}>
+                {isMJ ? "Tableau MJ →" : "Ma fiche →"}
+              </Link>
+            </Button>
           </nav>
         </header>
 
-        {/* Roster — col-span-12 mobile, col-span-3 desktop */}
-        <div className="col-span-12 lg:col-span-3">
+        {/* Grille principale 3 colonnes */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)_320px] lg:gap-6">
+          {/* Roster — gauche */}
           <Roster
             characters={characters}
             isMJ={isMJ}
             ownedId={ownedCharacterId}
           />
-        </div>
 
-        {/* Hero "Dernier acte" — col-span-12 mobile, col-span-6 desktop */}
-        <div className="col-span-12 lg:col-span-6">
+          {/* Hero "Dernier acte" — centre */}
           <LastActHero item={initialRolls[0] ?? null} />
-        </div>
 
-        {/* Lanceur — col-span-12 mobile, col-span-3 desktop */}
-        <div className="col-span-12 lg:col-span-3">
+          {/* Lanceur — droite */}
           {characters.length > 0 ? (
             <Launcher
               characters={characters}
               defaultCharacterId={defaultCharacterId}
             />
           ) : (
-            <div className="card-grimoire flex min-h-[200px] items-center justify-center text-center text-sm italic text-parchment-mute">
-              Aucun personnage à la table.
-            </div>
+            <Card className="min-h-[200px] items-center justify-center">
+              <CardContent className="text-center text-sm text-muted-foreground">
+                Aucun personnage à la table.
+              </CardContent>
+            </Card>
           )}
         </div>
 
-        {/* Carnet des jets — col-span-12 */}
-        <div className="col-span-12">
-          <Carnet items={initialRolls} />
-        </div>
+        {/* Carnet des jets — pleine largeur */}
+        <Carnet items={initialRolls} />
       </div>
     </main>
   );

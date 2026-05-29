@@ -3,15 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Overlay full-screen pour les crits.
+ * Overlay full-screen pour les crits — Linear sobre mais impactant.
  *
  * Compare le dernier roll reçu avec le précédent (par id). Si nouveau crit,
  * affiche une animation 2.5s puis se cache.
  *
- *  - Réussite critique (✦) : radial gold-aged + grand titre + sigil tournant
- *  - Échec catastrophique  : radial blood-deep + titre tremblant + sigil ⚜ inversé
+ *  - Réussite critique (✦) : glow lavande/primary (#5e6ad2) + grand titre + sigil tournant
+ *  - Échec catastrophique  : glow hp (#e5484d) + titre tremblant (shake) + sigil ⚜ inversé
  *
- * Pas de son.
+ * Pas de son. Plein écran z-[60], au-dessus de tout.
  */
 
 type RollPing = {
@@ -56,30 +56,30 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
         aria-hidden
       >
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at center, rgba(202,161,90,0.35) 0%, rgba(202,161,90,0.0) 60%)",
+              "radial-gradient(ellipse at center, rgba(94,106,210,0.32) 0%, rgba(94,106,210,0) 60%)",
             animation: "crit-glow-expand 1.2s ease-out forwards",
           }}
         />
         <div className="relative flex flex-col items-center gap-6 px-4 text-center">
           <span
-            className="font-display text-7xl text-gold-bright opacity-0"
+            className="text-7xl text-primary-hover opacity-0"
             style={{
               animation: "crit-sigil-spin 1.4s ease-out forwards",
               textShadow:
-                "0 0 30px rgba(232, 192, 116, 0.6), 0 0 60px rgba(202,161,90,0.35)",
+                "0 0 30px rgba(94,106,210,0.6), 0 0 60px rgba(94,106,210,0.35)",
             }}
           >
             ✦
           </span>
           <h1
-            className="font-display text-5xl uppercase tracking-[0.18em] text-gold-bright sm:text-7xl"
+            className="text-5xl font-semibold uppercase tracking-tight text-primary-hover sm:text-7xl"
             style={{
               animation: "crit-text-rise 2.4s ease-out forwards",
               textShadow:
-                "0 0 28px rgba(232, 192, 116, 0.65), 0 0 64px rgba(202,161,90,0.45)",
+                "0 0 28px rgba(94,106,210,0.6), 0 0 64px rgba(94,106,210,0.4)",
             }}
           >
             Réussite critique
@@ -96,31 +96,32 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
       aria-hidden
     >
       <div
-        className="absolute inset-0 pointer-events-none"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, rgba(122,58,58,0.4) 0%, rgba(122,58,58,0) 65%)",
+            "radial-gradient(ellipse at center, rgba(229,72,77,0.34) 0%, rgba(229,72,77,0) 65%)",
           animation: "crit-glow-expand 1.2s ease-out forwards",
         }}
       />
       <div className="relative flex flex-col items-center gap-6 px-4 text-center">
         <h1
-          className="font-display text-4xl italic uppercase tracking-[0.16em] text-blood-dried sm:text-6xl"
+          className="text-4xl font-semibold uppercase tracking-tight text-hp italic sm:text-6xl"
           style={{
             animation:
               "crit-text-rise 2.4s ease-out forwards, crit-shake 0.5s ease-in-out 2",
+            textShadow: "0 0 24px rgba(229,72,77,0.5)",
           }}
         >
           Échec catastrophique
         </h1>
         <p
-          className="font-display text-[0.78rem] italic uppercase tracking-[0.22em] text-parchment-mute opacity-0"
+          className="text-[0.78rem] uppercase tracking-[0.18em] text-muted-foreground italic opacity-0"
           style={{ animation: "crit-text-rise 2.4s ease-out 0.25s forwards" }}
         >
           L&apos;Impôt Divin réclame son dû.
         </p>
         <span
-          className="font-display text-6xl text-blood-dried opacity-0"
+          className="text-6xl text-hp opacity-0"
           style={{
             animation: "crit-sigil-spin 1.4s ease-out forwards",
             transform: "rotate(180deg)",

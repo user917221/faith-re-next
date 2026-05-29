@@ -21,7 +21,7 @@ export function RoundTableGlyph({
       height={size}
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.4"
+      strokeWidth="1.2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}

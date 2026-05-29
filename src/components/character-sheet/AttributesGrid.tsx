@@ -2,6 +2,7 @@
 
 import { SKILL_GROUPS, calculateAttribute, type AttributeName } from "@/lib/skills";
 import { SkillRow } from "./SkillRow";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RollContext } from "./DDDrawer";
 import type { Character } from "./types";
 
@@ -31,31 +32,31 @@ export function AttributesGrid({ character, isCapped, onSkillChange, onOpenRollD
           : null;
 
         return (
-          <div key={attr} className="card-grimoire card-hover-lift">
-            <header className="mb-3 flex items-center justify-between">
-              <span className="font-display text-lg font-medium uppercase tracking-[0.15em] text-gold-aged">
+          <Card key={attr} size="sm">
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
+              <CardTitle className="text-sm font-semibold uppercase tracking-tight text-foreground">
                 {attr}
-              </span>
+              </CardTitle>
               {openAttrRoll ? (
                 <button
                   type="button"
                   onClick={openAttrRoll}
                   title={`Lancer un jet d'attribut ${attr}`}
                   aria-label={`Lancer un jet d'attribut ${attr}`}
-                  className="focus-grimoire tabular flex h-9 w-9 items-center justify-center rounded-full border border-gold-aged/30 text-base font-bold text-gold-bright transition-all hover:-translate-y-px hover:border-gold-aged/60 hover:bg-gold-aged/10"
+                  className="tabular rounded-md px-1 text-3xl font-semibold leading-none text-primary outline-none transition-colors hover:text-primary-hover focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   {score}
                 </button>
               ) : (
                 <span
                   title={`Score d'attribut ${attr}`}
-                  className="tabular flex h-9 w-9 items-center justify-center rounded-full border border-gold-aged/30 text-base font-bold text-gold-bright"
+                  className="tabular px-1 text-3xl font-semibold leading-none text-primary"
                 >
                   {score}
                 </span>
               )}
-            </header>
-            <div className="flex flex-col gap-2.5">
+            </CardHeader>
+            <CardContent className="flex flex-col gap-0.5">
               {SKILL_GROUPS[attr].map((skill) => (
                 <SkillRow
                   key={skill}
@@ -67,8 +68,8 @@ export function AttributesGrid({ character, isCapped, onSkillChange, onOpenRollD
                   onOpenRollDrawer={onOpenRollDrawer}
                 />
               ))}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         );
       })}
     </section>

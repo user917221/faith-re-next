@@ -6,6 +6,7 @@ import { characters, trainingRequests } from "@/db/schema";
 import { loadCharacterForUser } from "@/lib/load-character";
 import { ConstellationGlyph } from "@/components/glyphs";
 import { MyCharacterClient } from "./client";
+import { Card, CardContent } from "@/components/ui/card";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
@@ -47,33 +48,33 @@ export default async function MePage() {
       <main className="relative z-[2] min-h-screen px-6 py-12">
         <div className="mx-auto max-w-3xl">
           {/* Hero card centrée */}
-          <section className="card-hero text-center">
-            <div className="flex flex-col items-center gap-5">
-              <span className="text-gold-aged">
-                <ConstellationGlyph size={120} />
-              </span>
+          <Card>
+            <CardContent className="flex flex-col items-center gap-5 text-center">
+              <ConstellationGlyph size={104} className="text-primary/70" />
               <div className="flex flex-col gap-2">
                 <span className="label-grimoire">Convocation</span>
-                <h1 className="font-display text-4xl font-bold tracking-[0.02em] text-gold-aged">
+                <h1 className="text-4xl font-semibold tracking-tight text-foreground">
                   Bienvenue, {session.user.name}
                 </h1>
-                <p className="mx-auto max-w-md text-sm text-parchment-dim leading-relaxed">
+                <p className="mx-auto max-w-md text-sm leading-relaxed text-muted-foreground">
                   Tu n&apos;as pas encore réclamé de personnage. Choisis le tien
                   parmi le grimoire de la table.
                 </p>
               </div>
-            </div>
-          </section>
+            </CardContent>
+          </Card>
 
           {/* Liste portfolio des persos */}
           <div className="mt-8">
             {availableRows.length === 0 ? (
-              <p className="card-grimoire text-center text-sm italic text-parchment-mute">
-                Aucun personnage disponible. Le MJ doit en créer un ou
-                t&apos;assigner manuellement.
-              </p>
+              <Card>
+                <CardContent className="text-center text-sm text-ink-tertiary">
+                  Aucun personnage disponible. Le MJ doit en créer un ou
+                  t&apos;assigner manuellement.
+                </CardContent>
+              </Card>
             ) : (
-              <div className="card-grimoire list-portfolio !p-0">
+              <div className="list-portfolio overflow-hidden rounded-lg border border-border bg-card">
                 {availableRows.map((c) => (
                   <form
                     key={c.id}
@@ -90,15 +91,15 @@ export default async function MePage() {
                       <span className="flex items-center gap-4">
                         <span
                           aria-hidden
-                          className="font-display tabular text-[0.7rem] uppercase tracking-[0.18em] text-parchment-mute transition-colors group-hover:text-gold-aged"
+                          className="text-sm text-ink-tertiary transition-colors group-hover:text-muted-foreground"
                         >
                           ✦
                         </span>
-                        <span className="font-display text-lg tracking-wide text-parchment transition-colors group-hover:text-gold-aged">
+                        <span className="text-base font-medium tracking-tight text-foreground">
                           {c.name}
                         </span>
                       </span>
-                      <span className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute transition-colors group-hover:text-gold-aged">
+                      <span className="text-xs text-muted-foreground transition-colors group-hover:text-foreground">
                         Réclamer →
                       </span>
                     </button>

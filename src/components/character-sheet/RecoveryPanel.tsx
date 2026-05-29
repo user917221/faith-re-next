@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { CalvaryGlyph, EclipseGlyph } from "@/components/glyphs";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 type RecoveryResult =
   | { kind: "hp"; gain: number; d1: number; d2: number; ecaille: number; newHp: number; maxHp: number }
@@ -44,128 +46,108 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
   }
 
   return (
-    <section className="card-grimoire">
-      <header className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h3 className="label-grimoire">✚ Récupération</h3>
-          <p className="mt-0.5 text-xs text-parchment-mute">
-            Lance les dés de régénération naturelle.
-          </p>
+    <Card>
+      <CardHeader>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <CardTitle className="label-grimoire">Récupération</CardTitle>
+            <CardDescription className="mt-0.5 text-xs">
+              Lance les dés de régénération naturelle.
+            </CardDescription>
+          </div>
+          {lastResult && lastResult.kind !== "error" && (
+            <span className="tabular text-xs tracking-wider text-muted-foreground">
+              {lastResult.kind === "hp"
+                ? `Dernier soin : +${lastResult.gain} HP`
+                : `Dernier souffle : +${lastResult.gain} Endu`}
+            </span>
+          )}
         </div>
-        {lastResult && lastResult.kind !== "error" && (
-          <span className="font-display tabular text-[0.7rem] tracking-wider text-gold-bright">
-            {lastResult.kind === "hp"
-              ? `Dernier soin : +${lastResult.gain} HP`
-              : `Dernier souffle : +${lastResult.gain} Endu`}
-          </span>
-        )}
-      </header>
+      </CardHeader>
 
-      <div className="flex items-center justify-between gap-3">
-        {/* Glyph gauche — HP */}
-        <span className="hidden shrink-0 text-blood-dried/55 sm:block">
-          <CalvaryGlyph size={64} />
-        </span>
+      <CardContent>
+        <div className="flex items-center justify-between gap-3">
+          {/* Glyph gauche — HP */}
+          <CalvaryGlyph className="hidden shrink-0 text-ink-tertiary sm:block" size={44} />
 
-        {/* Boutons centraux */}
-        <div className="flex flex-1 flex-col gap-3 sm:flex-row">
-          <button
-            type="button"
-            disabled={!onRecoverHp || isPending}
-            onClick={doHp}
-            className="group relative flex-1 overflow-hidden rounded-[--radius-sm] border border-blood-dried/25 bg-ink-far p-4 text-center transition-all hover:-translate-y-px hover:border-blood-dried/50 hover:bg-ink-edge active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.05]"
-              style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(179, 90, 90, 0.7), transparent 70%)",
-              }}
-            />
-            <div className="relative z-[1] flex flex-col items-center gap-1">
-              <span className="font-display text-sm tracking-[0.1em] text-parchment">
-                Régénérer HP
-              </span>
-              <span className="tabular text-[0.7rem] text-parchment-mute">
+          {/* Boutons centraux */}
+          <div className="flex flex-1 flex-col gap-2 sm:flex-row">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!onRecoverHp || isPending}
+              onClick={doHp}
+              className="h-auto flex-1 flex-col gap-1 py-3 text-hp hover:text-hp"
+            >
+              <span className="text-sm font-medium text-foreground">Régénérer HP</span>
+              <span className="tabular text-[0.7rem] text-muted-foreground">
                 (2d6 + Écaillé) / 2
               </span>
-            </div>
-          </button>
+            </Button>
 
-          <button
-            type="button"
-            disabled={!onRecoverEndurance || isPending}
-            onClick={doEndu}
-            className="group relative flex-1 overflow-hidden rounded-[--radius-sm] border border-celadon/25 bg-ink-far p-4 text-center transition-all hover:-translate-y-px hover:border-celadon/50 hover:bg-ink-edge active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.05]"
-              style={{
-                background:
-                  "radial-gradient(ellipse at center, rgba(142, 176, 145, 0.7), transparent 70%)",
-              }}
-            />
-            <div className="relative z-[1] flex flex-col items-center gap-1">
-              <span className="font-display text-sm tracking-[0.1em] text-parchment">
-                Reprendre souffle
-              </span>
-              <span className="tabular text-[0.7rem] text-parchment-mute">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!onRecoverEndurance || isPending}
+              onClick={doEndu}
+              className="h-auto flex-1 flex-col gap-1 py-3 text-endu hover:text-endu"
+            >
+              <span className="text-sm font-medium text-foreground">Reprendre souffle</span>
+              <span className="tabular text-[0.7rem] text-muted-foreground">
                 1d50 / 2
               </span>
-            </div>
-          </button>
+            </Button>
+          </div>
+
+          {/* Glyph droite — Endurance */}
+          <EclipseGlyph className="hidden shrink-0 text-ink-tertiary sm:block" size={44} />
         </div>
 
-        {/* Glyph droite — Endurance */}
-        <span className="hidden shrink-0 text-celadon/55 sm:block">
-          <EclipseGlyph size={64} />
-        </span>
-      </div>
-
-      {lastResult && (
-        <div className="mt-4 rounded-[--radius-sm] border border-gold-aged/15 bg-ink-deep p-3">
-          {lastResult.kind === "hp" && (
-            <p className="tabular text-xs leading-relaxed text-parchment-dim">
-              <span className="text-gold-aged">2d6</span>{" "}
-              <span className="text-parchment">
-                [{lastResult.d1}, {lastResult.d2}]
-              </span>
-              {" + "}
-              <span className="text-blood-dried">Écaillé</span>(
-              {lastResult.ecaille}){" "}
-              <span className="text-parchment-mute">=</span>{" "}
-              <span className="text-parchment">
-                {lastResult.d1 + lastResult.d2 + lastResult.ecaille}
-              </span>
-              {" → ÷2 ="}{" "}
-              <span className="font-display text-blood-dried text-lg">
-                +{lastResult.gain} HP
-              </span>
-              <span className="ml-2 text-parchment-mute">
-                ({lastResult.newHp}/{lastResult.maxHp})
-              </span>
-            </p>
-          )}
-          {lastResult.kind === "endu" && (
-            <p className="tabular text-xs leading-relaxed text-parchment-dim">
-              <span className="text-gold-aged">1d50</span>{" "}
-              <span className="text-parchment">[{lastResult.roll}]</span>
-              {" → ÷2 = "}
-              <span className="font-display text-celadon text-lg">
-                +{lastResult.gain} Endu
-              </span>
-              <span className="ml-2 text-parchment-mute">
-                ({lastResult.newEndurance}/{lastResult.maxEndurance})
-              </span>
-            </p>
-          )}
-          {lastResult.kind === "error" && (
-            <p className="text-xs italic text-blood-dried">
-              Erreur : {lastResult.message}
-            </p>
-          )}
-        </div>
-      )}
-    </section>
+        {lastResult && (
+          <div className="mt-4 rounded-md bg-muted p-3">
+            {lastResult.kind === "hp" && (
+              <p className="tabular text-xs leading-relaxed text-ink-muted">
+                <span className="text-muted-foreground">2d6</span>{" "}
+                <span className="text-foreground">
+                  [{lastResult.d1}, {lastResult.d2}]
+                </span>
+                {" + "}
+                <span className="text-hp">Écaillé</span>(
+                {lastResult.ecaille}){" "}
+                <span className="text-muted-foreground">=</span>{" "}
+                <span className="text-foreground">
+                  {lastResult.d1 + lastResult.d2 + lastResult.ecaille}
+                </span>
+                {" → ÷2 ="}{" "}
+                <span className="tabular text-lg font-semibold text-hp">
+                  +{lastResult.gain} HP
+                </span>
+                <span className="ml-2 text-muted-foreground">
+                  ({lastResult.newHp}/{lastResult.maxHp})
+                </span>
+              </p>
+            )}
+            {lastResult.kind === "endu" && (
+              <p className="tabular text-xs leading-relaxed text-ink-muted">
+                <span className="text-muted-foreground">1d50</span>{" "}
+                <span className="text-foreground">[{lastResult.roll}]</span>
+                {" → ÷2 = "}
+                <span className="tabular text-lg font-semibold text-endu">
+                  +{lastResult.gain} Endu
+                </span>
+                <span className="ml-2 text-muted-foreground">
+                  ({lastResult.newEndurance}/{lastResult.maxEndurance})
+                </span>
+              </p>
+            )}
+            {lastResult.kind === "error" && (
+              <p className="text-xs italic text-hp">
+                Erreur : {lastResult.message}
+              </p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

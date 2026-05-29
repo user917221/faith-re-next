@@ -5,6 +5,8 @@ import { useTransition } from "react";
 import CharacterSheet from "@/components/character-sheet";
 import type { Character, ProfilePatch } from "@/components/character-sheet/types";
 import { GrimoireGlyph } from "@/components/glyphs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   updateSkill,
   updateVital,
@@ -103,37 +105,32 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
   const refresh = () => startTransition(() => router.refresh());
 
   return (
-    <div className="card-grimoire h-full p-0">
-      <header className="flex items-center gap-4 border-b border-gold-soft/12 px-5 py-4">
+    <div className="h-full overflow-hidden rounded-lg border border-border bg-card">
+      <header className="flex items-center gap-4 border-b border-border px-5 py-4">
         <GrimoireGlyph
-          size={50}
+          size={36}
           className={`shrink-0 ${
-            requests.length > 0 ? "text-gold-bright sigil-glow" : "text-gold-soft"
+            requests.length > 0 ? "text-muted-foreground" : "text-ink-tertiary"
           }`}
         />
         <div className="min-w-0 flex-1">
           <p className="label-grimoire">Entraînements en attente</p>
-          <h2 className="font-display mt-0.5 text-base font-semibold tracking-wide text-parchment">
+          <h2 className="mt-0.5 text-base font-medium tracking-tight text-foreground">
             File d&apos;approbation
           </h2>
         </div>
-        <span
-          className={`font-display tabular shrink-0 rounded-[--radius-xs] border px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.15em] ${
-            requests.length > 0
-              ? "border-gold-aged/40 bg-gold-aged/10 text-gold-bright"
-              : "border-gold-soft/20 text-parchment-mute"
-          }`}
+        <Badge
+          variant={requests.length > 0 ? "default" : "outline"}
+          className="tabular shrink-0"
         >
           {requests.length}
-        </span>
+        </Badge>
       </header>
 
       {requests.length === 0 ? (
         <div className="px-5 py-8 text-center">
-          <p className="font-display text-[0.7rem] uppercase tracking-[0.2em] text-parchment-mute">
-            File vide
-          </p>
-          <p className="mt-2 text-sm italic text-parchment-dim">
+          <p className="label-grimoire">File vide</p>
+          <p className="mt-2 text-sm text-ink-tertiary">
             Aucune demande d&apos;entraînement en attente.
           </p>
         </div>
@@ -143,20 +140,20 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
             <li key={r.id} className="!py-3 !px-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="font-display flex flex-wrap items-baseline gap-2 text-sm tracking-wide text-parchment">
+                  <p className="flex flex-wrap items-baseline gap-2 text-sm font-medium tracking-tight text-foreground">
                     <span>{r.characterName}</span>
                     {r.requesterName && (
-                      <span className="text-[0.7rem] font-normal text-parchment-mute">
-                        par <span className="text-parchment-dim">{r.requesterName}</span>
+                      <span className="text-xs font-normal text-ink-tertiary">
+                        par <span className="text-muted-foreground">{r.requesterName}</span>
                       </span>
                     )}
                   </p>
                   {r.note && (
-                    <p className="mt-1 truncate text-xs italic text-parchment-dim">
+                    <p className="mt-1 truncate text-xs italic text-muted-foreground">
                       «&nbsp;{r.note}&nbsp;»
                     </p>
                   )}
-                  <p className="tabular mt-1 text-[0.62rem] uppercase tracking-[0.1em] text-parchment-mute">
+                  <p className="tabular mt-1 text-[0.62rem] text-ink-tertiary">
                     {new Date(r.requestedAt).toLocaleString("fr-FR", {
                       day: "2-digit",
                       month: "short",
@@ -166,22 +163,23 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <button
+                  <Button
                     type="button"
+                    size="sm"
                     disabled={isPending}
                     onClick={() => startTransition(async () => { await approveTraining(r.id); refresh(); })}
-                    className="btn-grimoire focus-grimoire"
                   >
                     Approuver +1
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    size="sm"
+                    variant="outline"
                     disabled={isPending}
                     onClick={() => startTransition(async () => { await rejectTraining(r.id); refresh(); })}
-                    className="btn-ghost focus-grimoire"
                   >
                     Refuser
-                  </button>
+                  </Button>
                 </div>
               </div>
             </li>

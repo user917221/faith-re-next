@@ -38,13 +38,13 @@ export function MyCharacterClient({
       <div className="mx-auto mb-6 flex max-w-7xl items-center justify-between gap-4">
         <Link
           href="/plateau"
-          className="font-display text-[0.7rem] uppercase tracking-[0.18em] text-parchment-dim transition-colors hover:text-gold-aged"
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           ← Plateau
         </Link>
-        <p className="text-xs text-parchment-mute">
+        <p className="text-xs text-ink-tertiary">
           Connecté&nbsp;:{" "}
-          <span className="text-parchment-dim">{userName}</span>
+          <span className="text-muted-foreground">{userName}</span>
         </p>
       </div>
 

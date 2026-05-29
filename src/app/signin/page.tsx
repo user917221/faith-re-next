@@ -1,5 +1,7 @@
 import { signIn } from "@/lib/auth";
 import { ConstellationGlyph } from "@/components/glyphs";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 // Cette page lit `searchParams.callbackUrl` (Server Action), donc rendu dynamique requis.
 export const dynamic = "force-dynamic";
@@ -11,30 +13,22 @@ export default function SignInPage({
 }) {
   return (
     <main className="relative z-[2] flex min-h-screen items-center justify-center px-6 py-12">
-      <section className="card-hero w-full max-w-md">
-        <div className="flex flex-col items-center gap-7 text-center">
-          {/* Glyph hero dominant — rotation très lente + sigil-glow pulse */}
-          <div className="text-gold-aged glyph-rotate">
-            <div className="sigil-glow">
-              <ConstellationGlyph size={150} />
-            </div>
-          </div>
+      <Card className="w-full max-w-md">
+        <CardContent className="flex flex-col items-center gap-7 text-center">
+          {/* Glyph hero — seul usage lavande décoratif autorisé, subtil */}
+          <ConstellationGlyph size={132} className="text-primary/70" />
 
-          {/* Convocation + titre rituel */}
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-2.5">
             <p className="label-grimoire">Convocation</p>
-            <h1 className="font-display text-4xl font-bold tracking-[0.04em] text-gold-aged drop-shadow-[0_0_24px_rgba(202,161,90,0.18)]">
+            <h1 className="text-4xl font-semibold tracking-tight text-foreground">
               FAITH&nbsp;:&nbsp;RE
             </h1>
-            <p className="font-display max-w-xs text-[0.7rem] uppercase tracking-[0.22em] text-parchment-dim">
-              Connecte-toi pour rejoindre la table
+            <p className="max-w-xs text-sm text-muted-foreground">
+              Connecte-toi pour rejoindre la table.
             </p>
           </div>
 
-          {/* Sigil divider */}
-          <div className="sigil-divider !my-0 w-full">
-            <span className="sigil-mark">✦</span>
-          </div>
+          <Separator />
 
           {/* Form Discord — bouton brand exception */}
           <form
@@ -47,22 +41,22 @@ export default function SignInPage({
           >
             <button
               type="submit"
-              className="w-full rounded-[--radius-sm] bg-[#5865F2] px-6 py-3 text-sm font-medium text-white transition hover:bg-[#4752c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-aged/40"
+              className="w-full rounded-md bg-[#5865F2] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#4752c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Connexion avec Discord
             </button>
           </form>
 
           {/* Note MJ */}
-          <p className="text-[0.66rem] leading-relaxed text-parchment-mute">
+          <p className="text-xs leading-relaxed text-ink-tertiary">
             MJ&nbsp;? Ton rôle est promu automatiquement si ton Discord ID correspond à{" "}
-            <code className="tabular rounded-[--radius-xs] border border-gold-aged/20 bg-ink-deep px-1 py-0.5 text-gold-aged">
+            <code className="tabular rounded-sm border border-border bg-popover px-1 py-0.5 text-muted-foreground">
               MJ_DISCORD_ID
             </code>
             .
           </p>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
     </main>
   );
 }

@@ -2,6 +2,13 @@
 
 import { useTransition } from "react";
 import { ENDURANCE_COSTS } from "@/lib/faith-system";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import type { ActionType } from "./types";
 
 type Props = {
@@ -27,10 +34,10 @@ const ACTIONS: ActionConfig[] = [
 ];
 
 const CATEGORY_COST: Record<ActionConfig["category"], string> = {
-  phy: "text-celadon",
-  off: "text-blood-dried",
-  def: "text-amethyst",
-  esq: "text-gold-bright",
+  phy: "text-endu",
+  off: "text-hp",
+  def: "text-mhp",
+  esq: "text-primary",
 };
 
 export function EnduranceActionPanel({ onActionCost }: Props) {
@@ -44,33 +51,40 @@ export function EnduranceActionPanel({ onActionCost }: Props) {
   }
 
   return (
-    <section className="card-grimoire flex flex-col gap-4">
-      <span className="label-grimoire">Dépense d&apos;endurance</span>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {ACTIONS.map((a) => {
-          const cost = ENDURANCE_COSTS[a.key].cost;
-          const costColor = CATEGORY_COST[a.category];
-          return (
-            <button
-              key={a.key}
-              type="button"
-              disabled={isPending || !onActionCost}
-              onClick={() => trigger(a.key)}
-              className="group flex flex-col items-center justify-center gap-1 rounded-[--radius-sm] border border-gold-aged/10 bg-ink-far px-2 py-3 text-parchment transition-all hover:border-gold-aged/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-gold-aged/10"
-            >
-              <span className="font-display text-[0.7rem] font-medium uppercase tracking-[0.15em] text-parchment">
-                {a.label}
-              </span>
-              <span className="text-[0.65rem] italic text-parchment-mute">
-                {a.sub}
-              </span>
-              <span className={`tabular text-2xl font-bold leading-none ${costColor}`}>
-                −{cost}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    </section>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-sm">Dépense d&apos;endurance</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {ACTIONS.map((a) => {
+            const cost = ENDURANCE_COSTS[a.key].cost;
+            const costColor = CATEGORY_COST[a.category];
+            return (
+              <Button
+                key={a.key}
+                type="button"
+                variant="outline"
+                disabled={isPending || !onActionCost}
+                onClick={() => trigger(a.key)}
+                className="h-auto flex-col gap-1 py-3"
+              >
+                <span className="text-sm font-medium text-foreground">
+                  {a.label}
+                </span>
+                <span className="text-xs font-normal text-muted-foreground">
+                  {a.sub}
+                </span>
+                <span
+                  className={`tabular text-2xl font-semibold leading-none ${costColor}`}
+                >
+                  −{cost}
+                </span>
+              </Button>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
