@@ -16,6 +16,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VitalsHeader } from "./VitalsHeader";
+import { FluxBar } from "./FluxBar";
+import { RuneInventory } from "./RuneInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
 import { SkillRow } from "./SkillRow";
@@ -65,6 +67,12 @@ export default function CharacterSheet({
   onRecoverEndurance,
   onTogglePresence,
   onRollSkill,
+  onFluxChange,
+  onFluxTrainingChange,
+  onCombatChange,
+  onTechnicalChange,
+  onAddRune,
+  onRemoveRune,
 }: CharacterSheetProps) {
   const allocated = countAllocatedPoints(character.skills);
   const isCapped = allocated >= SKILL_CAP;
@@ -98,6 +106,18 @@ export default function CharacterSheet({
               </h1>
               <Badge variant="outline" className="font-normal">
                 {isMJ ? "MJ" : "Joueur"}
+              </Badge>
+              <Badge
+                variant="secondary"
+                className="tabular font-normal tracking-tight"
+              >
+                {character.tier}
+              </Badge>
+              <Badge
+                variant="outline"
+                className="font-normal tracking-tight text-ink-muted"
+              >
+                Flux {character.fluxLabel}
               </Badge>
             </div>
             {character.nom && (
@@ -161,11 +181,18 @@ export default function CharacterSheet({
         {/* ─── Vitaux + actions ─── colonnes denses ─── */}
         <TabsContent value="vitaux">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            {/* Trio vitaux */}
-            <div className="xl:col-span-7">
+            {/* Trio vitaux + Flux (4e jauge) */}
+            <div className="flex flex-col gap-4 xl:col-span-7">
               <VitalsHeader
                 character={character}
                 onVitalChange={onVitalChange}
+              />
+              <FluxBar
+                current={character.currentFlux}
+                max={character.maxFlux}
+                palier={character.fluxPalier}
+                palierLabel={character.fluxLabel}
+                onAdjust={onFluxChange}
               />
             </div>
 
@@ -287,6 +314,9 @@ export default function CharacterSheet({
               character={character}
               onXpChange={onXpChange}
               onTrainingChange={onTrainingChange}
+              onFluxTrainingChange={onFluxTrainingChange}
+              onCombatChange={onCombatChange}
+              onTechnicalChange={onTechnicalChange}
             />
           </TabsContent>
         )}
@@ -298,6 +328,12 @@ export default function CharacterSheet({
               <ProfileEditor
                 character={character}
                 onProfileChange={onProfileChange}
+              />
+
+              <RuneInventory
+                runes={character.runesInventory}
+                onAddRune={onAddRune}
+                onRemoveRune={onRemoveRune}
               />
 
               {!isMJ && onRequestTraining && (

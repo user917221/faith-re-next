@@ -18,6 +18,9 @@ import {
   requestTraining,
   togglePresence,
   rollSkillWithDD,
+  updateFlux,
+  addRune,
+  removeRune,
 } from "@/lib/actions";
 
 export function MyCharacterClient({
@@ -78,6 +81,29 @@ export function MyCharacterClient({
           skillName: skillName ?? null,
           dd,
         });
+        refresh();
+      }}
+      onFluxChange={async (delta) => {
+        await updateFlux(character.id, delta);
+        toast(`Flux ${delta > 0 ? "+" : ""}${delta}`);
+        refresh();
+      }}
+      onAddRune={async (input) => {
+        const res = await addRune(character.id, input);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast.success("Rune ajoutée");
+        refresh();
+      }}
+      onRemoveRune={async (runeId) => {
+        const res = await removeRune(character.id, runeId);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast("Rune retirée");
         refresh();
       }}
     />

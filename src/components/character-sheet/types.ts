@@ -78,6 +78,17 @@ export type CharacterSheetProps = {
   onRuneChange?: (index: number, value: string) => Promise<void>;
   onProfileChange?: (patch: ProfilePatch) => Promise<void>;
   onRequestTraining?: (note?: string) => Promise<void>;
+  // --- Flux & inventaire de runes ---
+  onFluxChange?: (delta: number) => Promise<void>;
+  onFluxTrainingChange?: (delta: 1 | -1) => Promise<void>;
+  onCombatChange?: (delta: 1 | -1) => Promise<void>;
+  onTechnicalChange?: (delta: 1 | -1) => Promise<void>;
+  onAddRune?: (input: {
+    name: string;
+    type: "utilitaire" | "armement" | "predefinie";
+    description?: string;
+  }) => Promise<void>;
+  onRemoveRune?: (runeId: string) => Promise<void>;
   onRecoverHp?: () => Promise<{ gain: number; d1: number; d2: number; ecaille: number; newHp: number; maxHp: number }>;
   onRecoverEndurance?: () => Promise<{ gain: number; roll: number; newEndurance: number; maxEndurance: number }>;
   onTogglePresence?: () => Promise<void>;

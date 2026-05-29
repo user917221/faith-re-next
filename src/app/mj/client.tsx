@@ -41,6 +41,12 @@ import {
   recoverEndurance,
   togglePresence,
   rollSkillWithDD,
+  updateFlux,
+  updateFluxTrainings,
+  updateCombats,
+  updateTechnicalTrainings,
+  addRune,
+  removeRune,
   type TrainingRequestWithChar,
 } from "@/lib/actions";
 
@@ -336,6 +342,75 @@ export function MJCharacterClient({ character }: { character: Character }) {
           skillName: skillName ?? null,
           dd,
         });
+        refresh();
+      }}
+      onFluxChange={async (delta) => {
+        await updateFlux(character.id, delta);
+        refresh();
+      }}
+      onFluxTrainingChange={async (delta) => {
+        const res = await updateFluxTrainings(character.id, delta);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        if (res.palierChanged) {
+          toast.success(`Nouveau palier de Flux — ${res.palierLabel}`, {
+            description: `Flux max ${res.max}`,
+          });
+        } else {
+          toast.success(
+            delta > 0 ? "Entraînement de Flux +1" : "Entraînement de Flux −1",
+          );
+        }
+        refresh();
+      }}
+      onCombatChange={async (delta) => {
+        const res = await updateCombats(character.id, delta);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        if (res.palierChanged) {
+          toast.success(`Nouveau palier de Flux — ${res.palierLabel}`, {
+            description: `Flux max ${res.max}`,
+          });
+        } else {
+          toast.success(delta > 0 ? "Combat réel +1" : "Combat réel −1");
+        }
+        refresh();
+      }}
+      onTechnicalChange={async (delta) => {
+        const res = await updateTechnicalTrainings(character.id, delta);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        if (res.palierChanged) {
+          toast.success(`Nouveau palier technique — ${res.palierLabel}`);
+        } else {
+          toast.success(
+            delta > 0 ? "Entraînement technique +1" : "Entraînement technique −1",
+          );
+        }
+        refresh();
+      }}
+      onAddRune={async (input) => {
+        const res = await addRune(character.id, input);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast.success("Rune ajoutée");
+        refresh();
+      }}
+      onRemoveRune={async (runeId) => {
+        const res = await removeRune(character.id, runeId);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast("Rune retirée");
         refresh();
       }}
     />
