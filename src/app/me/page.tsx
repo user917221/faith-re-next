@@ -50,7 +50,7 @@ export default async function MePage() {
           {/* Hero card centrée */}
           <Card>
             <CardContent className="flex flex-col items-center gap-5 text-center">
-              <ConstellationGlyph size={104} className="text-primary/70" />
+              <ConstellationGlyph size={104} className="text-ink-tertiary" />
               <div className="flex flex-col gap-2">
                 <span className="label-grimoire">Convocation</span>
                 <h1 className="text-4xl font-semibold tracking-tight text-foreground">

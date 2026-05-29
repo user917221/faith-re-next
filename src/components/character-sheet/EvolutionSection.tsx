@@ -74,7 +74,7 @@ export function EvolutionSection({
   }
 
   return (
-    <Card className="relative">
+    <Card className="relative border border-border ring-0">
       <div className="pointer-events-none absolute right-4 top-4 text-ink-tertiary">
         <AscensionGlyph size={56} />
       </div>
@@ -96,7 +96,7 @@ export function EvolutionSection({
                   Niveau
                 </span>
                 <div className="flex items-baseline gap-2">
-                  <span className="big-number text-primary">{level}</span>
+                  <span className="big-number text-foreground">{level}</span>
                   <span className="tabular text-sm text-muted-foreground">
                     bonus +{bonus}
                   </span>
@@ -177,7 +177,7 @@ export function EvolutionSection({
                   >
                     −
                   </Button>
-                  <span className="tabular flex-1 rounded-md border border-border bg-background px-2 py-1 text-center text-sm font-semibold text-foreground">
+                  <span className="tabular flex-1 rounded-md border border-border bg-muted px-2 py-1 text-center text-sm font-semibold text-foreground">
                     {character.enduranceTrainings}
                   </span>
                   <Button

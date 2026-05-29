@@ -19,14 +19,14 @@ export default async function HomePage() {
         {/* ============================================================
             HERO — col-span-3 : glyph lavande discret + titre Linear
             ============================================================ */}
-        <Card className="justify-center lg:col-span-3">
+        <Card className="justify-center border border-border ring-0 lg:col-span-3">
           <CardContent className="flex min-h-[440px] flex-col items-center justify-center gap-8 text-center lg:min-h-[520px]">
             {/* Glyph hero — seul usage lavande décoratif autorisé, subtil */}
-            <ConstellationGlyph size={176} className="text-primary/70" />
+            <ConstellationGlyph size={160} className="text-primary/70" />
 
             <div className="flex flex-col items-center gap-3">
               <p className="label-grimoire">Grimoire de campagne</p>
-              <h1 className="text-6xl font-semibold tracking-tight text-foreground">
+              <h1 className="text-4xl font-semibold tracking-tight text-foreground">
                 FAITH&nbsp;:&nbsp;RE
               </h1>
               <p className="max-w-md text-sm text-muted-foreground">
@@ -40,7 +40,7 @@ export default async function HomePage() {
             AUTH — col-span-2 : convocation ou identité
             ============================================================ */}
         {user ? (
-          <Card className="lg:col-span-2">
+          <Card className="border border-border ring-0 lg:col-span-2">
             <CardContent className="flex h-full flex-col gap-5">
               <header className="flex flex-col gap-3">
                 <p className="label-grimoire">Compagnon</p>
@@ -81,7 +81,7 @@ export default async function HomePage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="lg:col-span-2">
+          <Card className="border border-border ring-0 lg:col-span-2">
             <CardContent className="flex h-full flex-col gap-5">
               <header className="flex flex-col gap-3">
                 <p className="label-grimoire">Convocation</p>
@@ -103,12 +103,12 @@ export default async function HomePage() {
                   await signIn("discord", { redirectTo: "/me" });
                 }}
               >
-                <button
+                <Button
                   type="submit"
-                  className="w-full rounded-md bg-[#5865F2] px-6 py-2.5 text-center text-sm font-medium text-white transition-colors hover:bg-[#4752c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="h-auto w-full bg-[#5865F2] py-2.5 text-white hover:bg-[#4752c4]"
                 >
                   Connexion avec Discord
-                </button>
+                </Button>
               </form>
 
               <p className="text-xs leading-relaxed text-ink-tertiary">

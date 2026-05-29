@@ -41,7 +41,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   }
 
   return (
-    <Card>
+    <Card className="border border-border ring-0">
       <CardHeader className="grid-cols-[auto_1fr_auto] items-center gap-3">
         <span className="shrink-0 text-ink-tertiary">
           <CrestGlyph size={36} />
@@ -51,7 +51,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
           <CardDescription>Identité du personnage</CardDescription>
         </div>
         {feedback && (
-          <span className="self-start text-xs text-primary">{feedback}</span>
+          <span className="self-start text-xs text-muted-foreground">{feedback}</span>
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

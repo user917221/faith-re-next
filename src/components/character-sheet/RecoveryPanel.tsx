@@ -46,11 +46,11 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
   }
 
   return (
-    <Card>
+    <Card className="border border-border ring-0">
       <CardHeader>
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div>
-            <CardTitle className="label-grimoire">Récupération</CardTitle>
+            <CardTitle className="text-sm">Récupération</CardTitle>
             <CardDescription className="mt-0.5 text-xs">
               Lance les dés de régénération naturelle.
             </CardDescription>

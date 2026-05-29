@@ -1,5 +1,6 @@
 import { signIn } from "@/lib/auth";
 import { ConstellationGlyph } from "@/components/glyphs";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
@@ -13,7 +14,7 @@ export default function SignInPage({
 }) {
   return (
     <main className="relative z-[2] flex min-h-screen items-center justify-center px-6 py-12">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md border border-border ring-0">
         <CardContent className="flex flex-col items-center gap-7 text-center">
           {/* Glyph hero — seul usage lavande décoratif autorisé, subtil */}
           <ConstellationGlyph size={132} className="text-primary/70" />
@@ -39,12 +40,12 @@ export default function SignInPage({
               await signIn("discord", { redirectTo: params.callbackUrl ?? "/me" });
             }}
           >
-            <button
+            <Button
               type="submit"
-              className="w-full rounded-md bg-[#5865F2] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#4752c4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="h-auto w-full bg-[#5865F2] py-2.5 text-white hover:bg-[#4752c4]"
             >
               Connexion avec Discord
-            </button>
+            </Button>
           </form>
 
           {/* Note MJ */}

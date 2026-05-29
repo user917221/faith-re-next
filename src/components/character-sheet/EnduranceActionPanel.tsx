@@ -37,7 +37,7 @@ const CATEGORY_COST: Record<ActionConfig["category"], string> = {
   phy: "text-endu",
   off: "text-hp",
   def: "text-mhp",
-  esq: "text-primary",
+  esq: "text-foreground",
 };
 
 export function EnduranceActionPanel({ onActionCost }: Props) {
@@ -51,7 +51,7 @@ export function EnduranceActionPanel({ onActionCost }: Props) {
   }
 
   return (
-    <Card>
+    <Card className="border border-border ring-0">
       <CardHeader>
         <CardTitle className="text-sm">Dépense d&apos;endurance</CardTitle>
       </CardHeader>

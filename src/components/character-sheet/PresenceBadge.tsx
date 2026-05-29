@@ -25,7 +25,7 @@ export function PresenceBadge({ isPresent, onToggle }: Props) {
   }
 
   return (
-    <Card size="sm">
+    <Card size="sm" className="border border-border ring-0">
       <CardContent className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <span

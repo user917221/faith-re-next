@@ -194,7 +194,7 @@ function RosterItem({
             )}
           </div>
           {isOwner && (
-            <p className="mt-0.5 text-[0.6rem] font-medium uppercase tracking-[0.14em] text-primary">
+            <p className="mt-0.5 text-[0.6rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
               Toi
             </p>
           )}
@@ -296,8 +296,9 @@ function LastActHero({ item }: { item: FeedItem | null }) {
 
   const breakdownPieces = buildBreakdown(item);
 
-  // Couleur du big number : lavande si réussite/crit succ, hp si échec crit, ink sinon.
-  let totalClass = "text-primary";
+  // Couleur du big number — accent SCARCE : lavande réservé au crit succ, hp au crit
+  // fail, endu/gris pour réussite/échec. Jet neutre (sans DD) = foreground monochrome.
+  let totalClass = "text-foreground";
   if (item.isCritSucc) {
     totalClass = "text-primary";
   } else if (item.isCritFail) {
@@ -815,7 +816,7 @@ function CarnetRow({ item }: { item: FeedItem }) {
 function Carnet({ items }: { items: FeedItem[] }) {
   return (
     <Card className="min-w-0 gap-0 py-0">
-      <CardHeader className="sticky top-0 z-10 flex flex-row items-baseline justify-between gap-2 rounded-t-xl border-b bg-card px-4 py-3">
+      <CardHeader className="sticky top-0 z-10 flex flex-row items-baseline justify-between gap-2 rounded-t-lg border-b bg-card px-4 py-3">
         <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Carnet des jets
         </CardTitle>

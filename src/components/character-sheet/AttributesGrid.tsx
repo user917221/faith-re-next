@@ -32,7 +32,7 @@ export function AttributesGrid({ character, isCapped, onSkillChange, onOpenRollD
           : null;
 
         return (
-          <Card key={attr} size="sm">
+          <Card key={attr} size="sm" className="border border-border ring-0">
             <CardHeader className="flex flex-row items-center justify-between gap-3">
               <CardTitle className="text-sm font-semibold uppercase tracking-tight text-foreground">
                 {attr}
@@ -43,14 +43,14 @@ export function AttributesGrid({ character, isCapped, onSkillChange, onOpenRollD
                   onClick={openAttrRoll}
                   title={`Lancer un jet d'attribut ${attr}`}
                   aria-label={`Lancer un jet d'attribut ${attr}`}
-                  className="tabular rounded-md px-1 text-3xl font-semibold leading-none text-primary outline-none transition-colors hover:text-primary-hover focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="tabular rounded-md px-1 text-3xl font-semibold leading-none text-foreground outline-none transition-colors hover:text-primary-hover focus-visible:ring-3 focus-visible:ring-ring/50"
                 >
                   {score}
                 </button>
               ) : (
                 <span
                   title={`Score d'attribut ${attr}`}
-                  className="tabular px-1 text-3xl font-semibold leading-none text-primary"
+                  className="tabular px-1 text-3xl font-semibold leading-none text-foreground"
                 >
                   {score}
                 </span>

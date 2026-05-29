@@ -289,7 +289,7 @@ export default function CharacterSheet({
 
         {!isMJ && onRequestTraining && (
           <div className="xl:col-span-7">
-            <Card className="relative overflow-hidden">
+            <Card className="relative overflow-hidden border border-border ring-0">
               <span className="pointer-events-none absolute right-3 top-3 text-ink-tertiary/40">
                 <GrimoireGlyph size={64} />
               </span>

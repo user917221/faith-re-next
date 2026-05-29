@@ -7,6 +7,7 @@ import { MJCharacterClient, PendingTrainingPanel } from "./client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +51,7 @@ export default async function MjDashboardPage({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="uppercase tracking-[0.12em] text-muted-foreground">
+            <Badge variant="outline" className="uppercase tracking-wide text-muted-foreground">
               Endurance révélée
             </Badge>
             <Button asChild variant="outline">
@@ -100,21 +101,21 @@ export default async function MjDashboardPage({
                           {c.name}
                         </span>
                       </span>
-                      <Badge variant="outline" className="shrink-0 tabular uppercase tracking-[0.1em] text-muted-foreground">
+                      <Badge variant="outline" className="shrink-0 tabular tracking-wide text-muted-foreground">
                         Niv. {c.level}
                       </Badge>
                     </div>
 
                     {/* Row 2 — mini HP bar + numeric */}
                     <div className="mt-2 flex items-center gap-2">
-                      <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-secondary">
-                        <div
-                          className={`absolute inset-y-0 left-0 transition-[width] duration-300 ${
-                            hpCritical ? "bg-hp" : "bg-hp/80"
-                          }`}
-                          style={{ width: `${hpPct}%` }}
-                        />
-                      </div>
+                      <Progress
+                        value={hpPct}
+                        className={`flex-1 [&_[data-slot=progress-indicator]]:transition-[transform,width] [&_[data-slot=progress-indicator]]:duration-300 ${
+                          hpCritical
+                            ? "[&_[data-slot=progress-indicator]]:bg-hp"
+                            : "[&_[data-slot=progress-indicator]]:bg-hp/80"
+                        }`}
+                      />
                       <span className="tabular shrink-0 text-[0.62rem] text-ink-tertiary">
                         <span className={hpCritical ? "text-hp" : "text-muted-foreground"}>
                           {c.currentHp}

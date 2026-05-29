@@ -147,7 +147,7 @@ export default function PreviewPage() {
               />
             </button>
             <span
-              className={`tabular text-[0.7rem] font-semibold uppercase tracking-[0.12em] ${
+              className={`tabular text-xs font-semibold uppercase tracking-[0.12em] ${
                 isMJ ? "text-primary" : "text-ink-tertiary"
               }`}
             >

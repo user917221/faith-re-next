@@ -57,7 +57,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
             Ta demande est en cours d&apos;examen par le MJ.
           </p>
           {pending.note && (
-            <p className="mt-3 rounded-md border border-border bg-background p-3 text-xs italic text-muted-foreground">
+            <p className="mt-3 rounded-md border border-border bg-muted p-3 text-xs italic text-muted-foreground">
               «&nbsp;{pending.note}&nbsp;»
             </p>
           )}
@@ -89,7 +89,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
           </Button>
         </div>
         {feedback && (
-          <p className="mt-3 text-xs text-primary">{feedback}</p>
+          <p className="mt-3 text-xs text-muted-foreground">{feedback}</p>
         )}
       </CardContent>
     </Card>

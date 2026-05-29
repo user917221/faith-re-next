@@ -8,8 +8,9 @@ import { useEffect, useRef, useState } from "react";
  * Compare le dernier roll reçu avec le précédent (par id). Si nouveau crit,
  * affiche une animation 2.5s puis se cache.
  *
- *  - Réussite critique (✦) : glow lavande/primary (#5e6ad2) + grand titre + sigil tournant
- *  - Échec catastrophique  : glow hp (#e5484d) + titre tremblant (shake) + sigil ⚜ inversé
+ * Voile sobre bg-background/70 (pas de halo/bloom — Linear plat), impact par la typo.
+ *  - Réussite critique (✦) : titre lavande/primary (#5e6ad2) + sigil tournant
+ *  - Échec catastrophique  : titre hp (#e5484d) tremblant (shake) + sigil ⚜ inversé
  *
  * Pas de son. Plein écran z-[60], au-dessus de tout.
  */
@@ -51,36 +52,20 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
   if (mode === "succ") {
     return (
       <div
-        className="fixed inset-0 z-[60] flex items-center justify-center"
+        className="fixed inset-0 z-[60] flex items-center justify-center bg-background/70"
         style={{ animation: "crit-overlay-fade 2.5s ease-in-out forwards" }}
         aria-hidden
       >
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(94,106,210,0.32) 0%, rgba(94,106,210,0) 60%)",
-            animation: "crit-glow-expand 1.2s ease-out forwards",
-          }}
-        />
         <div className="relative flex flex-col items-center gap-6 px-4 text-center">
           <span
-            className="text-7xl text-primary-hover opacity-0"
-            style={{
-              animation: "crit-sigil-spin 1.4s ease-out forwards",
-              textShadow:
-                "0 0 30px rgba(94,106,210,0.6), 0 0 60px rgba(94,106,210,0.35)",
-            }}
+            className="text-6xl text-primary-hover opacity-0 sm:text-7xl"
+            style={{ animation: "crit-sigil-spin 1.4s ease-out forwards" }}
           >
             ✦
           </span>
           <h1
             className="text-5xl font-semibold uppercase tracking-tight text-primary-hover sm:text-7xl"
-            style={{
-              animation: "crit-text-rise 2.4s ease-out forwards",
-              textShadow:
-                "0 0 28px rgba(94,106,210,0.6), 0 0 64px rgba(94,106,210,0.4)",
-            }}
+            style={{ animation: "crit-text-rise 2.4s ease-out forwards" }}
           >
             Réussite critique
           </h1>
@@ -91,25 +76,16 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-background/70"
       style={{ animation: "crit-overlay-fade 2.5s ease-in-out forwards" }}
       aria-hidden
     >
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at center, rgba(229,72,77,0.34) 0%, rgba(229,72,77,0) 65%)",
-          animation: "crit-glow-expand 1.2s ease-out forwards",
-        }}
-      />
       <div className="relative flex flex-col items-center gap-6 px-4 text-center">
         <h1
           className="text-4xl font-semibold uppercase tracking-tight text-hp italic sm:text-6xl"
           style={{
             animation:
               "crit-text-rise 2.4s ease-out forwards, crit-shake 0.5s ease-in-out 2",
-            textShadow: "0 0 24px rgba(229,72,77,0.5)",
           }}
         >
           Échec catastrophique
