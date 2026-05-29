@@ -16,7 +16,7 @@ const cinzel = Cinzel({
 });
 
 const mono = JetBrains_Mono({
-  variable: "--font-mono",
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -33,6 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
+      suppressHydrationWarning
       className={`${inter.variable} ${cinzel.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>

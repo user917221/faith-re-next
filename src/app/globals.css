@@ -38,10 +38,10 @@
   --color-warning: #d4a449;
   --color-danger: #b35a5a;
 
-  /* Typography */
-  --font-display: "Cinzel", ui-serif, Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  /* Typography — référence les CSS vars next/font (layout.tsx) */
+  --font-display: var(--font-cinzel), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
 
   /* Espacement */
   --spacing: 0.25rem; /* base 4px */
