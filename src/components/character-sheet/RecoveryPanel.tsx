@@ -80,7 +80,7 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
               className="h-auto flex-1 flex-col gap-1 py-3 text-hp hover:text-hp"
             >
               <span className="text-sm font-medium text-foreground">Régénérer HP</span>
-              <span className="tabular text-[0.7rem] text-muted-foreground">
+              <span className="tabular text-2xs text-muted-foreground">
                 (2d6 + Écaillé) / 2
               </span>
             </Button>
@@ -93,7 +93,7 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
               className="h-auto flex-1 flex-col gap-1 py-3 text-endu hover:text-endu"
             >
               <span className="text-sm font-medium text-foreground">Reprendre souffle</span>
-              <span className="tabular text-[0.7rem] text-muted-foreground">
+              <span className="tabular text-2xs text-muted-foreground">
                 1d50 / 2
               </span>
             </Button>

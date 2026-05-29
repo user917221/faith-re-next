@@ -63,7 +63,7 @@ export function AppSidebar({
             <span className="text-sm font-semibold tracking-tight text-foreground">
               FAITH&nbsp;:&nbsp;RE
             </span>
-            <span className="text-[0.65rem] uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="text-2xs uppercase tracking-[0.14em] text-muted-foreground">
               Compagnon
             </span>
           </div>
@@ -103,7 +103,7 @@ export function AppSidebar({
                   <Avatar className="h-7 w-7 rounded-md">
                     {user.image && <AvatarImage src={user.image} alt={user.name} />}
                     <AvatarFallback
-                      className="rounded-md text-[0.7rem]"
+                      className="rounded-md text-2xs"
                       style={avatarFallbackStyle(user.name)}
                     >
                       {initialsOf(user.name)}
@@ -113,7 +113,7 @@ export function AppSidebar({
                     <span className="truncate text-sm font-medium text-foreground">
                       {user.name}
                     </span>
-                    <span className="truncate text-[0.7rem] text-muted-foreground">
+                    <span className="truncate text-2xs text-muted-foreground">
                       {ROLE_LABEL[user.role]}
                     </span>
                   </div>

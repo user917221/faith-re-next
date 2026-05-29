@@ -247,7 +247,7 @@ export default function CharacterSheet({
                   <CardContent className="flex flex-col gap-4">
                     <header className="flex items-start justify-between gap-3">
                       <div className="flex flex-col gap-1">
-                        <span className="text-[0.62rem] font-medium uppercase tracking-[0.08em] text-ink-tertiary">
+                        <span className="text-3xs font-medium uppercase tracking-[0.08em] text-ink-tertiary">
                           Attribut
                         </span>
                         <span className="text-lg font-semibold tracking-tight text-foreground">
@@ -268,7 +268,7 @@ export default function CharacterSheet({
                           >
                             {score}
                           </span>
-                          <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary transition-colors group-hover:text-muted-foreground">
+                          <span className="text-3xs uppercase tracking-[0.08em] text-ink-tertiary transition-colors group-hover:text-muted-foreground">
                             Jet
                           </span>
                         </button>
@@ -280,7 +280,7 @@ export default function CharacterSheet({
                           >
                             {score}
                           </span>
-                          <span className="text-[0.58rem] uppercase tracking-[0.08em] text-ink-tertiary">
+                          <span className="text-3xs uppercase tracking-[0.08em] text-ink-tertiary">
                             Score
                           </span>
                         </div>

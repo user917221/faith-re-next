@@ -103,7 +103,7 @@ export function RosterNav({
                           <Avatar size="sm" className="rounded-md">
                             <AvatarImage src={c.avatarUrl ?? undefined} alt={c.name} />
                             <AvatarFallback
-                              className="rounded-md text-[0.65rem]"
+                              className="rounded-md text-2xs"
                               style={avatarFallbackStyle(c.name)}
                             >
                               {initialsOf(c.name, c.nom)}
@@ -144,7 +144,7 @@ export function RosterNav({
                             : "[&_[data-slot=progress-indicator]]:bg-hp/80"
                         }`}
                       />
-                      <span className="tabular shrink-0 text-[0.62rem] text-ink-tertiary">
+                      <span className="tabular shrink-0 text-3xs text-ink-tertiary">
                         <span className={hpCritical ? "text-hp" : "text-muted-foreground"}>
                           {c.currentHp}
                         </span>
@@ -173,7 +173,7 @@ export function RosterNav({
                           <span className="font-normal text-ink-tertiary"> {c.nom}</span>
                         ) : null}
                       </p>
-                      <p className="flex items-center gap-1.5 text-[0.65rem] text-ink-tertiary">
+                      <p className="flex items-center gap-1.5 text-2xs text-ink-tertiary">
                         <span
                           aria-hidden
                           className={`h-1.5 w-1.5 rounded-full ${
@@ -204,7 +204,7 @@ export function RosterNav({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2 text-[0.65rem]">
+                  <div className="flex items-center justify-between gap-2 border-t border-border px-3 py-2 text-2xs">
                     <span className="text-ink-tertiary">Compétences acquises</span>
                     <span className="tabular text-foreground">{skillCount}</span>
                   </div>
@@ -505,7 +505,7 @@ export function PendingTrainingPanel({
                         «&nbsp;{r.note}&nbsp;»
                       </p>
                     )}
-                    <p className="tabular mt-1 text-[0.62rem] text-ink-tertiary">
+                    <p className="tabular mt-1 text-3xs text-ink-tertiary">
                       {new Date(r.requestedAt).toLocaleString("fr-FR", {
                         day: "2-digit",
                         month: "short",

@@ -104,6 +104,10 @@
   --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
 
+  /* ---- Micro-tailles typo (labels/eyebrows denses, sous text-xs) ---- */
+  --text-2xs: 0.6875rem; /* 11px — petits labels */
+  --text-3xs: 0.625rem;  /* 10px — eyebrows micro / badges */
+
   /* ---- Radius custom (Linear : cards 12px, inputs/buttons 6-8px) ---- */
   --radius-grim-xs: 4px;
   --radius-grim-sm: 6px;

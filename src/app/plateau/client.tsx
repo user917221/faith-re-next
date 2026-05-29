@@ -174,7 +174,7 @@ function MiniBar({
         value={pct}
         className={`h-1 flex-1 bg-secondary ${meta.indicator}`}
       />
-      <span className={`tabular w-12 shrink-0 text-right text-[0.62rem] ${meta.text}`}>
+      <span className={`tabular w-12 shrink-0 text-right text-3xs ${meta.text}`}>
         {current}
         <span className="text-ink-tertiary">/{max}</span>
       </span>
@@ -205,7 +205,7 @@ function RosterItem({
         <Avatar size="sm" className="mt-0.5 shrink-0">
           <AvatarImage src={character.avatarUrl ?? undefined} alt="" />
           <AvatarFallback
-            className="text-[0.62rem] font-medium"
+            className="text-3xs font-medium"
             style={avatarFallbackStyle(character.name)}
           >
             {initialsOf(character.name, character.nom)}
@@ -216,7 +216,7 @@ function RosterItem({
             <h4 className="truncate text-sm font-medium tracking-tight text-foreground">
               {character.name}
               {character.nom && (
-                <span className="ml-1 text-[0.72rem] font-normal text-muted-foreground">
+                <span className="ml-1 text-2xs font-normal text-muted-foreground">
                   {character.nom}
                 </span>
               )}
@@ -228,7 +228,7 @@ function RosterItem({
             )}
           </div>
           {isOwner && (
-            <p className="mt-0.5 text-[0.6rem] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            <p className="mt-0.5 text-3xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
               Toi
             </p>
           )}
@@ -281,7 +281,7 @@ function Roster({
           <p className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
             La table est encore vide
           </p>
-          <p className="text-[0.78rem] text-ink-tertiary">
+          <p className="text-xs text-ink-tertiary">
             En attente des compagnons.
           </p>
         </div>
@@ -335,7 +335,7 @@ function LastActHero({ item }: { item: FeedItem | null }) {
         <span className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Dernier acte
         </span>
-        <span className="tabular text-[0.62rem] uppercase tracking-[0.06em] text-ink-tertiary">
+        <span className="tabular text-3xs uppercase tracking-[0.06em] text-ink-tertiary">
           {formatRelative(item.createdAt)}
         </span>
       </div>
@@ -344,7 +344,7 @@ function LastActHero({ item }: { item: FeedItem | null }) {
         <div className="flex items-center gap-2.5">
           <Avatar size="sm" className="shrink-0">
             <AvatarFallback
-              className="text-[0.62rem] font-medium"
+              className="text-3xs font-medium"
               style={avatarFallbackStyle(item.characterName)}
             >
               {initialsOf(item.characterName)}
@@ -355,7 +355,7 @@ function LastActHero({ item }: { item: FeedItem | null }) {
           </h2>
         </div>
         {item.casterName && item.casterName !== item.characterName && (
-          <p className="text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-3xs uppercase tracking-[0.14em] text-muted-foreground">
             Lancé par {item.casterName}
           </p>
         )}
@@ -378,7 +378,7 @@ function LastActHero({ item }: { item: FeedItem | null }) {
         </div>
 
         {breakdownPieces.length > 0 && (
-          <p className="tabular text-[0.72rem] text-muted-foreground">
+          <p className="tabular text-2xs text-muted-foreground">
             {breakdownPieces.join(" ")}
           </p>
         )}
@@ -459,7 +459,7 @@ function StatsChart({ items }: { items: FeedItem[] }) {
         <span className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Distribution des totaux
         </span>
-        <span className="tabular text-[0.62rem] uppercase tracking-[0.06em] text-ink-tertiary">
+        <span className="tabular text-3xs uppercase tracking-[0.06em] text-ink-tertiary">
           {items.length} jets
         </span>
       </div>
@@ -547,7 +547,7 @@ function AttrRadioGrid({
                 : ""
             }
           >
-            <span className="text-[0.62rem] font-medium uppercase tracking-[0.1em]">
+            <span className="text-3xs font-medium uppercase tracking-[0.1em]">
               {a}
             </span>
           </Button>
@@ -580,10 +580,10 @@ function DDChip({
           : ""
       }`}
     >
-      <span className="text-[0.55rem] font-medium uppercase tracking-[0.1em]">
+      <span className="text-3xs font-medium uppercase tracking-[0.1em]">
         {label}
       </span>
-      <span className="tabular text-[0.72rem]">{value}</span>
+      <span className="tabular text-2xs">{value}</span>
     </Button>
   );
 }
@@ -626,7 +626,7 @@ function DDChipsRow({
       </div>
       {value === "free" && (
         <div className="flex items-center gap-2">
-          <span className="text-[0.6rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+          <span className="text-3xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
             DD perso
           </span>
           <Input
@@ -648,7 +648,7 @@ function DDChipsRow({
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[0.58rem] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+    <span className="text-3xs font-medium uppercase tracking-[0.1em] text-muted-foreground">
       {children}
     </span>
   );
@@ -746,7 +746,7 @@ function Launcher({
         <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Lanceur
         </CardTitle>
-        <p className="text-[0.62rem] uppercase tracking-[0.14em] text-ink-tertiary">
+        <p className="text-3xs uppercase tracking-[0.14em] text-ink-tertiary">
           Jet d&apos;attribut · 2d6
         </p>
       </CardHeader>
@@ -823,14 +823,14 @@ function Launcher({
               {skill ? " + skill" : ""}
             </Button>
 
-            {errorA && <p className="text-[0.72rem] text-hp">{errorA}</p>}
+            {errorA && <p className="text-2xs text-hp">{errorA}</p>}
           </div>
 
           <Separator />
 
           {/* Section 2 — Formule libre */}
           <div className="flex flex-col gap-3">
-            <p className="text-[0.66rem] font-medium uppercase tracking-[0.14em] text-ink-muted">
+            <p className="text-2xs font-medium uppercase tracking-[0.14em] text-ink-muted">
               Formule libre
             </p>
 
@@ -872,7 +872,7 @@ function Launcher({
               Lancer la formule
             </Button>
 
-            {errorB && <p className="text-[0.72rem] text-hp">{errorB}</p>}
+            {errorB && <p className="text-2xs text-hp">{errorB}</p>}
           </div>
         </CardContent>
       </ScrollArea>
@@ -892,7 +892,7 @@ function CarnetRow({ item }: { item: FeedItem }) {
       <div className="flex min-w-0 flex-1 items-start gap-2.5">
         <Avatar size="sm" className="mt-0.5 shrink-0">
           <AvatarFallback
-            className="text-[0.6rem] font-medium"
+            className="text-3xs font-medium"
             style={avatarFallbackStyle(item.characterName)}
           >
             {initialsOf(item.characterName)}
@@ -904,15 +904,15 @@ function CarnetRow({ item }: { item: FeedItem }) {
               {item.characterName}
             </h4>
             {item.casterName && item.casterName !== item.characterName && (
-              <span className="text-[0.6rem] uppercase tracking-[0.12em] text-ink-tertiary">
+              <span className="text-3xs uppercase tracking-[0.12em] text-ink-tertiary">
                 · {item.casterName}
               </span>
             )}
-            <span className="tabular ml-auto text-[0.6rem] uppercase tracking-[0.1em] text-ink-tertiary">
+            <span className="tabular ml-auto text-3xs uppercase tracking-[0.1em] text-ink-tertiary">
               {formatRelative(item.createdAt)}
             </span>
           </div>
-          <p className="tabular mt-0.5 text-[0.72rem] text-muted-foreground">
+          <p className="tabular mt-0.5 text-2xs text-muted-foreground">
             {item.formula}
             {breakdownPieces.length > 0 && (
               <span className="text-ink-tertiary"> · {breakdownPieces.join(" ")}</span>
@@ -928,7 +928,7 @@ function CarnetRow({ item }: { item: FeedItem }) {
             {item.total}
           </span>
           {item.dd !== null && (
-            <span className="tabular text-[0.65rem] text-ink-tertiary">/ {item.dd}</span>
+            <span className="tabular text-2xs text-ink-tertiary">/ {item.dd}</span>
           )}
         </div>
         <div className="flex flex-col items-end gap-1">
@@ -963,7 +963,7 @@ function Carnet({ items }: { items: FeedItem[] }) {
         <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Carnet des jets
         </CardTitle>
-        <span className="tabular text-[0.62rem] uppercase tracking-[0.06em] text-ink-tertiary">
+        <span className="tabular text-3xs uppercase tracking-[0.06em] text-ink-tertiary">
           {items.length} / 30
         </span>
       </CardHeader>
@@ -1085,7 +1085,7 @@ export function PlateauClient({
       {/* Sous-titre — le titre "Plateau" vit dans la topbar du shell, on ne le redouble pas. */}
       <div className="flex items-center gap-2">
         <span className="presence-led-on mt-px inline-block h-1.5 w-1.5 shrink-0 rounded-full" aria-hidden />
-        <p className="text-[0.78rem] text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Session ouverte
           <span className="text-ink-tertiary">
             {" · "}

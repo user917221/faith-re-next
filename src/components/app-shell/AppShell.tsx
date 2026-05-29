@@ -50,7 +50,7 @@ export function AppShell({
           >
             <Search className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Rechercher</span>
-            <kbd className="tabular hidden rounded border border-border bg-muted px-1 text-[0.65rem] sm:inline">
+            <kbd className="tabular hidden rounded border border-border bg-muted px-1 text-2xs sm:inline">
               ⌘K
             </kbd>
           </button>

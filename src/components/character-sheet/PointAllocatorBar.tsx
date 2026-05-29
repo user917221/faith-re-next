@@ -13,7 +13,7 @@ export function PointAllocatorBar({ allocated }: Props) {
     <div className="card-grimoire flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-baseline gap-2.5">
-          <span className="text-[0.7rem] font-medium uppercase tracking-[0.06em] text-muted-foreground">
+          <span className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
             Allocation
           </span>
           <span
@@ -29,7 +29,7 @@ export function PointAllocatorBar({ allocated }: Props) {
           </span>
         </div>
         {isCapped && (
-          <span className="text-[0.7rem] font-medium uppercase tracking-[0.06em] text-hp">
+          <span className="text-2xs font-medium uppercase tracking-[0.06em] text-hp">
             Cap atteint
           </span>
         )}

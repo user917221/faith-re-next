@@ -95,7 +95,7 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
           Échec catastrophique
         </h1>
         <p
-          className="text-[0.78rem] uppercase tracking-[0.18em] text-muted-foreground italic opacity-0"
+          className="text-xs uppercase tracking-[0.18em] text-muted-foreground italic opacity-0"
           style={{ animation: "crit-text-rise 2.4s ease-out 0.25s forwards" }}
         >
           L&apos;Impôt Divin réclame son dû.
