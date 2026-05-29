@@ -55,9 +55,9 @@ export default function CharacterSheet({
   return (
     <div className="relative z-[2] flex flex-col gap-2">
       {/* Header identité */}
-      <header className="flex flex-wrap items-end justify-between gap-3 pb-4">
+      <header className="flex flex-wrap items-end justify-between gap-3 rounded-[--radius-xl] border border-gold-aged/12 bg-ink-near/35 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-[0.02em] text-gold-aged">
+          <h1 className="font-display text-4xl font-black tracking-tight text-gold-aged">
             {character.name}
             {character.nom ? ` ${character.nom}` : ""}
           </h1>

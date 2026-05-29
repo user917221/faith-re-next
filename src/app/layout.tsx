@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cinzel, Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,15 +8,8 @@ const inter = Inter({
   display: "swap",
 });
 
-const cinzel = Cinzel({
-  variable: "--font-cinzel",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
 const mono = JetBrains_Mono({
-  variable: "--font-mono",
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -33,7 +26,8 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${inter.variable} ${cinzel.variable} ${mono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${inter.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full">{children}</body>
     </html>

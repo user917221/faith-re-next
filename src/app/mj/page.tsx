@@ -63,7 +63,7 @@ export default async function MjDashboardPage({
                 href={`/mj?id=${c.id}`}
                 className={`card-grimoire block transition ${
                   isActive
-                    ? "!border-gold-aged/50 shadow-[0_0_22px_-8px_rgba(202,161,90,0.4)]"
+                    ? "!border-gold-aged/50 shadow-[0_0_22px_-8px_rgba(17,17,17,0.28)]"
                     : "hover:!border-gold-aged/25"
                 }`}
               >

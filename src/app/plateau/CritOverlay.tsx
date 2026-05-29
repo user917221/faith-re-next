@@ -59,7 +59,7 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "radial-gradient(ellipse at center, rgba(202,161,90,0.35) 0%, rgba(202,161,90,0.0) 60%)",
+              "radial-gradient(ellipse at center, rgba(17, 17, 17,0.35) 0%, rgba(17, 17, 17,0.0) 60%)",
             animation: "crit-glow-expand 1.2s ease-out forwards",
           }}
         />
@@ -69,7 +69,7 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
             style={{
               animation: "crit-sigil-spin 1.4s ease-out forwards",
               textShadow:
-                "0 0 30px rgba(232, 192, 116, 0.6), 0 0 60px rgba(202,161,90,0.35)",
+                "0 0 30px rgba(232, 192, 116, 0.6), 0 0 60px rgba(17, 17, 17,0.35)",
             }}
           >
             ✦
@@ -79,7 +79,7 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
             style={{
               animation: "crit-text-rise 2.4s ease-out forwards",
               textShadow:
-                "0 0 28px rgba(232, 192, 116, 0.65), 0 0 64px rgba(202,161,90,0.45)",
+                "0 0 28px rgba(232, 192, 116, 0.65), 0 0 64px rgba(17, 17, 17,0.45)",
             }}
           >
             Réussite critique

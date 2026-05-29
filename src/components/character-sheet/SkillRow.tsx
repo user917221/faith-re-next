@@ -55,12 +55,12 @@ export function SkillRow({ name, value, attrScore, isCapped, onSkillChange, onOp
   const minusDisabled = isPending || !onSkillChange || value <= 0;
 
   return (
-    <div className="group flex items-center justify-between gap-3 text-sm">
+    <div className="group flex items-center justify-between gap-3 rounded-[--radius-md] border border-gold-aged/8 bg-ink-deep/18 px-3 py-2 text-sm transition-colors hover:border-gold-aged/20 hover:bg-ink-far/34">
       <span
         title={description}
         className="flex cursor-help items-center gap-2 font-medium text-parchment transition-colors hover:text-gold-bright"
       >
-        <span aria-hidden className="text-gold-soft text-xs">
+        <span aria-hidden className="text-gold-soft text-[0.55rem]">
           ✦
         </span>
         {name}

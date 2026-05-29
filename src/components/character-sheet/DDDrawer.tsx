@@ -85,14 +85,14 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
         role="dialog"
         aria-modal="true"
         aria-label={`Lancer de dés pour ${context.title}`}
-        className="fixed right-0 top-0 z-50 h-full w-[360px] max-w-[90vw] border-l border-gold-aged/25 bg-ink-near shadow-[-24px_0_60px_-12px_rgba(0,0,0,0.7),inset_1px_0_0_rgba(202,161,90,0.08)] animate-[drawer-slide_0.28s_cubic-bezier(0.16,1,0.3,1)]"
+        className="fixed right-0 top-0 z-50 h-full w-[360px] max-w-[90vw] border-l border-gold-aged/25 bg-ink-near shadow-[-24px_0_60px_-12px_rgba(0,0,0,0.7),inset_1px_0_0_rgba(17, 17, 17,0.08)] animate-[drawer-slide_0.28s_cubic-bezier(0.16,1,0.3,1)]"
       >
         {/* Couture dorée intérieure */}
         <div
           className="pointer-events-none absolute inset-y-0 left-0 w-px"
           style={{
             background:
-              "linear-gradient(180deg, transparent 0%, rgba(202,161,90,0.6) 50%, transparent 100%)",
+              "linear-gradient(180deg, transparent 0%, rgba(17, 17, 17,0.6) 50%, transparent 100%)",
           }}
           aria-hidden
         />

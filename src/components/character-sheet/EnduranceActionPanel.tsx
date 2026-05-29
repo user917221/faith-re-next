@@ -46,7 +46,7 @@ export function EnduranceActionPanel({ onActionCost }: Props) {
   return (
     <section className="card-grimoire flex flex-col gap-4">
       <span className="label-grimoire">Dépense d&apos;endurance</span>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {ACTIONS.map((a) => {
           const cost = ENDURANCE_COSTS[a.key].cost;
           const costColor = CATEGORY_COST[a.category];
@@ -56,9 +56,9 @@ export function EnduranceActionPanel({ onActionCost }: Props) {
               type="button"
               disabled={isPending || !onActionCost}
               onClick={() => trigger(a.key)}
-              className="group flex flex-col items-center justify-center gap-1 rounded-[--radius-sm] border border-gold-aged/10 bg-ink-far px-2 py-3 text-parchment transition-all hover:border-gold-aged/30 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-gold-aged/10"
+              className="group flex min-h-24 flex-col items-center justify-center gap-1.5 rounded-[--radius-md] border border-gold-aged/12 bg-ink-far/55 px-3 py-3 text-parchment shadow-[inset_0_1px_0_rgba(255,255,255,0.13)] transition-all hover:-translate-y-0.5 hover:border-gold-aged/34 hover:bg-ink-far/75 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-gold-aged/10"
             >
-              <span className="font-display text-[0.7rem] font-medium uppercase tracking-[0.15em] text-parchment">
+              <span className="font-display text-[0.7rem] font-bold uppercase tracking-[0.15em] text-parchment">
                 {a.label}
               </span>
               <span className="text-[0.65rem] italic text-parchment-mute">

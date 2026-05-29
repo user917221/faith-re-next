@@ -30,9 +30,9 @@ export function PointAllocatorBar({ allocated }: Props) {
           </span>
         )}
       </div>
-      <div className="h-px overflow-hidden rounded-full bg-ink-deep">
+      <div className="h-2 overflow-hidden rounded-full bg-ink-deep/45 shadow-[inset_0_1px_3px_rgba(0,0,0,0.24)]">
         <div
-          className={`h-full transition-[width] ${
+          className={`h-full rounded-full transition-[width] ${
             isCapped ? "bg-blood-dried" : "bg-gold-aged"
           }`}
           style={{ width: `${pct}%` }}

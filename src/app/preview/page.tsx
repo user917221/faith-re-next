@@ -8,7 +8,7 @@ import type {
   VitalType,
 } from "@/components/character-sheet";
 import { ENDURANCE_COSTS, calculateLevel } from "@/lib/faith-system";
-import { ALL_SKILLS, countAllocatedPoints } from "@/lib/skills";
+import { ALL_SKILLS } from "@/lib/skills";
 
 function buildMockBrad(): Character {
   return {
@@ -115,22 +115,17 @@ export default function PreviewPage() {
     }));
   }, []);
 
-  const allocated = countAllocatedPoints(character.skills);
-
   return (
     <main className="relative z-[2] min-h-screen px-6 py-10">
-      <div className="mx-auto flex max-w-4xl flex-col gap-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto flex max-w-5xl flex-col gap-7">
+        <div className="rounded-[--radius-xl] border border-gold-aged/16 bg-ink-near/45 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_18px_44px_-38px_rgba(0,0,0,0.72)] backdrop-blur-sm flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-display text-xs uppercase tracking-[0.22em] text-gold-aged">
+            <p className="font-display text-xs font-bold uppercase tracking-[0.22em] text-parchment-mute">
               Preview / dev
             </p>
-            <h1 className="font-display mt-1 text-xl font-bold tracking-wide text-parchment">
-              CharacterSheet
+            <h1 className="font-display mt-1 text-2xl font-black tracking-tight text-parchment">
+              Fiche Personnage
             </h1>
-            <p className="mt-1 text-xs text-parchment-mute">
-              Mock Brad — <span className="tabular">{allocated}</span> pts alloués
-            </p>
           </div>
           <label className="flex cursor-pointer items-center gap-3 rounded-[--radius-sm] border border-gold-aged/18 bg-ink-near px-4 py-2 text-sm text-parchment-dim">
             <span className="font-display text-[0.7rem] uppercase tracking-[0.18em]">

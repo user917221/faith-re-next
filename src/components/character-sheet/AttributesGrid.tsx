@@ -32,8 +32,8 @@ export function AttributesGrid({ character, isCapped, onSkillChange, onOpenRollD
 
         return (
           <div key={attr} className="card-grimoire card-hover-lift">
-            <header className="mb-3 flex items-center justify-between">
-              <span className="font-display text-lg font-medium uppercase tracking-[0.15em] text-gold-aged">
+            <header className="mb-4 flex items-center justify-between border-b border-gold-aged/10 pb-3">
+              <span className="font-display text-lg font-black uppercase tracking-[0.12em] text-gold-aged">
                 {attr}
               </span>
               {openAttrRoll ? (

@@ -1,4 +1,6 @@
 import { signIn } from "@/lib/auth";
+import { isLocalDevAuthBypass } from "@/lib/dev-mode";
+import { redirect } from "next/navigation";
 
 // Cette page lit `searchParams.callbackUrl` (Server Action), donc rendu dynamique requis.
 export const dynamic = "force-dynamic";
@@ -20,6 +22,7 @@ export default function SignInPage({
         <form
           action={async () => {
             "use server";
+            if (isLocalDevAuthBypass) redirect("/preview");
             const params = await searchParams;
             await signIn("discord", { redirectTo: params.callbackUrl ?? "/me" });
           }}

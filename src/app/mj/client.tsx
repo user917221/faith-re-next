@@ -112,7 +112,7 @@ export function PendingTrainingPanel({ requests }: { requests: TrainingRequestWi
   return (
     <div
       className="card-grimoire mb-6"
-      style={{ borderColor: "rgba(202, 161, 90, 0.3)" }}
+      style={{ borderColor: "rgba(17, 17, 17, 0.3)" }}
     >
       <header className="mb-3 flex items-center justify-between gap-3">
         <h2 className="label-grimoire !text-gold-bright">

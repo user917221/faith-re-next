@@ -36,7 +36,14 @@ const MJ_DISCORD_IDS = (process.env.MJ_DISCORD_ID || "")
   .map((id) => id.trim())
   .filter(Boolean);
 
+const AUTH_SECRET =
+  process.env.AUTH_SECRET ??
+  (process.env.NODE_ENV === "production"
+    ? undefined
+    : "faith-re-local-dev-secret-change-me");
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: AUTH_SECRET,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,

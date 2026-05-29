@@ -34,7 +34,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
     return (
       <section
         className="card-grimoire"
-        style={{ borderColor: "rgba(202, 161, 90, 0.3)" }}
+        style={{ borderColor: "rgba(17, 17, 17, 0.3)" }}
       >
         <header className="flex items-baseline justify-between gap-3">
           <span className="label-grimoire !text-gold-bright">

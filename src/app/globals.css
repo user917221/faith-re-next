@@ -2,46 +2,46 @@
 
 /* ============================================================
    FAITH : RE — Design tokens
-   Direction : grimoire de campagne moderne
-   Nuit absolue + or vieilli + parchemin, sigils ✦
+   Direction : carnet minéral sobre
+   Gris sable statique + accents noirs + surfaces mates
    ============================================================ */
 
 @theme {
-  /* Surfaces — élévation par teinte légèrement plus claire que le fond */
-  --color-ink-deep: #0a0a0f;
-  --color-ink-near: #131319;
-  --color-ink-far: #1c1c25;
-  --color-ink-edge: #2a2a36;
+  /* Surfaces — bleu-gris froid, mat, lisible avec texte noir */
+  --color-ink-deep: #99a7bd;
+  --color-ink-near: #b0bacb;
+  --color-ink-far: #c2cbd7;
+  --color-ink-edge: #76869f;
 
-  /* Signature : or vieilli */
-  --color-gold-aged: #caa15a;
-  --color-gold-bright: #e8c074;
-  --color-gold-soft: #8a6e3e;
-  --color-gold-deep: #5d4926;
+  /* Signature : noir sobre (conserve les noms historiques côté composants) */
+  --color-gold-aged: #111111;
+  --color-gold-bright: #000000;
+  --color-gold-soft: #303030;
+  --color-gold-deep: #5f5b53;
 
   /* Vitaux */
-  --color-blood-dried: #b35a5a;
-  --color-blood-deep: #7a3a3a;
-  --color-amethyst: #9b7fd0;
-  --color-amethyst-deep: #5a4495;
-  --color-celadon: #8eb091;
-  --color-celadon-deep: #4f7053;
+  --color-blood-dried: #8f4747;
+  --color-blood-deep: #623232;
+  --color-amethyst: #705893;
+  --color-amethyst-deep: #4f3f70;
+  --color-celadon: #1e83ed;
+  --color-celadon-deep: #0f4f99;
 
-  /* Parchemin (texte) */
-  --color-parchment: #ece1c4;
-  --color-parchment-dim: #aea087;
-  --color-parchment-mute: #6e6555;
-  --color-parchment-faint: #4a4339;
+  /* Texte */
+  --color-parchment: #111111;
+  --color-parchment-dim: #2f2f2f;
+  --color-parchment-mute: #55524c;
+  --color-parchment-faint: #706c64;
 
   /* Sémantique fonctionnelle */
-  --color-success: #8eb091;
-  --color-warning: #d4a449;
-  --color-danger: #b35a5a;
+  --color-success: #597a5d;
+  --color-warning: #766335;
+  --color-danger: #8f4747;
 
   /* Typography */
-  --font-display: "Cinzel", ui-serif, Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
 
   /* Espacement */
   --spacing: 0.25rem; /* base 4px */
@@ -57,8 +57,20 @@
 /* ============================================================
    Body globals
    ============================================================ */
+html {
+  background: #99a7bd;
+  overscroll-behavior: none;
+}
+
 body {
-  background: var(--color-ink-deep);
+  background:
+    radial-gradient(circle at 18% 8%, rgba(232, 239, 248, 0.5), transparent 22rem) fixed,
+    radial-gradient(circle at 82% 22%, rgba(83, 101, 127, 0.24), transparent 30rem) fixed,
+    radial-gradient(circle at 45% 100%, rgba(37, 50, 72, 0.22), transparent 34rem) fixed,
+    linear-gradient(180deg, #aeb9ca 0%, #99a7bd 42%, #8f9eb6 100%) fixed;
+  background-color: #99a7bd;
+  min-height: 100dvh;
+  overscroll-behavior: none;
   color: var(--color-parchment);
   font-family: var(--font-sans);
   font-feature-settings: "kern", "liga", "calt";
@@ -67,8 +79,7 @@ body {
 }
 
 /* ============================================================
-   Grain de parchemin sur le fond (très subtil)
-   Active via la classe `.with-grain` sur body ou un wrapper
+   Grain statique gris sable
    ============================================================ */
 body::before {
   content: "";
@@ -76,9 +87,11 @@ body::before {
   inset: 0;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.035;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.6' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
+  opacity: 0.32;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='sand'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2.7' numOctaves='3' seed='14' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.82 0 0 0 0 0.85 0 0 0 0 0.89 0 0 0 0.36 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23sand)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  mix-blend-mode: screen;
 }
 
 /* ============================================================
@@ -93,9 +106,9 @@ body::before {
   color: var(--color-gold-soft);
   font-family: var(--font-display);
   font-size: 0.875rem;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin: 2rem 0 1rem;
+  margin: 2.25rem 0 1.1rem;
 }
 .sigil-divider::before,
 .sigil-divider::after {
@@ -105,24 +118,33 @@ body::before {
   background: linear-gradient(
     to right,
     transparent,
-    var(--color-gold-deep) 30%,
-    var(--color-gold-deep) 70%,
+    rgba(17, 17, 17, 0.08) 10%,
+    rgba(17, 17, 17, 0.32) 48%,
+    rgba(17, 17, 17, 0.08) 90%,
     transparent
   );
 }
 .sigil-divider .sigil-mark {
   color: var(--color-gold-aged);
   font-size: 1rem;
+  filter: drop-shadow(0 0 8px rgba(17, 17, 17, 0.25));
 }
 
 /* Card "parchemin" — fond très légèrement plus clair que ink-deep,
    bord doré quasi-invisible, padding généreux */
 .card-grimoire {
-  background: var(--color-ink-near);
-  border: 1px solid rgba(202, 161, 90, 0.12);
+  background:
+    linear-gradient(180deg, rgba(242, 246, 251, 0.28) 0%, rgba(88, 102, 124, 0.08) 100%),
+    rgba(176, 186, 203, 0.78);
+  border: 1px solid rgba(17, 17, 17, 0.18);
   border-radius: var(--radius-lg);
   padding: 1.25rem;
   position: relative;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(17, 17, 17, 0.06),
+    0 18px 42px -34px rgba(12, 20, 32, 0.72);
+  backdrop-filter: blur(2px);
 }
 .card-grimoire::before {
   content: "";
@@ -132,8 +154,8 @@ body::before {
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    rgba(202, 161, 90, 0.1) 0%,
-    transparent 50%,
+    rgba(255, 255, 255, 0.34) 0%,
+    transparent 42%,
     transparent 100%
   );
   -webkit-mask:
@@ -142,35 +164,37 @@ body::before {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   padding: 1px;
-  opacity: 0.4;
+  opacity: 0.65;
 }
 
-/* Label de section — Cinzel small caps */
+/* Label de section */
 .label-grimoire {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 750;
   font-size: 0.7rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-gold-aged);
 }
 
-/* Bouton primaire signature : or, contour fin */
+/* Bouton primaire signature */
 .btn-grimoire {
   font-family: var(--font-display);
-  letter-spacing: 0.08em;
-  font-weight: 500;
-  background: linear-gradient(180deg, var(--color-gold-aged) 0%, var(--color-gold-soft) 100%);
-  color: var(--color-ink-deep);
+  letter-spacing: 0.04em;
+  font-weight: 650;
+  background: linear-gradient(180deg, #191919 0%, #050505 100%);
+  color: #d9e2ef;
   border: 1px solid var(--color-gold-aged);
   padding: 0.5rem 1rem;
   border-radius: var(--radius-sm);
-  transition: filter 0.15s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 8px 18px -12px rgba(0,0,0,0.75);
+  transition: filter 0.15s ease, transform 0.15s ease;
   text-transform: uppercase;
   font-size: 0.7rem;
 }
 .btn-grimoire:hover:not(:disabled) {
-  filter: brightness(1.15);
+  filter: brightness(0.88);
+  transform: translateY(-1px);
 }
 .btn-grimoire:disabled {
   opacity: 0.35;
@@ -180,8 +204,8 @@ body::before {
 /* Bouton ghost (action secondaire) */
 .btn-ghost {
   font-family: var(--font-sans);
-  background: transparent;
-  border: 1px solid rgba(202, 161, 90, 0.18);
+  background: rgba(226, 233, 242, 0.12);
+  border: 1px solid rgba(17, 17, 17, 0.2);
   color: var(--color-parchment-dim);
   padding: 0.5rem 0.9rem;
   border-radius: var(--radius-sm);
@@ -189,14 +213,15 @@ body::before {
   transition: all 0.15s ease;
 }
 .btn-ghost:hover:not(:disabled) {
-  border-color: rgba(202, 161, 90, 0.4);
+  border-color: rgba(17, 17, 17, 0.45);
+  background: rgba(236, 241, 248, 0.2);
   color: var(--color-parchment);
 }
 
 /* Input grimoire — fond plus sombre que la card (inset), focus doré */
 .input-grimoire {
-  background: var(--color-ink-deep);
-  border: 1px solid rgba(202, 161, 90, 0.1);
+  background: rgba(225, 232, 241, 0.2);
+  border: 1px solid rgba(17, 17, 17, 0.22);
   border-radius: var(--radius-sm);
   color: var(--color-parchment);
   padding: 0.5rem 0.75rem;
@@ -206,7 +231,8 @@ body::before {
   transition: border-color 0.15s ease;
 }
 .input-grimoire:focus {
-  border-color: rgba(202, 161, 90, 0.5);
+  border-color: rgba(17, 17, 17, 0.55);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
 }
 
 /* Chiffres vitaux : Mono, tabular */
@@ -231,6 +257,22 @@ body::before {
   100% { transform: translateX(120%); opacity: 0; }
 }
 
+@keyframes vital-fluid {
+  0%, 100% {
+    background-position: 0% 50%, 100% 50%, 0% 50%;
+    filter: saturate(1.05) brightness(1);
+  }
+  50% {
+    background-position: 100% 50%, 0% 50%, 100% 50%;
+    filter: saturate(1.25) brightness(1.08);
+  }
+}
+
+@keyframes vital-fluid-orb {
+  0%, 100% { transform: translateX(0) scaleX(1); }
+  50% { transform: translateX(190%) scaleX(1.35); }
+}
+
 /* Drawer latéral slide depuis la droite */
 @keyframes drawer-slide {
   from { transform: translateX(100%); opacity: 0.4; }
@@ -242,7 +284,7 @@ body::before {
    ============================================================ */
 .select-grimoire {
   background-color: var(--color-ink-deep);
-  border: 1px solid rgba(202, 161, 90, 0.18);
+  border: 1px solid rgba(17, 17, 17, 0.18);
   color: var(--color-parchment);
   padding: 0.5rem 2rem 0.5rem 0.75rem;
   border-radius: var(--radius-sm);
@@ -253,17 +295,17 @@ body::before {
   -webkit-appearance: none;
   -moz-appearance: none;
   transition: border-color 0.15s ease;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23caa15a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 L6 6.5 L11 1.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23111111' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 L6 6.5 L11 1.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   background-size: 0.6rem;
   cursor: pointer;
 }
 .select-grimoire:hover {
-  border-color: rgba(202, 161, 90, 0.32);
+  border-color: rgba(17, 17, 17, 0.38);
 }
 .select-grimoire:focus-visible {
-  border-color: rgba(202, 161, 90, 0.55);
+  border-color: rgba(17, 17, 17, 0.58);
 }
 .select-grimoire option {
   background: var(--color-ink-deep);
@@ -273,7 +315,7 @@ body::before {
 /* Custom scrollbar fine — feed plateau */
 .scrollbar-grimoire {
   scrollbar-width: thin;
-  scrollbar-color: rgba(202, 161, 90, 0.25) transparent;
+  scrollbar-color: rgba(17, 17, 17, 0.25) transparent;
 }
 .scrollbar-grimoire::-webkit-scrollbar {
   width: 6px;
@@ -282,11 +324,11 @@ body::before {
   background: transparent;
 }
 .scrollbar-grimoire::-webkit-scrollbar-thumb {
-  background: rgba(202, 161, 90, 0.22);
+  background: rgba(17, 17, 17, 0.22);
   border-radius: 3px;
 }
 .scrollbar-grimoire::-webkit-scrollbar-thumb:hover {
-  background: rgba(202, 161, 90, 0.42);
+  background: rgba(17, 17, 17, 0.42);
 }
 
 /* ============================================================
@@ -319,8 +361,8 @@ body::before {
 
 /* DD chip selected glow */
 .dd-chip-active {
-  background: rgba(202, 161, 90, 0.15);
-  border-color: rgba(202, 161, 90, 0.7);
+  background: rgba(17, 17, 17, 0.1);
+  border-color: rgba(17, 17, 17, 0.7);
   color: var(--color-gold-bright);
 }
 
@@ -370,7 +412,7 @@ body::before {
   transition: border-color 0.2s ease-out, transform 0.2s ease-out;
 }
 .card-hover-lift:hover {
-  border-color: rgba(202, 161, 90, 0.28);
+  border-color: rgba(17, 17, 17, 0.3);
   transform: translateY(-1px);
 }
 
@@ -386,5 +428,5 @@ body::before {
 /* Focus ring grimoire */
 .focus-grimoire:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(202, 161, 90, 0.4);
+  box-shadow: 0 0 0 2px rgba(17, 17, 17, 0.35);
 }
