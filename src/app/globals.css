@@ -224,6 +224,15 @@ body::before {
   animation: sigil-glow 3.2s ease-in-out infinite;
 }
 
+/* Rotation très lente d'un glyph (signin hero) — 36s par tour */
+@keyframes glyph-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.glyph-rotate {
+  animation: glyph-rotate 36s linear infinite;
+}
+
 /* Pulse de barre vitale en état critique : reflet qui traverse */
 @keyframes vital-pulse {
   0% { transform: translateX(-100%); opacity: 0; }
@@ -387,4 +396,65 @@ body::before {
 .focus-grimoire:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(202, 161, 90, 0.4);
+}
+
+/* ============================================================
+   Bento industrial-mystique — patterns hero / portfolio
+   Inspiré Petronex Oil & Gas (Behance)
+   ============================================================ */
+
+/* Card hero — surface ink-near, bord or 18%, halo radial doré au sommet */
+.card-hero {
+  background: var(--color-ink-near);
+  border: 1px solid rgba(202, 161, 90, 0.18);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.card-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    rgba(202, 161, 90, 0.08) 0%,
+    transparent 60%
+  );
+  border-radius: inherit;
+}
+.card-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Liste Portfolio Overview — items séparés par filets or, hover surface ink-far */
+.list-portfolio {
+  display: flex;
+  flex-direction: column;
+}
+.list-portfolio > * {
+  border-bottom: 1px solid rgba(202, 161, 90, 0.12);
+  border-left: 2px solid transparent;
+  padding: 1rem 1.25rem;
+  transition: background-color 0.18s ease, border-left-color 0.18s ease;
+}
+.list-portfolio > *:last-child {
+  border-bottom: none;
+}
+.list-portfolio > *:hover {
+  background: var(--color-ink-far);
+  border-left-color: var(--color-gold-aged);
+}
+
+/* Big number hero — mono tabular, taille fluide responsive */
+.big-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-parchment);
 }

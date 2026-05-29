@@ -13,8 +13,6 @@ import {
   updateSkill,
   updateVital,
   applyEnduranceAction,
-  updateFatePoints,
-  updateRunes,
   updateProfile,
   requestTraining,
   togglePresence,
@@ -35,32 +33,22 @@ export function MyCharacterClient({
   const refresh = () => startTransition(() => router.refresh());
 
   return (
-    <main className="relative z-[2] min-h-screen px-6 py-10">
-      <div className="mx-auto mb-4 max-w-6xl">
+    <main className="relative z-[2] min-h-screen px-6 py-8">
+      {/* Nav top */}
+      <div className="mx-auto mb-6 flex max-w-7xl items-center justify-between gap-4">
         <Link
           href="/plateau"
           className="font-display text-[0.7rem] uppercase tracking-[0.18em] text-parchment-dim transition-colors hover:text-gold-aged"
         >
           ← Plateau
         </Link>
-      </div>
-      <header className="mx-auto mb-8 max-w-6xl flex items-center justify-between gap-4">
-        <div>
-          <p className="font-display text-xs uppercase tracking-[0.22em] text-gold-aged">
-            Ma fiche
-          </p>
-          <h1 className="font-display mt-1 text-2xl font-bold tracking-wide text-parchment">
-            {character.name}
-            {character.nom && (
-              <span className="text-parchment-dim"> {character.nom}</span>
-            )}
-          </h1>
-        </div>
         <p className="text-xs text-parchment-mute">
-          Connecté&nbsp;: <span className="text-parchment-dim">{userName}</span>
+          Connecté&nbsp;:{" "}
+          <span className="text-parchment-dim">{userName}</span>
         </p>
-      </header>
-      <div className="mx-auto max-w-6xl">
+      </div>
+
+      <div className="mx-auto max-w-7xl">
         <CharacterSheet
           character={character}
           isMJ={false}
@@ -75,16 +63,6 @@ export function MyCharacterClient({
           }}
           onActionCost={async (actionType) => {
             await applyEnduranceAction(character.id, actionType);
-            refresh();
-          }}
-          onFateChange={async (value) => {
-            await updateFatePoints(character.id, value);
-            refresh();
-          }}
-          onRuneChange={async (index, value) => {
-            const next = [...character.runes];
-            next[index] = value;
-            await updateRunes(character.id, next);
             refresh();
           }}
           onProfileChange={async (patch: ProfilePatch) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { CrestGlyph } from "@/components/glyphs";
 import type { Character, ProfilePatch } from "./types";
 
 type Props = {
@@ -31,16 +32,23 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
 
   return (
     <section className="card-grimoire">
-      <header className="mb-4 flex items-baseline justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="label-grimoire">Profil</span>
-          <p className="text-xs text-parchment-mute">Identité du personnage</p>
+      <header className="mb-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="shrink-0 text-gold-soft">
+            <CrestGlyph size={42} />
+          </span>
+          <div className="flex flex-col gap-0.5">
+            <span className="label-grimoire">Profil</span>
+            <p className="text-xs text-parchment-mute">
+              Identité du personnage
+            </p>
+          </div>
         </div>
         {feedback && (
           <span className="text-xs italic text-gold-bright">{feedback}</span>
         )}
       </header>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+      <div className="flex flex-col gap-3">
         <Field label="Prénom" required>
           <input
             type="text"
@@ -70,16 +78,14 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             className="input-grimoire tabular w-full disabled:opacity-40"
           />
         </Field>
-        <div className="flex items-end">
-          <button
-            type="button"
-            disabled={!onProfileChange || !dirty || isPending}
-            onClick={save}
-            className="btn-grimoire h-10 w-full"
-          >
-            {isPending ? "…" : "Enregistrer"}
-          </button>
-        </div>
+        <button
+          type="button"
+          disabled={!onProfileChange || !dirty || isPending}
+          onClick={save}
+          className="btn-grimoire h-10 w-full"
+        >
+          {isPending ? "…" : "Enregistrer"}
+        </button>
       </div>
     </section>
   );

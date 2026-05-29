@@ -9,6 +9,7 @@ import {
   nextEnduranceTier,
   nextLevelXp,
 } from "@/lib/faith-system";
+import { AscensionGlyph } from "@/components/glyphs";
 import type { Character } from "./types";
 
 type Props = {
@@ -25,8 +26,6 @@ export function EvolutionSection({
   const [isPending, startTransition] = useTransition();
   const [xpDraft, setXpDraft] = useState<string>(String(character.xp));
 
-  // Niveau dérivé du XP — toujours recalculé, pas pris dans character.level
-  // pour éviter les désynchros entre champ stocké et XP réel.
   const level = calculateLevel(character.xp);
   const bonus = getLevelBonus(level);
   const nextXp = nextLevelXp(level);
@@ -63,28 +62,38 @@ export function EvolutionSection({
   }
 
   return (
-    <section className="card-grimoire flex flex-col gap-5">
-      <header className="flex items-baseline gap-3">
-        <span className="label-grimoire">Évolution</span>
+    <section className="card-hero relative">
+      <div className="pointer-events-none absolute right-4 top-4 text-gold-soft opacity-[0.16]">
+        <AscensionGlyph size={68} />
+      </div>
+
+      <header className="relative z-[1] flex items-baseline gap-3">
+        <span className="label-grimoire">⚜ Évolution</span>
         <span className="text-[0.65rem] italic text-parchment-faint">
           (privé MJ)
         </span>
       </header>
 
-      <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+      <div className="relative z-[1] mt-5 grid grid-cols-1 gap-6 md:grid-cols-2">
         {/* XP / Niveau */}
-        <div className="flex flex-col gap-3 border-r-0 border-gold-aged/10 md:border-r md:pr-5">
-          <div className="flex items-baseline justify-between gap-3">
-            <div>
-              <p className="font-display text-3xl font-bold leading-none text-gold-aged">
-                Niveau {level}
-              </p>
-              <p className="mt-1.5 text-xs text-parchment-dim">
-                Bonus PV / MHP : <span className="tabular text-parchment">+{bonus}</span>
-              </p>
+        <div className="flex flex-col gap-3 border-b border-gold-aged/10 pb-5 md:border-b-0 md:border-r md:pb-0 md:pr-6">
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute">
+                Niveau
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="big-number text-gold-aged">{level}</span>
+                <span className="font-display tabular text-sm text-parchment-mute">
+                  bonus +{bonus}
+                </span>
+              </div>
             </div>
             <div className="flex w-28 flex-col gap-1">
-              <label htmlFor="evo-xp" className="font-display text-[0.65rem] uppercase tracking-[0.18em] text-parchment-mute">
+              <label
+                htmlFor="evo-xp"
+                className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute"
+              >
                 XP total
               </label>
               <input
@@ -111,12 +120,16 @@ export function EvolutionSection({
           </div>
           <p className="text-[0.7rem] text-parchment-mute">
             {isMaxLevel ? (
-              <>Niveau max atteint (<span className="tabular">{character.xp}</span> XP)</>
+              <>
+                Niveau max (<span className="tabular">{character.xp}</span> XP)
+              </>
             ) : (
               <>
                 <span className="tabular">{character.xp}</span> /{" "}
-                <span className="tabular">{nextXp}</span> XP — encore{" "}
-                <span className="tabular text-gold-aged">{Math.max(0, nextXp - character.xp)}</span>{" "}
+                <span className="tabular">{nextXp}</span> — encore{" "}
+                <span className="tabular text-gold-aged">
+                  {Math.max(0, nextXp - character.xp)}
+                </span>{" "}
                 XP pour Niv. {level + 1}
               </>
             )}
@@ -125,24 +138,34 @@ export function EvolutionSection({
 
         {/* Endurance / Entraînements */}
         <div className="flex flex-col gap-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <div>
-              <p className="font-display text-2xl font-medium leading-none text-celadon">
-                {tier.label}
-              </p>
-              <p className="mt-1.5 text-xs text-parchment-dim">
-                Max : <span className="tabular text-parchment">{character.maxEndurance}</span>
-              </p>
+          <div className="flex items-end justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute">
+                Palier endurance
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span
+                  className="big-number text-celadon"
+                  style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}
+                >
+                  {tier.label}
+                </span>
+              </div>
+              <span className="font-display tabular text-xs text-parchment-mute">
+                max {character.maxEndurance}
+              </span>
             </div>
             <div className="flex w-28 flex-col gap-1">
-              <span className="font-display text-[0.65rem] uppercase tracking-[0.18em] text-parchment-mute">
+              <span className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute">
                 Entraînements
               </span>
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   disabled={
-                    isPending || !onTrainingChange || character.enduranceTrainings <= 0
+                    isPending ||
+                    !onTrainingChange ||
+                    character.enduranceTrainings <= 0
                   }
                   onClick={() => adjustTrainings(-1)}
                   className="btn-ghost flex h-8 w-7 items-center justify-center !p-0 text-sm font-bold disabled:opacity-35"
@@ -166,16 +189,22 @@ export function EvolutionSection({
           <p className="text-[0.7rem] text-parchment-mute">
             {nextTier ? (
               <>
-                <span className="tabular">{character.enduranceTrainings}</span> entraînement(s)
-                — encore{" "}
+                <span className="tabular">
+                  {character.enduranceTrainings}
+                </span>{" "}
+                entraînement(s) — encore{" "}
                 <span className="tabular text-gold-aged">
                   {nextTier.trainings - character.enduranceTrainings}
                 </span>{" "}
-                pour {nextTier.label} (<span className="tabular">{nextTier.max}</span>)
+                pour {nextTier.label} (
+                <span className="tabular">{nextTier.max}</span>)
               </>
             ) : (
               <>
-                Palier max atteint (<span className="tabular">{character.enduranceTrainings}</span>{" "}
+                Palier max (
+                <span className="tabular">
+                  {character.enduranceTrainings}
+                </span>{" "}
                 entraînements)
               </>
             )}

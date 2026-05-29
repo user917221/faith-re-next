@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { and, eq, isNull } from "drizzle-orm";
 import { characters, trainingRequests } from "@/db/schema";
 import { loadCharacterForUser } from "@/lib/load-character";
+import { ConstellationGlyph } from "@/components/glyphs";
 import { MyCharacterClient } from "./client";
 import { revalidatePath } from "next/cache";
 
@@ -43,33 +44,67 @@ export default async function MePage() {
       where: isNull(characters.ownerUserId),
     });
     return (
-      <main className="relative z-[2] min-h-screen px-6 py-10">
-        <div className="mx-auto max-w-2xl">
-          <h1 className="font-display text-3xl font-bold tracking-wide text-gold-aged">
-            Bienvenue, {session.user.name}
-          </h1>
-          <p className="mt-2 text-sm text-parchment-dim">
-            Tu n&apos;as pas encore réclamé de personnage. Choisis le tien&nbsp;:
-          </p>
-          <div className="mt-6 grid gap-3">
+      <main className="relative z-[2] min-h-screen px-6 py-12">
+        <div className="mx-auto max-w-3xl">
+          {/* Hero card centrée */}
+          <section className="card-hero text-center">
+            <div className="flex flex-col items-center gap-5">
+              <span className="text-gold-aged">
+                <ConstellationGlyph size={120} />
+              </span>
+              <div className="flex flex-col gap-2">
+                <span className="label-grimoire">Convocation</span>
+                <h1 className="font-display text-4xl font-bold tracking-[0.02em] text-gold-aged">
+                  Bienvenue, {session.user.name}
+                </h1>
+                <p className="mx-auto max-w-md text-sm text-parchment-dim leading-relaxed">
+                  Tu n&apos;as pas encore réclamé de personnage. Choisis le tien
+                  parmi le grimoire de la table.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Liste portfolio des persos */}
+          <div className="mt-8">
             {availableRows.length === 0 ? (
-              <p className="text-sm text-parchment-mute">
-                Aucun personnage disponible. Le MJ doit en créer un ou t&apos;assigner manuellement.
+              <p className="card-grimoire text-center text-sm italic text-parchment-mute">
+                Aucun personnage disponible. Le MJ doit en créer un ou
+                t&apos;assigner manuellement.
               </p>
             ) : (
-              availableRows.map((c) => (
-                <form key={c.id} action={async () => { "use server"; await claimCharacter(c.id); redirect("/me"); }}>
-                  <button
-                    type="submit"
-                    className="card-grimoire group w-full text-left transition hover:border-gold-aged/30"
+              <div className="card-grimoire list-portfolio !p-0">
+                {availableRows.map((c) => (
+                  <form
+                    key={c.id}
+                    action={async () => {
+                      "use server";
+                      await claimCharacter(c.id);
+                      redirect("/me");
+                    }}
                   >
-                    <span className="font-display text-lg text-parchment transition-colors group-hover:text-gold-aged">
-                      <span aria-hidden className="mr-2 text-gold-soft">✦</span>
-                      {c.name}
-                    </span>
-                  </button>
-                </form>
-              ))
+                    <button
+                      type="submit"
+                      className="group flex w-full items-center justify-between gap-3 text-left"
+                    >
+                      <span className="flex items-center gap-4">
+                        <span
+                          aria-hidden
+                          className="font-display tabular text-[0.7rem] uppercase tracking-[0.18em] text-parchment-mute transition-colors group-hover:text-gold-aged"
+                        >
+                          ✦
+                        </span>
+                        <span className="font-display text-lg tracking-wide text-parchment transition-colors group-hover:text-gold-aged">
+                          {c.name}
+                        </span>
+                      </span>
+                      <span className="font-display text-[0.62rem] uppercase tracking-[0.18em] text-parchment-mute transition-colors group-hover:text-gold-aged">
+                        Réclamer →
+                      </span>
+                    </button>
+                  </form>
+                ))}
+              </div>
             )}
           </div>
         </div>
