@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,7 +31,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`dark ${inter.variable} ${mono.variable} h-full antialiased`}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+        <Toaster position="bottom-right" theme="dark" />
+      </body>
     </html>
   );
 }

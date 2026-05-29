@@ -62,5 +62,6 @@ function hydrate(row: typeof characters.$inferSelect & { skills: { skillName: st
     runes: Array.isArray(row.runes) ? (row.runes as string[]) : ["", "", ""],
     skills,
     isPresent: row.isPresent === 1,
+    avatarUrl: row.avatarUrl ?? null,
   };
 }

@@ -27,6 +27,7 @@ export type Character = {
   runes: string[];
   skills: Record<string, number>;
   isPresent: boolean;
+  avatarUrl: string | null;
 };
 
 export type ActionType = keyof typeof ENDURANCE_COSTS;

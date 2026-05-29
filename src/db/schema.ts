@@ -102,6 +102,8 @@ export const characters = pgTable("character", {
   runes: jsonb("runes").$type<string[]>().default([]).notNull(),
   // intégrations
   discordMessageId: text("discord_message_id"),
+  // portrait du personnage (URL ; fallback initiales si null)
+  avatarUrl: text("avatar_url"),
   // présence sur le plateau (rejoint la session ON/OFF)
   isPresent: integer("is_present").default(0).notNull(),
   // audit
