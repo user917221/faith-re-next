@@ -12,6 +12,7 @@ import { SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 import { updateCharacterFull, type FullCharacterPatch } from "@/lib/actions";
 import { SKILL_GROUPS } from "@/lib/skills";
+import { AvatarUpload } from "@/components/character-sheet/AvatarUpload";
 import type { Character } from "@/components/character-sheet/types";
 
 type Form = {
@@ -226,7 +227,21 @@ function Editor({
               {T("charClass", "Classe")}
             </div>
             <div className="mt-3 grid grid-cols-1 gap-3">
-              {T("avatarUrl", "URL portrait")}
+              <div className="flex flex-col gap-1.5">
+                <span className={lbl}>Portrait</span>
+                <AvatarUpload
+                  name={f.name}
+                  value={f.avatarUrl}
+                  onChange={(v) => set("avatarUrl", v)}
+                />
+                <input
+                  type="url"
+                  value={f.avatarUrl.startsWith("data:") ? "" : f.avatarUrl}
+                  placeholder="ou URL https://…"
+                  onChange={(e) => set("avatarUrl", e.target.value)}
+                  className={inp}
+                />
+              </div>
               <label className="flex flex-col gap-1">
                 <span className={lbl}>Bio</span>
                 <textarea
@@ -266,7 +281,6 @@ function Editor({
           <Section title="Progression & entraînements">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {N("xp", "XP total")}
-              {N("fatePoints", "Points de destin")}
               {N("combatsReal", "Combats réels")}
               {N("enduranceTrainings", "Entraîn. endurance")}
               {N("fluxTrainings", "Entraîn. flux")}

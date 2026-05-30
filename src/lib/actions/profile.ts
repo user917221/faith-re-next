@@ -73,10 +73,10 @@ export async function updateProfile(
   }
   if (typeof patch.avatarUrl === "string") {
     const v = patch.avatarUrl.trim();
-    if (v && !/^https?:\/\//i.test(v)) {
-      return { ok: false, reason: "URL de portrait invalide (http/https)" };
+    if (v && !/^(https?:\/\/|data:image\/)/i.test(v)) {
+      return { ok: false, reason: "Portrait : URL http(s) ou image téléversée" };
     }
-    update.avatarUrl = v.length ? v.slice(0, 500) : null;
+    update.avatarUrl = v.length ? v.slice(0, 3_000_000) : null;
   }
 
   const [row] = await db

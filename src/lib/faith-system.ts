@@ -158,9 +158,12 @@ export function getTechnicalTier(trainings: number) {
   return { trainings: 0, palier: -1, label: "Aucun" } as const;
 }
 
-// --- Tier global (alias du niveau XP, affiché "T{n}") ---
+// --- Tier global : bande de 5 niveaux (T1 = niv 1-5, T2 = 6-10, … T6 = 26-30).
+// Le Tier n'est PAS le niveau : un perso niveau 2 est T1.
 export function tierLabel(xp: number): string {
-  return `T${calculateLevel(xp)}`;
+  const level = calculateLevel(xp);
+  const tier = Math.max(1, Math.min(6, Math.ceil(level / 5)));
+  return `T${tier}`;
 }
 
 // --- Types de runes (inventaire) ---

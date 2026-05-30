@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { VitalsHeader } from "./VitalsHeader";
 import { PaliersRewards } from "./PaliersRewards";
+import { XpBar } from "./XpBar";
 import { ConditionsPanel } from "./ConditionsPanel";
 import { RuneInventory } from "./RuneInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
@@ -265,6 +266,9 @@ export default function CharacterSheet({
         {/* ─── Vitaux + actions ─── stack vertical (flux v0) ─── */}
         <TabsContent value="vitaux">
           <div className="flex flex-col gap-4">
+            {/* Barre d'XP — MJ uniquement */}
+            {isMJ && <XpBar character={character} />}
+
             {/* Conditions actives */}
             <ConditionsPanel
               conditions={character.conditions}

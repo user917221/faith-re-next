@@ -170,6 +170,19 @@ export async function pauseSessionTimer(
   return { ok: true, elapsedSeconds };
 }
 
+/** Remet le minuteur à zéro et relance le cycle depuis le début. */
+export async function resetSessionTimer(
+  sessionId: string,
+): Promise<ActionResult<Record<never, never>>> {
+  await requireMJ();
+  await db
+    .update(gameSessions)
+    .set({ elapsedSeconds: 0, timerStartedAt: new Date() })
+    .where(eq(gameSessions.id, sessionId));
+  revalidatePath("/mj");
+  return { ok: true };
+}
+
 // ---------------- notes de statut ----------------
 
 export async function addStatusNote(

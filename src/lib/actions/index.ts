@@ -61,6 +61,7 @@ export {
   advanceSession,
   startSessionTimer,
   pauseSessionTimer,
+  resetSessionTimer,
   addStatusNote,
   removeStatusNote,
   type CampaignStatusPatch,

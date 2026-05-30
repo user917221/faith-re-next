@@ -74,10 +74,10 @@ export async function updateCharacterFull(
   if (patch.notes !== undefined) u.notes = tag(patch.notes ?? "");
   if (patch.avatarUrl !== undefined) {
     const v = (patch.avatarUrl ?? "").trim();
-    if (v && !/^https?:\/\//i.test(v)) {
-      return { ok: false, reason: "URL de portrait invalide" };
+    if (v && !/^(https?:\/\/|data:image\/)/i.test(v)) {
+      return { ok: false, reason: "Portrait : URL http(s) ou image téléversée" };
     }
-    u.avatarUrl = v ? v.slice(0, 500) : null;
+    u.avatarUrl = v ? v.slice(0, 3_000_000) : null;
   }
 
   if (typeof patch.xp === "number") u.xp = clampInt(patch.xp, 0, 1000000);

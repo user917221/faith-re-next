@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Pause, Play, Sunrise, Sun, Sunset, Moon, Flag } from "lucide-react";
+import { Pause, Play, RotateCcw, Sunrise, Sun, Sunset, Moon, Flag } from "lucide-react";
 import { toast } from "sonner";
 
 /**
- * Minuteur de séance (cockpit MJ). Init depuis le temps live serveur
+ * Minuteur de session (cockpit MJ). Init depuis le temps live serveur
  * (`session.elapsedSeconds`) + état `running` ; tic local pour l'affichage ;
- * `onToggle` persiste start/pause.
+ * `onToggle` persiste start/pause, `onReset` remet le cycle à zéro.
  *
  * Rappels d'horaires : toutes les 37 min, changement de moment de la journée
- * (matin → midi → soirée → début de nuit), puis « Fin de séance » au temps
+ * (matin → midi → soirée → début de nuit), puis « Fin de session » au temps
  * écoulé (3 × 37 = 111 min).
  */
 const MIN = 60;
@@ -23,7 +23,7 @@ const SESSION_END = 111 * MIN;
 
 function moment(seconds: number) {
   const m = seconds / MIN;
-  if (seconds >= SESSION_END) return { label: "Fin de séance", Icon: Flag, tone: "var(--hp)" };
+  if (seconds >= SESSION_END) return { label: "Fin de session", Icon: Flag, tone: "var(--hp)" };
   if (m < 37) return { label: "Matin", Icon: Sunrise, tone: "var(--primary)" };
   if (m < 74) return { label: "Midi", Icon: Sun, tone: "var(--primary)" };
   if (m < 111) return { label: "Soirée", Icon: Sunset, tone: "var(--primary)" };
@@ -34,10 +34,12 @@ export function SessionTimer({
   startSeconds = 0,
   running: initialRunning = true,
   onToggle,
+  onReset,
 }: {
   startSeconds?: number;
   running?: boolean;
   onToggle?: (running: boolean) => void | Promise<void>;
+  onReset?: () => void | Promise<void>;
 }) {
   const [seconds, setSeconds] = useState(startSeconds);
   const [running, setRunning] = useState(initialRunning);
@@ -71,8 +73,8 @@ export function SessionTimer({
     }
     if (seconds >= SESSION_END && !firedRef.current.has(SESSION_END)) {
       firedRef.current.add(SESSION_END);
-      toast.success("Fin de séance", {
-        description: "Le temps de la séance est écoulé.",
+      toast.success("Fin de session", {
+        description: "Le temps de la session est écoulé.",
       });
     }
   }, [seconds]);
@@ -81,6 +83,15 @@ export function SessionTimer({
     const next = !running;
     setRunning(next);
     void onToggle?.(next);
+  };
+
+  // Recommence le cycle depuis le début (00:00:00, matin) et relance.
+  const restart = () => {
+    firedRef.current = new Set();
+    setSeconds(0);
+    setRunning(true);
+    void onReset?.();
+    toast("Cycle de session relancé — Matin");
   };
 
   const hh = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -102,20 +113,32 @@ export function SessionTimer({
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col">
           <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground-subtle">
-            Temps de séance
+            Temps de session
           </p>
           <p className="font-mono text-sm tabular-nums slashed-zero text-foreground">
             {hh}:{mm}:{ss}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={toggle}
-          className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
-          aria-label={running ? "Mettre en pause" : "Reprendre"}
-        >
-          {running ? <Pause size={13} /> : <Play size={13} />}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={toggle}
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
+            aria-label={running ? "Mettre en pause" : "Reprendre"}
+            title={running ? "Pause" : "Reprendre"}
+          >
+            {running ? <Pause size={13} /> : <Play size={13} />}
+          </button>
+          <button
+            type="button"
+            onClick={restart}
+            className="flex h-7 w-7 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
+            aria-label="Recommencer le cycle depuis le début"
+            title="Recommencer depuis le début"
+          >
+            <RotateCcw size={12} />
+          </button>
+        </div>
       </div>
 
       {/* Moment de la journée + progression vers le prochain changement */}

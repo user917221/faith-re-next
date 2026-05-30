@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AvatarUpload } from "./AvatarUpload";
 import type { Character, ProfilePatch } from "./types";
 
 type Props = {
@@ -144,16 +145,20 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-avatar" className="text-foreground-muted">
-            URL du portrait
-          </Label>
+        <div className="flex flex-col gap-2">
+          <Label className="text-foreground-muted">Portrait</Label>
+          <AvatarUpload
+            name={name}
+            value={avatarUrl}
+            onChange={setAvatarUrl}
+            disabled={!onProfileChange}
+          />
           <Input
             id="profile-avatar"
             type="url"
-            value={avatarUrl}
+            value={avatarUrl.startsWith("data:") ? "" : avatarUrl}
             maxLength={500}
-            placeholder="https://… (image du personnage)"
+            placeholder="ou colle une URL https://…"
             onChange={(e) => setAvatarUrl(e.target.value)}
             disabled={!onProfileChange}
             className="font-mono text-xs"

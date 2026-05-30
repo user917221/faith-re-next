@@ -103,7 +103,7 @@ function mk(id: string, name: string, hp: number, maxHp: number): Character {
     fluxLabel: "P2",
     technicalPalier: 1,
     technicalLabel: "Initié",
-    tier: "T3",
+    tier: "T1",
     initiative: 3,
     armor: 2,
     movement: 4,

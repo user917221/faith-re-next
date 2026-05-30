@@ -18,6 +18,7 @@ import {
   updateCampaignStatus,
   startSessionTimer,
   pauseSessionTimer,
+  resetSessionTimer,
 } from "@/lib/actions";
 import { CampaignStatus } from "./CampaignStatus";
 import { SessionTimer } from "./SessionTimer";
@@ -63,7 +64,7 @@ export function CampaignSelector({
   const advance = () => {
     startTransition(async () => {
       const res = await advanceSession(campaign.id);
-      if (res.ok) toast.success(`Nouvelle séance — Session ${res.number}`);
+      if (res.ok) toast.success(`Nouvelle session ${res.number}`);
       setOpen(false);
       router.refresh();
     });
@@ -126,7 +127,7 @@ export function CampaignSelector({
               onClick={advance}
               className="mb-1.5 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
             >
-              <SkipForward size={13} /> Nouvelle séance
+              <SkipForward size={13} /> Nouvelle session
             </button>
 
             <div className="flex items-center gap-1.5">
@@ -224,6 +225,10 @@ export function SessionTimerLive({
       onToggle={async (next) => {
         if (next) await startSessionTimer(sessionId);
         else await pauseSessionTimer(sessionId);
+        router.refresh();
+      }}
+      onReset={async () => {
+        await resetSessionTimer(sessionId);
         router.refresh();
       }}
     />
