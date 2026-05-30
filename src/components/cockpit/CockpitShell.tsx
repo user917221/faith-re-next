@@ -156,7 +156,7 @@ export function CockpitShell({
       {/* ============ COLONNE PRINCIPALE ============ */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="cockpit-chrome flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
+        <header className="cockpit-chrome relative z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
           {campaignSelector ?? (
             <button
               type="button"

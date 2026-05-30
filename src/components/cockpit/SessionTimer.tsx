@@ -35,11 +35,13 @@ export function SessionTimer({
   running: initialRunning = true,
   onToggle,
   onReset,
+  onEnd,
 }: {
   startSeconds?: number;
   running?: boolean;
   onToggle?: (running: boolean) => void | Promise<void>;
   onReset?: () => void | Promise<void>;
+  onEnd?: () => void | Promise<void>;
 }) {
   const [seconds, setSeconds] = useState(startSeconds);
   const [running, setRunning] = useState(initialRunning);
@@ -92,6 +94,28 @@ export function SessionTimer({
     setRunning(true);
     void onReset?.();
     toast("Cycle de session relancé — Matin");
+  };
+
+  // Finir la session — 1er clic arme, 2e clic confirme. Délègue à onEnd
+  // (archive les jets + vide la table des dés), puis remet le minuteur à zéro.
+  const [confirmingEnd, setConfirmingEnd] = useState(false);
+  const [ending, setEnding] = useState(false);
+  useEffect(() => {
+    if (!confirmingEnd) return;
+    const t = setTimeout(() => setConfirmingEnd(false), 3000);
+    return () => clearTimeout(t);
+  }, [confirmingEnd]);
+  const end = () => {
+    if (!confirmingEnd) {
+      setConfirmingEnd(true);
+      return;
+    }
+    setConfirmingEnd(false);
+    setEnding(true);
+    firedRef.current = new Set();
+    setSeconds(0);
+    setRunning(false);
+    Promise.resolve(onEnd?.()).finally(() => setEnding(false));
   };
 
   const hh = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -157,6 +181,27 @@ export function SessionTimer({
           />
         </div>
       </div>
+
+      {onEnd && (
+        <button
+          type="button"
+          onClick={end}
+          disabled={ending}
+          aria-label="Finir la session"
+          className={`mt-1 flex items-center justify-center gap-1.5 rounded-md border px-2 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em] transition-colors disabled:opacity-50 ${
+            confirmingEnd
+              ? "border-hp/50 bg-hp/15 text-hp"
+              : "border-border text-foreground-subtle hover:bg-surface-overlay hover:text-foreground"
+          }`}
+        >
+          <Flag size={11} />
+          {ending
+            ? "Clôture…"
+            : confirmingEnd
+              ? "Confirmer la fin ?"
+              : "Finir la session"}
+        </button>
+      )}
     </div>
   );
 }

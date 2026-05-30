@@ -29,6 +29,7 @@ import {
   resetSessionTimer,
   renameSession,
   deleteSession,
+  endSession,
 } from "@/lib/actions";
 import { CampaignStatus } from "./CampaignStatus";
 import { SessionTimer } from "./SessionTimer";
@@ -271,6 +272,22 @@ export function SessionTimerLive({
         }}
         onReset={async () => {
           await resetSessionTimer(sessionId);
+          router.refresh();
+        }}
+        onEnd={async () => {
+          const res = await endSession(sessionId);
+          if (!res.ok) {
+            toast.error(res.reason);
+            return;
+          }
+          toast.success(`Session ${sessionNumber ?? ""} clôturée`.trim(), {
+            description:
+              res.archived > 0
+                ? `${res.archived} jet${res.archived > 1 ? "s" : ""} archivé${
+                    res.archived > 1 ? "s" : ""
+                  } dans les logs · table des dés vidée.`
+                : "Table des dés vidée.",
+          });
           router.refresh();
         }}
       />

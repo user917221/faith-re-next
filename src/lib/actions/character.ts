@@ -27,6 +27,7 @@ import {
   ENDURANCE_COSTS,
   calculateLevel,
   getEnduranceTier,
+  getSkillCap,
   HP_FLOOR,
   type ActionType,
 } from "@/lib/faith-system";
@@ -35,7 +36,6 @@ import { assertCanEdit, assertMJOnly } from "./guards";
 
 type ActionResult<T> = ({ ok: true } & T) | { ok: false; reason: string };
 
-const SKILL_CAP_TOTAL = 80;
 const FATE_MIN = 0;
 const FATE_MAX = 5;
 const VITAL_HP_MAX = 200; // garde-fou — le max réel est dérivé runtime côté caller
@@ -145,7 +145,7 @@ export async function updateSkill(
   skillName: string,
   delta: 1 | -1,
 ): Promise<ActionResult<{ newValue: number; totalAllocated: number }>> {
-  await assertCanEdit(characterId);
+  const { character } = await assertCanEdit(characterId);
 
   // Charge tous les skills du perso pour calculer le total alloué.
   const rows = await db
@@ -159,9 +159,11 @@ export async function updateSkill(
   const current = skillsMap[skillName] ?? 0;
   const totalCurrent = countAllocatedPoints(skillsMap);
 
+  // Cap d'allocation = 80 + 1 point par niveau (un point de stat par level-up).
+  const skillCap = getSkillCap(calculateLevel(character.xp));
   if (delta === 1) {
-    if (totalCurrent + 1 > SKILL_CAP_TOTAL) {
-      return { ok: false, reason: "Cap 80 atteint" };
+    if (totalCurrent + 1 > skillCap) {
+      return { ok: false, reason: `Cap ${skillCap} atteint` };
     }
   } else {
     // delta === -1 : si déjà à 0, no-op silencieux (le skill reste à 0).

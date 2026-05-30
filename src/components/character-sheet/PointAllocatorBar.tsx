@@ -2,6 +2,7 @@ import { SKILL_CAP } from "@/lib/faith-system";
 
 type Props = {
   allocated: number;
+  cap?: number;
 };
 
 /**
@@ -9,9 +10,9 @@ type Props = {
  * La jauge de progression est le SEUL porteur d'accent lavande de la vue
  * (discipline « accent = signal », réservé à la donnée de progression).
  */
-export function PointAllocatorBar({ allocated }: Props) {
-  const isCapped = allocated >= SKILL_CAP;
-  const pct = Math.min(100, (allocated / SKILL_CAP) * 100);
+export function PointAllocatorBar({ allocated, cap = SKILL_CAP }: Props) {
+  const isCapped = allocated >= cap;
+  const pct = Math.min(100, (allocated / cap) * 100);
 
   return (
     <section
@@ -27,7 +28,7 @@ export function PointAllocatorBar({ allocated }: Props) {
         >
           {allocated}
         </span>
-        <span className="text-xs text-foreground-subtle"> / {SKILL_CAP}</span>
+        <span className="text-xs text-foreground-subtle"> / {cap}</span>
       </span>
       <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
         <div

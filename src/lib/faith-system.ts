@@ -7,6 +7,11 @@
 export const BASE_HP = 40;
 export const BASE_MHP = 40;
 export const SKILL_CAP = 80;
+
+/** Cap d'allocation des compétences : 80 de base + 1 point de stat par niveau. */
+export function getSkillCap(level: number): number {
+  return SKILL_CAP + Math.max(0, level);
+}
 export const ENDURANCE_DEFAULT_MAX = 250;
 
 // --- Vitalité / seuils de mort (système FAITH:RE) ---

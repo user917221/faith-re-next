@@ -7,7 +7,7 @@ import {
   countAllocatedPoints,
   type AttributeName,
 } from "@/lib/skills";
-import { SKILL_CAP, calculateLevel } from "@/lib/faith-system";
+import { getSkillCap, calculateLevel } from "@/lib/faith-system";
 import { Brain, Eye, Shield, Crosshair, Dices } from "lucide-react";
 import { ConstellationGlyph } from "@/components/glyphs";
 import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
@@ -73,8 +73,9 @@ export default function CharacterSheet({
   onRemoveCondition,
 }: CharacterSheetProps) {
   const allocated = countAllocatedPoints(character.skills);
-  const isCapped = allocated >= SKILL_CAP;
   const derivedLevel = calculateLevel(character.xp);
+  const skillCap = getSkillCap(derivedLevel); // 80 + 1 par niveau
+  const isCapped = allocated >= skillCap;
 
   const [tab, setTab] = useState<TabValue>("vitaux");
   const [drawerCtx, setDrawerCtx] = useState<DrawerCtx | null>(null);
@@ -315,7 +316,7 @@ export default function CharacterSheet({
         {/* ─── Attributs & compétences ─── cartes de section v0 ─── */}
         <TabsContent value="competences">
           <div className="mb-4 flex flex-col gap-3">
-            <PointAllocatorBar allocated={allocated} />
+            <PointAllocatorBar allocated={allocated} cap={skillCap} />
             <SkillTierLegend />
           </div>
 
