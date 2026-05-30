@@ -47,16 +47,24 @@ const DEFAULT_CAMPAIGN = {
 };
 
 export async function getCampaignContext(): Promise<CampaignContext> {
-  // 1) Campagne active → sinon une au hasard → sinon amorce un défaut.
-  let campaign =
-    (await db.query.campaigns.findFirst({ where: eq(campaigns.isActive, 1) })) ??
-    (await db.query.campaigns.findFirst());
+  // 1) Campagne active + liste complète en PARALLÈLE — la liste est indépendante
+  //    de la campagne active (1 aller-retour Neon au lieu de 2).
+  let [campaign, all] = await Promise.all([
+    db.query.campaigns.findFirst({ where: eq(campaigns.isActive, 1) }),
+    db
+      .select({ id: campaigns.id, name: campaigns.name })
+      .from(campaigns)
+      .orderBy(desc(campaigns.createdAt)),
+  ]);
+  // Repli : aucune active → une au hasard → sinon amorce un défaut.
+  if (!campaign) campaign = await db.query.campaigns.findFirst();
   if (!campaign) {
     const [created] = await db
       .insert(campaigns)
       .values({ ...DEFAULT_CAMPAIGN, isActive: 1 })
       .returning();
     campaign = created;
+    all = [{ id: created.id, name: created.name }];
   }
 
   // 2) Séance active de la campagne → sinon la plus récente → sinon séance 1.
@@ -88,11 +96,6 @@ export async function getCampaignContext(): Promise<CampaignContext> {
           Math.floor((Date.now() - session.timerStartedAt!.getTime()) / 1000),
         )
       : 0);
-
-  const all = await db
-    .select({ id: campaigns.id, name: campaigns.name })
-    .from(campaigns)
-    .orderBy(desc(campaigns.createdAt));
 
   return {
     campaign: {
