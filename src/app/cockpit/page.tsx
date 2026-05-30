@@ -508,7 +508,11 @@ function CockpitInner() {
                       </span>
                     </span>
                     <span className="flex items-center gap-2">
-                      <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-overlay">
+                      <span
+                        className={`h-1.5 flex-1 overflow-hidden rounded-full ${
+                          c.currentHp < 0 ? "bg-mhp/30" : "bg-surface-overlay"
+                        }`}
+                      >
                         <span
                           className={`block h-full rounded-full transition-[width] duration-300 ${
                             hpPct > 50
