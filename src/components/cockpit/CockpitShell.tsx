@@ -107,7 +107,7 @@ export function CockpitShell({
           </div>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3">
+        <nav className="flex flex-1 flex-col gap-1 overflow-y-auto overscroll-none p-3">
           <p className="px-1 pb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
             Navigation
           </p>
@@ -197,13 +197,13 @@ export function CockpitShell({
 
         {/* 3 panneaux */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <aside className="cockpit-chrome hidden w-72 shrink-0 flex-col gap-3 overflow-y-auto border-r border-border p-3 md:flex">
+          <aside className="cockpit-chrome hidden w-72 shrink-0 flex-col gap-3 overflow-y-auto overscroll-none border-r border-border p-3 md:flex">
             {roster}
           </aside>
-          <main className="cockpit-print-area min-w-0 flex-1 overflow-y-auto p-4 lg:p-5">
+          <main className="cockpit-print-area min-w-0 flex-1 overflow-y-auto overscroll-none p-4 lg:p-5">
             {children}
           </main>
-          <aside className="cockpit-chrome hidden w-72 shrink-0 overflow-y-auto border-l border-border p-3 xl:block">
+          <aside className="cockpit-chrome hidden w-72 shrink-0 overflow-y-auto overscroll-none border-l border-border p-3 xl:block">
             {rollPanel ?? <QuickRollPanel />}
           </aside>
         </div>

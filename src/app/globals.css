@@ -272,9 +272,12 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
     letter-spacing: 0;
+    /* Supprime le rebond élastique d'overscroll aux deux extrémités */
+    overscroll-behavior: none;
   }
   html {
     @apply font-sans;
+    overscroll-behavior: none;
   }
   /* Display tracking négatif Linear sur les gros titres */
   h1, h2, h3 {
