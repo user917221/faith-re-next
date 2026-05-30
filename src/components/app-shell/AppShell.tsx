@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { AppSidebar, type ShellUser } from "./AppSidebar";
 import { CommandMenu } from "./CommandMenu";
 import { KeepWarmToggle } from "./KeepWarmToggle";
+import { ThemeToggle } from "@/components/theme-toggle";
+
 
 /**
  * Coquille applicative — sidebar persistante + topbar + palette ⌘K.
@@ -46,6 +48,7 @@ export function AppShell({
             </span>
           </div>
           <KeepWarmToggle className="ml-auto" />
+          <ThemeToggle />
           <button
             type="button"
             aria-label="Rechercher (⌘K)"

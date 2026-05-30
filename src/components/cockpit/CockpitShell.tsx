@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { KeepWarmToggle } from "@/components/app-shell/KeepWarmToggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   LayoutDashboard,
   Users,
@@ -189,6 +190,7 @@ export function CockpitShell({
           </div>
 
           <KeepWarmToggle className="ml-auto" />
+          <ThemeToggle />
           <button
             type="button"
             aria-label="Rechercher (⌘K)"
