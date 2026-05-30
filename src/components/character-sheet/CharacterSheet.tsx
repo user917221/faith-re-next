@@ -238,7 +238,7 @@ export default function CharacterSheet({
       <Tabs
         value={tab}
         onValueChange={(v) => setTab(v as TabValue)}
-        className="gap-6"
+        className="gap-5"
       >
         <div
           role="tablist"
@@ -267,8 +267,8 @@ export default function CharacterSheet({
                 onClick={() => setTab(value)}
                 className={`flex-1 whitespace-nowrap rounded-md px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors ${
                   active
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground-subtle hover:text-foreground-muted"
+                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                    : "text-foreground-subtle hover:bg-surface-overlay/60 hover:text-foreground"
                 }`}
               >
                 {label}
