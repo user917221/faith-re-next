@@ -260,6 +260,52 @@ export async function renameSession(
   return { ok: true };
 }
 
+// ---------------- deleteSession ----------------
+
+/**
+ * deleteSession — supprime une session (MJ). Les logs archivés (session_log)
+ * sont CONSERVÉS (gameSessionId → NULL par FK). Interdit de supprimer la
+ * dernière session d'une campagne. Si la session active est supprimée, la plus
+ * récente restante redevient active.
+ */
+export async function deleteSession(
+  sessionId: string,
+): Promise<ActionResult<{ remaining: number }>> {
+  await requireMJ();
+  const s = await db.query.gameSessions.findFirst({
+    where: eq(gameSessions.id, sessionId),
+  });
+  if (!s) return { ok: false, reason: "Session introuvable" };
+
+  const all = await db
+    .select({ id: gameSessions.id })
+    .from(gameSessions)
+    .where(eq(gameSessions.campaignId, s.campaignId));
+  if (all.length <= 1) {
+    return { ok: false, reason: "Impossible de supprimer la dernière session." };
+  }
+
+  await db.delete(gameSessions).where(eq(gameSessions.id, sessionId));
+
+  // Si on a supprimé la session active, réactive la plus récente restante.
+  if (s.isActive === 1) {
+    const next = await db.query.gameSessions.findFirst({
+      where: eq(gameSessions.campaignId, s.campaignId),
+      orderBy: desc(gameSessions.number),
+    });
+    if (next) {
+      await db
+        .update(gameSessions)
+        .set({ isActive: 1 })
+        .where(eq(gameSessions.id, next.id));
+    }
+  }
+
+  revalidatePath("/mj");
+  revalidatePath("/plateau");
+  return { ok: true, remaining: all.length - 1 };
+}
+
 // ---------------- endSession (#87) ----------------
 
 /**

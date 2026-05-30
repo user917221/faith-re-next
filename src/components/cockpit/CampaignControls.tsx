@@ -9,7 +9,15 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, Pencil, Plus, SkipForward, X } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  Pencil,
+  Plus,
+  SkipForward,
+  Trash2,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   setActiveCampaign,
@@ -20,6 +28,7 @@ import {
   pauseSessionTimer,
   resetSessionTimer,
   renameSession,
+  deleteSession,
 } from "@/lib/actions";
 import { CampaignStatus } from "./CampaignStatus";
 import { SessionTimer } from "./SessionTimer";
@@ -310,6 +319,26 @@ function SessionNameEditor({
     });
   };
 
+  // Suppression de session — 1er clic arme, 2e clic confirme (logs conservés).
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const del = () => {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      return;
+    }
+    startTransition(async () => {
+      const res = await deleteSession(sessionId);
+      if (!res.ok) {
+        toast.error(res.reason);
+        setConfirmingDelete(false);
+        return;
+      }
+      toast.success("Session supprimée");
+      setConfirmingDelete(false);
+      router.refresh();
+    });
+  };
+
   if (editing) {
     return (
       <div className="campaign-subpanel flex items-center gap-1.5 p-2">
@@ -363,15 +392,35 @@ function SessionNameEditor({
         </p>
         <p className="truncate text-sm font-medium text-foreground">{display}</p>
       </div>
-      <button
-        type="button"
-        onClick={open}
-        aria-label="Renommer la session"
-        title="Renommer la session"
-        className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
-      >
-        <Pencil size={12} />
-      </button>
+      <div className="flex shrink-0 items-center gap-1">
+        <button
+          type="button"
+          onClick={open}
+          aria-label="Renommer la session"
+          title="Renommer la session"
+          className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
+        >
+          <Pencil size={12} />
+        </button>
+        <button
+          type="button"
+          onClick={del}
+          disabled={isPending}
+          aria-label="Supprimer la session"
+          title={
+            confirmingDelete
+              ? "Cliquer encore pour confirmer"
+              : "Supprimer la session"
+          }
+          className={`flex size-7 shrink-0 items-center justify-center rounded-md border transition-colors disabled:opacity-40 ${
+            confirmingDelete
+              ? "border-destructive bg-destructive/15 text-destructive"
+              : "border-border text-foreground-muted hover:bg-surface-overlay hover:text-destructive"
+          }`}
+        >
+          <Trash2 size={12} />
+        </button>
+      </div>
     </div>
   );
 }

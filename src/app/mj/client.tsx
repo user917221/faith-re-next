@@ -112,84 +112,89 @@ export function RosterNav({
             return (
               <HoverCard key={c.id} openDelay={120} closeDelay={60}>
                 <HoverCardTrigger asChild>
-                  <div className="group relative">
-                  {isMJ && (
-                    <div className="absolute right-3 top-3 z-10">
-                      <DeleteCharacterDialog
-                        characterId={c.id}
-                        characterName={c.name}
-                        isSelected={isActive}
-                      />
-                    </div>
-                  )}
-                  <Link
-                    href={`/mj?id=${c.id}`}
-                    className={`block !py-3 !px-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                      isActive ? "!border-l-primary bg-primary/10" : ""
+                  <div
+                    className={`group flex items-stretch border-l-2 transition-colors ${
+                      isActive
+                        ? "border-l-primary bg-primary/10"
+                        : "border-l-transparent hover:bg-surface-overlay/40"
                     }`}
-                    aria-current={isActive ? "page" : undefined}
                   >
-                    {/* Row 1 — Avatar + LED + name + Niv badge.
-                        pr-7 (MJ) réserve l'emplacement du bouton supprimer. */}
-                    <div
-                      className={`flex items-center justify-between gap-2 ${
-                        isMJ ? "pr-7" : ""
-                      }`}
+                    <Link
+                      href={`/mj?id=${c.id}`}
+                      aria-current={isActive ? "page" : undefined}
+                      className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
                     >
-                      <span className="flex min-w-0 items-center gap-2.5">
-                        <span className="relative shrink-0">
-                          <Avatar size="sm" className="rounded-md">
-                            <AvatarImage src={c.avatarUrl ?? undefined} alt={c.name} />
-                            <AvatarFallback
-                              className="rounded-md text-2xs"
-                              style={avatarFallbackStyle(c.name)}
-                            >
-                              {initialsOf(c.name, c.nom)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span
-                            aria-hidden
-                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-card ${
-                              c.isPresent ? "presence-led-on" : "presence-led-off"
-                            }`}
-                          />
-                        </span>
+                      <span className="relative shrink-0">
+                        <Avatar size="sm" className="rounded-md">
+                          <AvatarImage src={c.avatarUrl ?? undefined} alt={c.name} />
+                          <AvatarFallback
+                            className="rounded-md text-2xs"
+                            style={avatarFallbackStyle(c.name)}
+                          >
+                            {initialsOf(c.name, c.nom)}
+                          </AvatarFallback>
+                        </Avatar>
                         <span
-                          className={`truncate text-sm font-medium tracking-tight ${
-                            isActive
-                              ? "text-foreground"
-                              : "text-ink-muted group-hover:text-foreground"
+                          aria-hidden
+                          className={`absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full ring-2 ring-card ${
+                            c.isPresent ? "presence-led-on" : "presence-led-off"
                           }`}
-                        >
-                          {c.name}
-                        </span>
+                        />
                       </span>
-                      <Badge
-                        variant="outline"
-                        className="shrink-0 rounded-md border border-border bg-background/45 px-2 py-1 font-mono tabular-nums text-[11px] text-foreground-muted"
-                      >
-                        Niv. {c.level}
-                      </Badge>
-                    </div>
 
-                    {/* Row 2 — mini HP bar + numeric */}
-                    <div className="mt-2 flex items-center gap-2">
-                      <Progress
-                        value={hpPct}
-                        className={`flex-1 [&_[data-slot=progress-indicator]]:transition-[transform,width] [&_[data-slot=progress-indicator]]:duration-300 ${
-                          hpCritical
-                            ? "[&_[data-slot=progress-indicator]]:bg-hp"
-                            : "[&_[data-slot=progress-indicator]]:bg-hp/80"
-                        }`}
-                      />
-                      <span className="tabular shrink-0 text-3xs text-ink-tertiary">
-                        <span className={hpCritical ? "text-hp" : "text-muted-foreground"}>
-                          {c.currentHp}
+                      {/* Nom + Niv (ligne 1) · barre HP (ligne 2) */}
+                      <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                        <span className="flex items-center gap-2">
+                          <span
+                            className={`truncate text-sm font-medium tracking-tight ${
+                              isActive
+                                ? "text-foreground"
+                                : "text-ink-muted group-hover:text-foreground"
+                            }`}
+                          >
+                            {c.name}
+                          </span>
+                          <span className="ml-auto shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-tertiary">
+                            Niv.&nbsp;{c.level}
+                          </span>
                         </span>
-                        <span className="text-ink-tertiary">/{c.maxHp}</span>
+                        <span className="flex items-center gap-2">
+                          <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-overlay">
+                            <span
+                              className={`block h-full rounded-full transition-[width] duration-300 ${
+                                hpPct > 50
+                                  ? "bg-endu"
+                                  : hpPct >= 25
+                                    ? "bg-primary"
+                                    : "bg-hp"
+                              }`}
+                              style={{ width: `${hpPct}%` }}
+                            />
+                          </span>
+                          <span className="shrink-0 font-mono text-[10px] tabular-nums slashed-zero">
+                            <span
+                              className={
+                                hpCritical ? "text-hp" : "text-foreground-muted"
+                              }
+                            >
+                              {c.currentHp}
+                            </span>
+                            <span className="text-ink-tertiary/60">/{c.maxHp}</span>
+                          </span>
+                        </span>
                       </span>
-                    </div>
-                  </Link>
+                    </Link>
+
+                    {/* Supprimer — colonne dédiée (pas de chevauchement) */}
+                    {isMJ && (
+                      <div className="flex shrink-0 items-center pr-1.5">
+                        <DeleteCharacterDialog
+                          characterId={c.id}
+                          characterName={c.name}
+                          isSelected={isActive}
+                        />
+                      </div>
+                    )}
                   </div>
                 </HoverCardTrigger>
 

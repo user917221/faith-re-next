@@ -75,6 +75,7 @@ export {
   pauseSessionTimer,
   resetSessionTimer,
   renameSession,
+  deleteSession,
   endSession,
   getSessionLogs,
   addStatusNote,

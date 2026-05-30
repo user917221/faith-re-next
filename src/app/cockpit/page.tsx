@@ -460,43 +460,78 @@ function CockpitInner() {
               {chars.length}/{chars.length} présents
             </span>
           </div>
-          <div className="flex flex-col gap-1 p-2">
+          <div className="flex flex-col">
             {chars.map((c) => {
               const active = c.id === selId;
-              const low = c.currentHp / c.maxHp < 0.5;
+              const hpPct = Math.max(
+                0,
+                Math.min(100, (c.currentHp / c.maxHp) * 100),
+              );
               return (
                 <button
                   key={c.id}
                   type="button"
                   onClick={() => setSelId(c.id)}
-                  className={`flex items-center gap-2.5 rounded-md border px-2.5 py-2 text-left transition-colors ${
+                  className={`group flex items-center gap-2.5 border-l-2 px-3 py-2.5 text-left transition-colors ${
                     active
-                      ? "border-primary/30 bg-primary/10"
-                      : "border-transparent hover:border-border hover:bg-surface-overlay"
+                      ? "border-l-primary bg-primary/10"
+                      : "border-l-transparent hover:bg-surface-overlay/40"
                   }`}
                 >
-                  <Avatar className="size-8 rounded-md">
-                    <AvatarFallback
-                      className="rounded-md text-[11px]"
-                      style={avatarFallbackStyle(c.name)}
-                    >
-                      {initialsOf(c.name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-foreground">{c.name}</p>
-                    <p
-                      className="font-mono text-[10px] tabular-nums slashed-zero"
-                      style={{ color: low ? "var(--hp)" : "var(--foreground-subtle)" }}
-                    >
-                      {c.currentHp}/{c.maxHp}
-                    </p>
-                  </div>
-                  <span
-                    className="size-1.5 shrink-0 rounded-full"
-                    style={{ background: "#5c7d63" }}
-                    aria-hidden
-                  />
+                  <span className="relative shrink-0">
+                    <Avatar className="size-8 rounded-md">
+                      <AvatarFallback
+                        className="rounded-md text-[11px]"
+                        style={avatarFallbackStyle(c.name)}
+                      >
+                        {initialsOf(c.name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span
+                      aria-hidden
+                      className="presence-led-on absolute -bottom-0.5 -right-0.5 size-2 rounded-full ring-2 ring-card"
+                    />
+                  </span>
+                  <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={`truncate text-sm font-medium tracking-tight ${
+                          active
+                            ? "text-foreground"
+                            : "text-ink-muted group-hover:text-foreground"
+                        }`}
+                      >
+                        {c.name}
+                      </span>
+                      <span className="ml-auto shrink-0 font-mono text-[10px] uppercase tracking-wider text-ink-tertiary">
+                        Niv.&nbsp;{c.level}
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-overlay">
+                        <span
+                          className={`block h-full rounded-full transition-[width] duration-300 ${
+                            hpPct > 50
+                              ? "bg-endu"
+                              : hpPct >= 25
+                                ? "bg-primary"
+                                : "bg-hp"
+                          }`}
+                          style={{ width: `${hpPct}%` }}
+                        />
+                      </span>
+                      <span className="shrink-0 font-mono text-[10px] tabular-nums slashed-zero">
+                        <span
+                          className={
+                            hpPct < 25 ? "text-hp" : "text-foreground-muted"
+                          }
+                        >
+                          {c.currentHp}
+                        </span>
+                        <span className="text-ink-tertiary/60">/{c.maxHp}</span>
+                      </span>
+                    </span>
+                  </span>
                 </button>
               );
             })}
