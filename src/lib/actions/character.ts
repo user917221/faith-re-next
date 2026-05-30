@@ -160,7 +160,7 @@ export async function updateSkill(
   const totalCurrent = countAllocatedPoints(skillsMap);
 
   // Cap d'allocation = 80 + 1 point par niveau (un point de stat par level-up).
-  const skillCap = getSkillCap(calculateLevel(character.xp));
+  const skillCap = getSkillCap(calculateLevel(character.xp), character.name);
   if (delta === 1) {
     if (totalCurrent + 1 > skillCap) {
       return { ok: false, reason: `Cap ${skillCap} atteint` };

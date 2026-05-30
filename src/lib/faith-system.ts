@@ -9,8 +9,9 @@ export const BASE_MHP = 40;
 export const SKILL_CAP = 80;
 
 /** Cap d'allocation des compétences : 80 de base + 1 point de stat par niveau. */
-export function getSkillCap(level: number): number {
-  return SKILL_CAP + Math.max(0, level);
+export function getSkillCap(level: number, name?: string): number {
+  const base = name === "Prométhée" ? 78 : SKILL_CAP;
+  return base + Math.max(0, level);
 }
 export const ENDURANCE_DEFAULT_MAX = 250;
 
