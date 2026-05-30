@@ -2,7 +2,12 @@
 
 > Snapshot d'état (surécrire, pas empiler). Lire en premier à chaque prise de relais.
 
-## État courant — 2026-05-30 · Claude Code (Opus)
+## État courant — 2026-05-30 · Claude Code (Opus) · /loop autonome Phases 2-8
+
+> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **Phase 2 ✅ (3ee7edb). En cours : Phase 3.**
+
+### Phase 2 — FAIT (`3ee7edb`) : stats de combat + conditions + tags identité
+Schema additif Neon (initiative/armor/movement/proficiency + race/pronouns/char_class + table `condition`). `CombatStatsBanner` (steppers) + `ConditionsPanel` (chips colorés add/remove) dans l'onglet Vitaux. Actions `combat.ts` (updateCombatStats/addCondition/removeCondition). Identité éditée via ProfileEditor. Rendu conforme maquette.
 
 ### Phase 1 du cockpit MJ — FAIT & poussé master (`8894df0`)
 

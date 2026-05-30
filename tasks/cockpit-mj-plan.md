@@ -26,11 +26,11 @@ Le plus gros saut visuel : passer de « sidebar + 1 contenu » à la grille cock
 
 _Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne + Session N/date + Session Timer persistance + Campaign Status (Phase 5) ; toggles bottom bar (Phase 8) ; nav-sidebar non-Dashboard inerte (phases 5-7). `QuickRollPanel` = mock `Math.random` (moteur réel Phase 3).
 
-## Phase 2 — Stats de combat + conditions · ~1.5 j
-- [ ] Schema (`db/schema.ts`) : ajouter `initiative`, `armor`, `movement`, `proficiency` (ou dérivés) sur `character` ; nouvelle table `condition` (characterId, label, kind: focused/wounded/buff/debuff/flux, color). `drizzle-kit push`.
-- [ ] UI bandeau stats (INITIATIVE / ARMOR / MOVEMENT / PROFICIENCY) + **panneau CONDITIONS** (chips colorés, add via popover, remove).
-- [ ] Server actions `addCondition` / `removeCondition` / `updateCombatStats` + `revalidatePath`.
-- [ ] Tags identité (race, pronouns, rôle, classe « Chronicle Adept », Player) : champs `bio` sur character.
+## Phase 2 — Stats de combat + conditions · ~1.5 j ✅ FAIT (2026-05-30, commit 3ee7edb)
+- [x] Schema (`db/schema.ts`) : `initiative`/`armor`/`movement`/`proficiency` sur `character` ; table `condition` (characterId, label, kind: buff/debuff/wound/focus/neutral). `drizzle-kit push` → Neon OK (additif).
+- [x] UI bandeau `CombatStatsBanner` (Initiative/Armure/Vitesse/Maîtrise, steppers inline, signés init/maîtrise) + `ConditionsPanel` (chips colorés sémantiques, add inline label+nature, remove ×). Onglet Vitaux, partagé /mj /me /cockpit /preview.
+- [x] Server actions `combat.ts` : `updateCombatStats` / `addCondition` / `removeCondition` (assertCanEdit, clamp, revalidate).
+- [x] Tags identité (race/pronoms/classe) : colonnes `race`/`pronouns`/`char_class` ; classe en badge or + race/pronoms en sous-titre header ; édition via `ProfileEditor` (updateProfile étendu).
 
 ## Phase 3 — Quick Roll panel · ~2 j (gros morceau interactif)
 - [ ] Composant `QuickRollPanel` : sélecteur de dé (d4…d100), gros display résultat (réutiliser `CountUp`), boutons **Roll / Advantage**.
