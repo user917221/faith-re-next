@@ -59,9 +59,12 @@ _Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne
 - [x] **NOTES** : colonne `notes` (joueur) dans ProfileEditor, distincte des status_note MJ (P5).
 - [~] **EFFECTS** : les `conditions` (P2) font déjà office d'effets actifs → non recréées (éviter doublon). Enrichissement durée/source = polish futur si besoin.
 
-## Phase 7 — Modules de nav secondaires · ~4 j (volumineux, parallélisable)
-- [ ] **Journal** (`session_log`/entries par session). **NPCs** (table + fiches légères). **Maps** (upload + pins, Vercel Blob). **Rules** (markdown statique/MDX). **Roster** (page dédiée). **Sessions** (historique + planif).
-- [ ] _Chaque module = table + route + UI ; candidat idéal à un workflow multi-agents (1 module/agent)._
+## Phase 7 — Modules de nav secondaires · ~4 j ✅ FAIT (partiel cadré, 2026-05-30, commit 161a107)
+- [x] **Nav fonctionnelle** : `?view=` relatif (marche /mj + /cockpit), CockpitShell `activeView` surligne l'entrée active, Dashboard/Journal/NPCs/Règles = `<Link>`. Shell identique, seul le centre change.
+- [x] **Journal** : table `journal_entry` + actions add/remove + `JournalView` (liste chrono + ajout).
+- [x] **NPCs** : table `npc` (disposition allié/neutre/hostile) + actions add/remove/updateDisposition + `NpcsView` (cartes + badges cyclables + ajout).
+- [x] **Règles** : `RulesView` statique dérivé de skills.ts + faith-system.ts (jets, attributs, paliers, endurance, flux). Pas de BDD.
+- [~] **Différé** : Maps (Vercel Blob → Phase 8 avec portrait) ; Roster page dédiée (déjà couverte par la sidebar) ; Sessions historique (table game_session existe, vue légère à faire si besoin).
 
 ## Phase 8 — GM↔Player view, Export, portrait, polish final · ~2 j
 - [ ] Toggle **GM Mode / Player View** : filtrage data privée (XP/level/notes MJ masqués côté joueur — logique de privacy déjà partielle).

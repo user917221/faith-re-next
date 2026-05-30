@@ -4,7 +4,10 @@
 
 ## État courant — 2026-05-30 · Claude Code (Opus) · /loop autonome Phases 2-8
 
-> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-6. En cours : Phase 7.**
+> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-7. En cours : Phase 8 (dernière).**
+
+### Phase 7 — FAIT (`161a107`) : nav fonctionnelle + Journal/PNJ/Règles
+Nav `?view=` (CockpitShell `activeView`). Tables `journal_entry` + `npc` + actions world.ts (assertMJ). Vues JournalView/NpcsView/RulesView (Règles = statique depuis les constantes). Différé : Maps (Blob→P8), Roster/Sessions (légers).
 
 ### Phase 6 — FAIT (`87397ca`) : Équipement + Bio + Notes
 Table `item` (arme/armure/objet/consommable, qty, equipped) + actions items.ts + `ItemInventory` + onglet **Équipement**. Colonnes `bio`/`notes` + textarea ProfileEditor. EFFECTS = conditions (P2), non recréées.
