@@ -66,12 +66,19 @@ _Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne
 - [x] **Règles** : `RulesView` statique dérivé de skills.ts + faith-system.ts (jets, attributs, paliers, endurance, flux). Pas de BDD.
 - [~] **Différé** : Maps (Vercel Blob → Phase 8 avec portrait) ; Roster page dédiée (déjà couverte par la sidebar) ; Sessions historique (table game_session existe, vue légère à faire si besoin).
 
-## Phase 8 — GM↔Player view, Export, portrait, polish final · ~2 j
-- [ ] Toggle **GM Mode / Player View** : filtrage data privée (XP/level/notes MJ masqués côté joueur — logique de privacy déjà partielle).
-- [ ] **Export PDF** de la fiche (`@react-pdf` ou print CSS).
-- [ ] **Upload portrait** (Vercel Blob → `avatarUrl`).
-- [ ] **Pending Training inline** dans le roster (accept/reject) — existe en partie sur `/mj`.
-- [ ] **Boucle critique multi-agents** (celle qu'on vient de faire) appliquée au cockpit complet → 9.5.
+## Phase 8 — GM↔Player view, Export, portrait, polish final · ~2 j ✅ FAIT (2026-05-30, commit a892826)
+- [x] Toggle **MJ ↔ Vue joueur** : `?mode=player` sur /mj, bottom bar en <Link> (modeHref conserve id/view), fiche isMJ={false} (masque Évolution + Niv/XP), notes de statut MJ masquées, badge top-bar « Vue joueur ». Vérifié.
+- [x] **Export PDF** : print CSS (`@media print` dans globals.css masque .cockpit-chrome, imprime .cockpit-print-area, couleurs conservées) + bouton « Export PDF » → window.print(). Vérifié (chrome masqué).
+- [x] **Portrait par URL** : champ ProfileEditor → updateProfile (avatar_url, validation http/https). Upload fichier Blob = différé (manque BLOB_READ_WRITE_TOKEN).
+- [x] **Pending Training inline** : déjà livré (PendingTrainingPanel sur /mj).
+- [~] **Boucle critique multi-agents → 9.5** : non lancée en auto (effort séparé lourd) ; dispo sur demande.
+
+---
+
+## ✅ COCKPIT MJ COMPLET — 8/8 phases livrées (2026-05-30)
+Commits : 8894df0 (P1) · 3ee7edb (P2) · edded6f (P3) · 5562dbe (P4) · 1def988 (P5) · 87397ca (P6) · 161a107 (P7) · a892826 (P8). Tout sur master (Vercel déploie).
+
+**Différé / sur demande** : Maps (pins + Vercel Blob), upload portrait fichier (manque token Blob), Roster page dédiée + Sessions historique (vues légères), boucle critique multi-agents 9.5, CountUp sur le Jet Rapide, EFFECTS enrichis (durée/source).
 
 ---
 

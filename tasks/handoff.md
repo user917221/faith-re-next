@@ -2,64 +2,43 @@
 
 > Snapshot d'état (surécrire, pas empiler). Lire en premier à chaque prise de relais.
 
-## État courant — 2026-05-30 · Claude Code (Opus) · /loop autonome Phases 2-8
+## État courant — 2026-05-30 · Claude Code (Opus) · ✅ COCKPIT MJ COMPLET (8/8)
 
-> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-7. En cours : Phase 8 (dernière).**
+> Le `/loop` « fais tout dans l'ordre » est **terminé**. Les 8 phases du cockpit MJ FAITH:RE sont livrées, build vert, poussées sur master (Vercel déploie). Loop arrêté (plus de ScheduleWakeup).
 
-### Phase 7 — FAIT (`161a107`) : nav fonctionnelle + Journal/PNJ/Règles
-Nav `?view=` (CockpitShell `activeView`). Tables `journal_entry` + `npc` + actions world.ts (assertMJ). Vues JournalView/NpcsView/RulesView (Règles = statique depuis les constantes). Différé : Maps (Blob→P8), Roster/Sessions (légers).
+### Les 8 phases (toutes sur master)
+1. **P1 shell & layout** (`8894df0`) — `CockpitShell` : nav-sidebar 10 entrées + top bar (campagne/Mode MJ/session/⌘K/avatar) + grille 3 panneaux (Roster | centre | Jet Rapide) + bottom bar. Câblé /mj (vraies données) + /cockpit (mock public).
+2. **P2 combat + conditions + identité** (`3ee7edb`) — `CombatStatsBanner` (init/armure/vitesse/maîtrise), `ConditionsPanel` (chips colorés), tags race/pronoms/classe. Table `condition` + `combat.ts`.
+3. **P3 Quick Roll réel** (`edded6f`) — `rollPublicPool` (NdS + mod + avantage/keep, crits) → persiste `public_roll` → /plateau. `MJQuickRoll` pane droit.
+4. **P4 compétences rang/MOD/palier** (`5562dbe`) — `getSkillTier`/`SKILL_TIERS` (Novice/Confirmé/Expert/Maître) dérivés des points (moteur de jets inchangé), `SkillRow` enrichi + `SkillTierLegend`.
+5. **P5 campagne / séances / notes** (`1def988`) — tables `campaign`/`game_session`/`status_note`, amorce paresseuse (lib/campaign.ts), `CampaignSelector` + `CampaignStatus` éditable + `SessionTimer` persisté + `StatusNotesPanel`. CockpitShell 3 slots.
+6. **P6 Équipement + Bio + Notes** (`87397ca`) — table `item` + `ItemInventory` + onglet **Équipement** ; colonnes `bio`/`notes` (ProfileEditor).
+7. **P7 nav fonctionnelle + Journal/PNJ/Règles** (`161a107`) — nav `?view=` (`activeView`), tables `journal_entry`/`npc` + `world.ts`, vues JournalView/NpcsView/RulesView (Règles statique depuis les constantes).
+8. **P8 vue MJ↔joueur + export PDF + portrait** (`a892826`) — `?mode=player` (fiche isMJ=false, Évolution/Niv/notes MJ masqués, badge « Vue joueur »), Export PDF print-CSS (`@media print` + window.print), portrait par URL (ProfileEditor).
 
-### Phase 6 — FAIT (`87397ca`) : Équipement + Bio + Notes
-Table `item` (arme/armure/objet/consommable, qty, equipped) + actions items.ts + `ItemInventory` + onglet **Équipement**. Colonnes `bio`/`notes` + textarea ProfileEditor. EFFECTS = conditions (P2), non recréées.
-
-### Phase 5 — FAIT (`1def988`) : campagne / séances / notes de statut
-3 tables Neon (`campaign`, `game_session` [pas `session` = Auth.js !], `status_note`). lib/campaign.ts (amorce paresseuse + temps live). Actions campaign.ts (statut/sélecteur/timer/notes). CockpitShell 3 slots. CampaignSelector + CampaignStatus éditable + SessionTimer persisté + StatusNotesPanel. Câblé /mj.
-
-### Phase 4 — FAIT (`5562dbe`) : compétences rang/MOD/palier
-RANK/MOD/PROG dérivés des points (moteur de jets inchangé). `getSkillTier`+`SKILL_TIERS` (Novice/Confirmé/Expert/Maître), `SkillRow` enrichi (MOD + chip palier + barre niveau), `SkillTierLegend`. Refonte 6 onglets repoussée en Phase 6 (éviter coquilles vides).
-
-### Phase 3 — FAIT (`edded6f`) : Quick Roll panel réel
-`QuickRollPanel` contrôlé (prop `onRoll`). Nouvelle action `rollPublicPool` (plateau.ts) : dés NdS multiples + modificateur + keep all/highest/lowest (avantage), crits naturels, persiste public_roll → /plateau. `MJQuickRoll(characterId)` câblé dans le pane droit /mj. Fallback local Math.random pour /cockpit (mock sans BDD). Vérifié Playwright (Lancer → d20).
-
-### Phase 2 — FAIT (`3ee7edb`) : stats de combat + conditions + tags identité
-Schema additif Neon (initiative/armor/movement/proficiency + race/pronouns/char_class + table `condition`). `CombatStatsBanner` (steppers) + `ConditionsPanel` (chips colorés add/remove) dans l'onglet Vitaux. Actions `combat.ts` (updateCombatStats/addCondition/removeCondition). Identité éditée via ProfileEditor. Rendu conforme maquette.
-
-### Phase 1 du cockpit MJ — FAIT & poussé master (`8894df0`)
-
-Le cockpit MJ a sa **coque complète** (réf : maquette grimoire de Corentin). On est passé de « sidebar + 1 fiche » à la **grille cockpit multi-panneaux**, branchée sur les vraies données.
-
-**Nouveau composant clé : `src/components/cockpit/CockpitShell.tsx`** — chrome réutilisable :
-- **Nav-sidebar** (`w-60`, lg:) : logo `CrestGlyph` + 10 entrées NAV (Dashboard/Roster/Sessions/Journal/Maps/NPCs/Items/Règles/Dés/Réglages) + `CampaignStatus` + `SessionTimer` en pied.
-- **Top bar** (`h-14`) : sélecteur campagne · badge **Mode MJ** (crown, si `role==="mj"`) · Session N · date · bouton ⌘K (`CommandMenu`) · avatar.
-- **Grille 3 panneaux** : `roster` (pane gauche `w-72` md:) | `children` (fiche centrale) | `rollPanel` ?? `QuickRollPanel` (pane droit `w-72` xl:).
-- **Bottom bar** (`h-10`) : Sauvegardé · Écran MJ · Vue joueur · Export PDF.
-- Props : `{ user, campaignName?, sessionNumber?, sessionDate?, roster, children, rollPanel? }`.
-
-**Câblage :**
-- **`/mj`** (`src/app/mj/page.tsx`) : server component, remplace `AppShell` par `CockpitShell`. Vraies données — `roster={<RosterNav/> + <PendingTrainingPanel/>}`, `children=<MJCharacterClient/>` (fiche câblée aux ~20 server actions). Sélection via `<Link href=/mj?id=>`.
-- **`/cockpit`** (`src/app/cockpit/page.tsx`) : banc d'essai **public** (mock, dans `PUBLIC_PATHS` du `proxy.ts`) qui consomme le **même** `CockpitShell` — sert à screenshoter le chrome (le `/mj` réel est auth-gated). Roster + fiche mock interactifs (state local).
-- Composants frères déjà commités avant (`CampaignStatus`, `SessionTimer`, `QuickRollPanel`) — ce sont des **stubs visuels** câblés en phases ultérieures.
+### Méthode du loop (référence)
+1 phase/itération : schema additif → `pnpm db:push --force` (Neon) → code → build vert (`(cd faith-re-next && pnpm build)`) → capture Playwright (`scripts/shoot-*.py` sur `/cockpit?...` car `/mj` auth-gated) → commit + `git push origin HEAD:master` → MAJ plan+handoff+TaskList → ScheduleWakeup 60s. Branche `codex/dashboard-redesign` poussée sur master à chaque phase.
 
 ### Vérifié
-- `pnpm build` ✅ exit 0. Capture Playwright `/cockpit` OK (chrome complet rendu, conforme à la maquille).
-- Build : lancer depuis `faith-re-next` (`(cd faith-re-next && pnpm build)` — cwd se réinitialise ; `pnpm -C` casse via worker Tailwind EINVAL).
-- Captures : `python scripts/shoot-cockpit.py` → `.tmp-screens/cockpit.png` (le Preview MCP screenshot timeout sur cette machine ; `preview_inspect`/`preview_eval` marchent).
+- `pnpm build` ✅ exit 0 à chaque phase. Schemas poussés sur Neon (bootstrap campagne vérifié via `scripts/check-campaign.ts`).
+- Captures Playwright : cockpit, skills, gear, journal, npcs, regles, player, print — toutes OK, conformes à la maquette.
+- Câblage server-actions intact ; fiche /me + /mj 100 % fonctionnelles.
 
-### Note design — branche `codex/dashboard-redesign` (PIVOT CHAUD actif)
-On n'est PAS sur la base v0-sobre lavande de la boucle 9.22 : **Codex a poussé un pivot chaud** (option A de `cockpit-mj-plan.md`) déjà mergé sur master. Tokens en place : `.campaign-panel` (dégradé brun + liseré or `rgba(223,184,117,0.35)`), `.campaign-subpanel`, `.campaign-header-line`, **jauges colorées sémantiques** (HP rouge / Mental cyan / Endu vert / Flux or). C'est la direction de la maquette de Corentin → on garde. (La fiche /me sobre 9.22 reste documentée plus bas, mais le cockpit assume le chaud.)
+### Note design — pivot chaud (actif)
+Cockpit sur le **pivot chaud** (option A) : `.campaign-panel` (brun + liseré or), jauges colorées sémantiques (HP rouge / Mental cyan / Endu vert / Flux or). C'est la direction de la maquette de Corentin.
 
-### Prochaines étapes — Phases 2-8 (`tasks/cockpit-mj-plan.md`)
-Phase 1 ✅. Suite, dans l'ordre du chemin critique :
-- **Phase 2** (~1.5 j) : stats de combat (`initiative/armor/movement/proficiency` sur `character`) + table `condition` (chips colorés) + tags identité (`bio`). Schema + `drizzle-kit push`.
-- **Phase 3** (~2 j) : `QuickRollPanel` réel — brancher le mock `Math.random` sur `rollPublicFormula` (moteur existe) + dice pool + avantage.
-- **Phase 4** : skills rank/mod/prog + onglets. **Phase 5** : campagne/sessions/status notes (décâble les stubs top bar + Campaign Status + Session Timer). **Phase 6** : Gear/Bio/Notes/Effects. **Phase 7** (parallélisable, 1 module/agent) : Journal/NPCs/Maps/Rules. **Phase 8** : GM↔Player view + Export PDF + portrait Blob + boucle critique 9.5.
+### Reste / différé (sur demande)
+- **Maps** (pins + upload Vercel Blob) — nav inerte. **Upload portrait fichier** (manque `BLOB_READ_WRITE_TOKEN` ; portrait par URL livré). **Roster page dédiée** + **Sessions historique** (vues légères ; données existent). **Boucle critique multi-agents → 9.5** (effort séparé, non lancée). **CountUp** sur le Jet Rapide. **EFFECTS** enrichis (durée/source sur conditions).
+- Nav inerte restante (boutons sans `view`) : Roster, Sessions, Maps, Items, Dés, Réglages.
 
 ### Blockers
-- Aucun. Build vert, poussé master (`8894df0`, Vercel déploie depuis master).
+- Aucun. Build vert, tout poussé master (`a892826`), Vercel déploie.
 
 ### Note durable
 - Token piège : `--accent` = `#141516` en dark → `--primary`/`text-primary` pour la lavande.
-- Specs : `tasks/cockpit-mj-plan.md` (plan 8 phases), `fiche-omen-design.md`, `redesign-v2-design.md`, `soul-and-combat-design.md`.
+- Table `session` réservée Auth.js → la séance de jeu = `game_session`.
+- Build depuis `faith-re-next` (`pnpm -C` casse via worker Tailwind EINVAL). `/mj` auth-gated → screenshoter via `/cockpit` (mock, dans PUBLIC_PATHS).
+- Specs : `tasks/cockpit-mj-plan.md` (plan 8 phases, tout coché), `fiche-omen-design.md`, `redesign-v2-design.md`, `soul-and-combat-design.md`.
 
 ---
 
