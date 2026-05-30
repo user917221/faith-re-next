@@ -32,12 +32,13 @@ _Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne
 - [x] Server actions `combat.ts` : `updateCombatStats` / `addCondition` / `removeCondition` (assertCanEdit, clamp, revalidate).
 - [x] Tags identité (race/pronoms/classe) : colonnes `race`/`pronouns`/`char_class` ; classe en badge or + race/pronoms en sous-titre header ; édition via `ProfileEditor` (updateProfile étendu).
 
-## Phase 3 — Quick Roll panel · ~2 j (gros morceau interactif)
-- [ ] Composant `QuickRollPanel` : sélecteur de dé (d4…d100), gros display résultat (réutiliser `CountUp`), boutons **Roll / Advantage**.
-- [ ] **MODIFIERS** : grille +1…+5 / −1…−5 (toggle cumulatif).
-- [ ] **DICE POOL builder** : ajouter `dXX × N`, supprimer, Clear, **Roll Pool** → construit une formule → moteur existant (`rollPublicFormula`).
-- [ ] Brancher sur le carnet/feed `/plateau` (les jets s'y affichent déjà).
-- [ ] Avantage/désavantage = 2 jets, garder le meilleur/pire.
+## Phase 3 — Quick Roll panel · ~2 j ✅ FAIT (2026-05-30, commit edded6f)
+- [x] `QuickRollPanel` contrôlé (prop `onRoll`) : sélecteur de dé d4…d100, gros display résultat (coloration crit vert/rouge), boutons **Lancer / Avantage**.
+- [x] **MODIFICATEURS** : grille +1…+5 / −1…−5 (toggle).
+- [x] **POOL DE DÉS** builder : ajouter `dXX × N`, supprimer, **Lancer le pool**.
+- [x] Branché sur le feed `/plateau` via nouvelle action `rollPublicPool` (persiste public_roll + revalidate). MJQuickRoll(characterId) dans le pane droit /mj.
+- [x] Avantage = keep highest (désavantage keep lowest), prêt côté serveur. Fallback local Math.random pour l'aperçu /cockpit sans BDD.
+- _Note : pas de CountUp sur le résultat (snap direct) ; à ajouter au polish Phase 8 si voulu._
 
 ## Phase 4 — Skills rank/mod/prog + onglets · ~2 j
 - [ ] Modèle skills : exposer **RANK (0-6)** + **MOD (+N dérivé)** + **PROG (%)**. Adapter `characterSkills` (ajouter `progress`/`mod` ou dériver).

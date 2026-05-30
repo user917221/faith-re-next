@@ -4,7 +4,10 @@
 
 ## État courant — 2026-05-30 · Claude Code (Opus) · /loop autonome Phases 2-8
 
-> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **Phase 2 ✅ (3ee7edb). En cours : Phase 3.**
+> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1,2,3. En cours : Phase 4.**
+
+### Phase 3 — FAIT (`edded6f`) : Quick Roll panel réel
+`QuickRollPanel` contrôlé (prop `onRoll`). Nouvelle action `rollPublicPool` (plateau.ts) : dés NdS multiples + modificateur + keep all/highest/lowest (avantage), crits naturels, persiste public_roll → /plateau. `MJQuickRoll(characterId)` câblé dans le pane droit /mj. Fallback local Math.random pour /cockpit (mock sans BDD). Vérifié Playwright (Lancer → d20).
 
 ### Phase 2 — FAIT (`3ee7edb`) : stats de combat + conditions + tags identité
 Schema additif Neon (initiative/armor/movement/proficiency + race/pronouns/char_class + table `condition`). `CombatStatsBanner` (steppers) + `ConditionsPanel` (chips colorés add/remove) dans l'onglet Vitaux. Actions `combat.ts` (updateCombatStats/addCondition/removeCondition). Identité éditée via ProfileEditor. Rendu conforme maquette.
