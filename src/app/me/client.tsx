@@ -14,6 +14,8 @@ import {
   updateSkill,
   updateVital,
   applyEnduranceAction,
+  recoverHp,
+  recoverEndurance,
   updateProfile,
   requestTraining,
   togglePresence,
@@ -84,6 +86,42 @@ export function MyCharacterClient({
         await togglePresence(character.id);
         toast(wasPresent ? "Tu quittes la table" : "Tu rejoins la table");
         refresh();
+      }}
+      onRecoverHp={async () => {
+        const res = await recoverHp(character.id);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast.success(`+${res.gain} PV`, {
+          description: `${res.newHp} / ${res.maxHp}`,
+        });
+        refresh();
+        return {
+          gain: res.gain,
+          d1: res.d1,
+          d2: res.d2,
+          ecaille: res.ecaille,
+          newHp: res.newHp,
+          maxHp: res.maxHp,
+        };
+      }}
+      onRecoverEndurance={async () => {
+        const res = await recoverEndurance(character.id);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast.success(`+${res.gain} END`, {
+          description: `${res.newEndurance} / ${res.maxEndurance}`,
+        });
+        refresh();
+        return {
+          gain: res.gain,
+          roll: res.roll,
+          newEndurance: res.newEndurance,
+          maxEndurance: res.maxEndurance,
+        };
       }}
       onRollSkill={async ({ attrName, skillName, dd }) => {
         await rollSkillWithDD({

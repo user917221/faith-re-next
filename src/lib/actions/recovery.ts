@@ -61,28 +61,28 @@ export async function recoverHp(characterId: string): Promise<
 
   const newHp = Math.min(maxHp, char.currentHp + gain);
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(characters)
-      .set({ currentHp: newHp, updatedAt: new Date() })
-      .where(eq(characters.id, char.id));
+  // Neon HTTP ne supporte pas les transactions interactives. On séquence :
+  // l'update PV est l'op critique, le log plateau suit (best-effort).
+  await db
+    .update(characters)
+    .set({ currentHp: newHp, updatedAt: new Date() })
+    .where(eq(characters.id, char.id));
 
-    // Log dans le feed plateau pour que la table voie la régen
-    await tx.insert(publicRolls).values({
-      characterId: char.id,
-      characterName: char.name,
-      casterUserId: session.user.id,
-      casterName: session.user.name ?? "—",
-      formula: "Récup HP — (2d6 + Écaillé) / 2",
-      rolls: [d1, d2],
-      attrName: "CONSTITUTION",
-      attrScore: null,
-      skillName: "Écaillé",
-      skillScore: ecaille,
-      total: gain,
-      isCritSucc: d1 === 6 && d2 === 6 ? 1 : 0,
-      isCritFail: d1 === 1 && d2 === 1 ? 1 : 0,
-    });
+  // Log dans le feed plateau pour que la table voie la régen
+  await db.insert(publicRolls).values({
+    characterId: char.id,
+    characterName: char.name,
+    casterUserId: session.user.id,
+    casterName: session.user.name ?? "—",
+    formula: "Récup HP — (2d6 + Écaillé) / 2",
+    rolls: [d1, d2],
+    attrName: "CONSTITUTION",
+    attrScore: null,
+    skillName: "Écaillé",
+    skillScore: ecaille,
+    total: gain,
+    isCritSucc: d1 === 6 && d2 === 6 ? 1 : 0,
+    isCritFail: d1 === 1 && d2 === 1 ? 1 : 0,
   });
 
   revalidatePath("/me");
@@ -121,27 +121,26 @@ export async function recoverEndurance(characterId: string): Promise<
   const maxEndurance = tier.max;
   const newEndurance = Math.min(maxEndurance, char.currentEndurance + gain);
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(characters)
-      .set({ currentEndurance: newEndurance, updatedAt: new Date() })
-      .where(eq(characters.id, char.id));
+  // Neon HTTP ne supporte pas les transactions interactives → séquentiel.
+  await db
+    .update(characters)
+    .set({ currentEndurance: newEndurance, updatedAt: new Date() })
+    .where(eq(characters.id, char.id));
 
-    await tx.insert(publicRolls).values({
-      characterId: char.id,
-      characterName: char.name,
-      casterUserId: session.user.id,
-      casterName: session.user.name ?? "—",
-      formula: "Récup Endurance — 1d50 / 2",
-      rolls: [roll],
-      attrName: null,
-      attrScore: null,
-      skillName: null,
-      skillScore: null,
-      total: gain,
-      isCritSucc: 0,
-      isCritFail: 0,
-    });
+  await db.insert(publicRolls).values({
+    characterId: char.id,
+    characterName: char.name,
+    casterUserId: session.user.id,
+    casterName: session.user.name ?? "—",
+    formula: "Récup Endurance — 1d50 / 2",
+    rolls: [roll],
+    attrName: null,
+    attrScore: null,
+    skillName: null,
+    skillScore: null,
+    total: gain,
+    isCritSucc: 0,
+    isCritFail: 0,
   });
 
   revalidatePath("/me");

@@ -73,16 +73,15 @@ export async function approveTraining(requestId: string): Promise<
   const next = char.enduranceTrainings + 1;
   const nextTier = getEnduranceTier(next);
 
-  await db.transaction(async (tx) => {
-    await tx
-      .update(characters)
-      .set({ enduranceTrainings: next, updatedAt: new Date() })
-      .where(eq(characters.id, char.id));
-    await tx
-      .update(trainingRequests)
-      .set({ status: "approved", decidedBy: session.user.id, decidedAt: new Date() })
-      .where(eq(trainingRequests.id, requestId));
-  });
+  // Neon HTTP ne supporte pas les transactions interactives → séquentiel.
+  await db
+    .update(characters)
+    .set({ enduranceTrainings: next, updatedAt: new Date() })
+    .where(eq(characters.id, char.id));
+  await db
+    .update(trainingRequests)
+    .set({ status: "approved", decidedBy: session.user.id, decidedAt: new Date() })
+    .where(eq(trainingRequests.id, requestId));
 
   revalidatePath("/me");
   revalidatePath("/mj");

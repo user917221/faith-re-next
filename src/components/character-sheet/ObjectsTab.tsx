@@ -9,7 +9,7 @@
  * Lecture seule sans handlers (mêmes conventions que les autres panneaux).
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Gem, Minus, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -59,11 +59,24 @@ function LightCrystalsSection({
   onUpdate?: (newCount: number) => Promise<void>;
 }) {
   const [isPending, startTransition] = useTransition();
-  const set = (n: number) => {
-    if (!onUpdate) return;
+  const [draft, setDraft] = useState(String(value));
+
+  // Resynchronise le champ si la valeur serveur change (révalidation).
+  useEffect(() => {
+    setDraft(String(value));
+  }, [value]);
+
+  const commit = (n: number) => {
     const clamped = Math.max(0, Math.min(999, n));
-    if (clamped === value) return;
+    setDraft(String(clamped));
+    if (!onUpdate || clamped === value) return;
     startTransition(() => onUpdate(clamped));
+  };
+
+  const commitDraft = () => {
+    const n = parseInt(draft, 10);
+    if (Number.isFinite(n)) commit(n);
+    else setDraft(String(value)); // saisie invalide → on revient à la valeur courante
   };
 
   return (
@@ -84,19 +97,34 @@ function LightCrystalsSection({
               type="button"
               aria-label="Cristaux −1"
               disabled={isPending || value <= 0}
-              onClick={() => set(value - 1)}
+              onClick={() => commit(value - 1)}
               className="flex size-7 items-center justify-center rounded-md border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
             >
               <Minus size={13} />
             </button>
-            <span className="w-12 text-center font-mono text-2xl font-semibold tabular-nums slashed-zero text-foreground">
-              {value}
-            </span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={999}
+              aria-label="Nombre de cristaux de lumière"
+              value={draft}
+              disabled={isPending}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={commitDraft}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }
+              }}
+              className="h-10 w-20 text-center font-mono text-lg font-semibold tabular-nums slashed-zero"
+            />
             <button
               type="button"
               aria-label="Cristaux +1"
               disabled={isPending || value >= 999}
-              onClick={() => set(value + 1)}
+              onClick={() => commit(value + 1)}
               className="flex size-7 items-center justify-center rounded-md border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
             >
               <Plus size={13} />
