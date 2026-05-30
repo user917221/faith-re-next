@@ -40,7 +40,6 @@ export function SkillRow({
   const description = SKILL_DESCRIPTIONS[name] ?? "";
   const attrName = SKILL_TO_ATTRIBUTE[name];
   const tier = getSkillTier(value);
-  const mod = attrScore + value; // bonus additionné au 2d6 pour CETTE compétence
   const fill = Math.min(100, (value / SKILL_DISPLAY_MAX) * 100);
 
   function adjust(delta: 1 | -1) {
@@ -54,10 +53,11 @@ export function SkillRow({
 
   function openRoll() {
     if (!onOpenRollDrawer || !attrName) return;
+    // Jet de compétence = 2d6 + compétence (sans l'attribut).
     onOpenRollDrawer({
       title: name,
-      bonus: attrScore + value,
-      bonusLabel: `${attrName} (${attrScore}) + ${name} (${value})`,
+      bonus: value,
+      bonusLabel: `${name} (${value})`,
       attrName,
       skillName: name,
     });
@@ -92,14 +92,6 @@ export function SkillRow({
           className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/16"
           aria-hidden
         />
-
-        <span
-          title="Bonus au jet : attribut + compétence"
-          className="mr-2 shrink-0 font-mono text-xs tabular-nums slashed-zero text-foreground-subtle"
-        >
-          {mod >= 0 ? "+" : "−"}
-          {Math.abs(mod)}
-        </span>
 
         <div className="flex shrink-0 items-center gap-1">
           <button

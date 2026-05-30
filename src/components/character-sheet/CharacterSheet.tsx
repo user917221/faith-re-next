@@ -288,9 +288,9 @@ export default function CharacterSheet({
 
             <EnduranceActionPanel onActionCost={onActionCost} />
 
-            {/* Récompenses des paliers (visible à tous ; le « comment atteindre »
-                reste dans l'onglet Évolution, privé MJ). */}
-            <PaliersRewards character={character} />
+            {/* Récompenses des paliers — MJ uniquement (les joueurs ne voient
+                ni les récompenses ni le « comment atteindre »). */}
+            {isMJ && <PaliersRewards character={character} />}
           </div>
         </TabsContent>
 

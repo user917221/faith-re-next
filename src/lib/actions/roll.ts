@@ -97,7 +97,8 @@ export async function rollSkillCheck(
     attrScore,
     skillName: resolvedSkill,
     skillScore,
-    total: diceSum + attrScore + skillScore,
+    // Jet de compétence = 2d6 + compétence ; attribut seul = 2d6 + attribut.
+    total: diceSum + (resolvedSkill ? skillScore : attrScore),
     isCritSucc: d1 === 6 && d2 === 6,
     isCritFail: d1 === 1 && d2 === 1,
   };

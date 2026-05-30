@@ -104,12 +104,14 @@ export async function rollPublicSkill(input: {
   const d2 = rollD6();
   const diceSum = d1 + d2;
   const attrScore = calculateAttribute(skillsMap, input.attrName);
-  const total = diceSum + attrScore + skillScore;
+  // Jet de COMPÉTENCE = 2d6 + compétence ; jet d'attribut seul = 2d6 + attribut.
+  const bonus = resolvedSkill ? skillScore : attrScore;
+  const total = diceSum + bonus;
   const isCritSucc = d1 === 6 && d2 === 6;
   const isCritFail = d1 === 1 && d2 === 1;
 
   const formula = resolvedSkill
-    ? `2d6 + ${input.attrName} + ${resolvedSkill}`
+    ? `2d6 + ${resolvedSkill}`
     : `2d6 + ${input.attrName}`;
 
   const [inserted] = await db
@@ -121,8 +123,8 @@ export async function rollPublicSkill(input: {
       casterName: session.user.name ?? "Inconnu",
       formula,
       rolls: [d1, d2],
-      attrName: input.attrName,
-      attrScore,
+      attrName: resolvedSkill ? null : input.attrName,
+      attrScore: resolvedSkill ? null : attrScore,
       skillName: resolvedSkill,
       skillScore: resolvedSkill ? skillScore : null,
       total,

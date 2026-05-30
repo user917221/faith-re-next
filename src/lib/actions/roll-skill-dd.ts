@@ -72,7 +72,10 @@ export async function rollSkillWithDD(input: {
 
   const d1 = Math.floor(Math.random() * 6) + 1;
   const d2 = Math.floor(Math.random() * 6) + 1;
-  const total = d1 + d2 + attrScore + skillScore;
+  // Règle FAITH:RE — jet de COMPÉTENCE = 2d6 + compétence (sans l'attribut).
+  // Jet d'attribut seul (sans compétence) = 2d6 + attribut.
+  const bonus = resolvedSkill ? skillScore : attrScore;
+  const total = d1 + d2 + bonus;
   const isCritSucc = d1 === 6 && d2 === 6;
   const isCritFail = d1 === 1 && d2 === 1;
 
@@ -91,14 +94,12 @@ export async function rollSkillWithDD(input: {
       characterName: char.name,
       casterUserId: session.user.id,
       casterName: session.user.name ?? "—",
-      formula: resolvedSkill
-        ? `2d6 + ${input.attrName} + ${resolvedSkill}`
-        : `2d6 + ${input.attrName}`,
+      formula: resolvedSkill ? `2d6 + ${resolvedSkill}` : `2d6 + ${input.attrName}`,
       rolls: [d1, d2],
-      attrName: input.attrName,
-      attrScore,
+      attrName: resolvedSkill ? null : input.attrName,
+      attrScore: resolvedSkill ? null : attrScore,
       skillName: resolvedSkill,
-      skillScore,
+      skillScore: resolvedSkill ? skillScore : null,
       total,
       dd: input.dd,
       success: success === null ? null : success ? 1 : 0,

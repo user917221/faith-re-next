@@ -40,12 +40,16 @@ export function RulesView() {
 
       <Panel title="Jets de dés">
         <p>
-          Jet de base :{" "}
-          <span className="font-mono text-foreground">2d6 + attribut + compétence</span>{" "}
-          contre une difficulté (DD).
+          Jet de compétence :{" "}
+          <span className="font-mono text-foreground">2d6 + compétence</span> contre
+          une difficulté (DD).
         </p>
         <ul className="mt-2 list-disc pl-5">
-          <li>Le score d&apos;attribut = somme des 5 compétences de l&apos;attribut.</li>
+          <li>
+            Jet d&apos;attribut seul :{" "}
+            <span className="font-mono text-foreground">2d6 + attribut</span> (somme
+            des 5 compétences de l&apos;attribut).
+          </li>
           <li>
             <span className="font-mono text-foreground">Double 6</span> = réussite
             critique (force le succès).
