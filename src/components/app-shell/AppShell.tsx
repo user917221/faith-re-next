@@ -62,7 +62,13 @@ export function AppShell({
             </kbd>
           </button>
         </header>
-        <div className="flex-1 p-4 lg:p-6 xl:p-8">{children}</div>
+        <div
+          className="flex-1 p-4 lg:p-6 xl:p-8"
+          // la barre d'onglets sticky de la fiche se cale sous la top-bar (h-14)
+          style={{ "--sheet-tabs-top": "3.5rem" } as React.CSSProperties}
+        >
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Dices, X } from "lucide-react";
+import { Dices, X, Plus, Minus } from "lucide-react";
 
 /**
  * Lanceur de dés (cockpit MJ) — un seul type de jet : le **Pool de Dés**.
- * Dés disponibles : d6 / d8 / d50 / d100. Modificateur plat optionnel.
+ * Dés : d6 / d8 / d50 / d100. Modificateur intégré au pool : signe (+/−) +
+ * valeur libre customisable.
  *
  * Contrôlé : si `onRoll` est fourni (cockpit /mj réel → `rollPublicPool`), le
- * jet est persisté et apparaît sur /plateau. Sinon, fallback local (Math.random).
+ * jet est persisté (visible /plateau). Sinon, fallback local (Math.random).
  */
 const DICE = [6, 8, 50, 100];
 
@@ -35,19 +36,18 @@ export function QuickRollPanel({
   characterName?: string;
   onRoll?: (input: RollInput) => Promise<RollResult | null>;
 } = {}) {
-  const [mods, setMods] = useState(0);
-  const [pool, setPool] = useState<PoolDie[]>([
-    { sides: 6, count: 2 },
-    { sides: 8, count: 1 },
-  ]);
+  const [pool, setPool] = useState<PoolDie[]>([{ sides: 6, count: 2 }]);
+  const [modSign, setModSign] = useState<1 | -1>(1);
+  const [modValue, setModValue] = useState(0);
   const [display, setDisplay] = useState<Display | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const modLabel = mods ? ` ${mods > 0 ? "+" : "−"}${Math.abs(mods)}` : "";
+  const modifier = modValue ? modSign * modValue : 0;
+  const modLabel = modifier ? ` ${modifier > 0 ? "+" : "−"}${Math.abs(modifier)}` : "";
 
   const rollPool = () => {
     if (pool.length === 0) return;
-    const input: RollInput = { dice: pool, modifier: mods, keep: "all" };
+    const input: RollInput = { dice: pool, modifier, keep: "all" };
     const label = pool.map((p) => `${p.count}d${p.sides}`).join(" + ") + modLabel;
     startTransition(async () => {
       const res = onRoll ? await onRoll(input) : localRoll(input);
@@ -100,31 +100,6 @@ export function QuickRollPanel({
         </div>
       </section>
 
-      {/* Modificateurs */}
-      <section className="campaign-panel p-4">
-        <p className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-          Modificateurs
-        </p>
-        <div className="grid grid-cols-5 gap-1.5">
-          {[1, 2, 3, 4, 5].map((n) => (
-            <ModBtn
-              key={`p${n}`}
-              label={`+${n}`}
-              active={mods === n}
-              onClick={() => setMods(mods === n ? 0 : n)}
-            />
-          ))}
-          {[1, 2, 3, 4, 5].map((n) => (
-            <ModBtn
-              key={`m${n}`}
-              label={`−${n}`}
-              active={mods === -n}
-              onClick={() => setMods(mods === -n ? 0 : -n)}
-            />
-          ))}
-        </div>
-      </section>
-
       {/* Pool de dés */}
       <section className="campaign-panel p-4">
         <div className="mb-2 flex items-center justify-between">
@@ -172,17 +147,61 @@ export function QuickRollPanel({
                 aria-label="Nombre de dés"
                 className="h-7 w-12 rounded-md border border-border bg-background/40 text-center font-mono text-[11px] tabular-nums text-foreground-muted outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <button
-                type="button"
-                onClick={() => setPool((pl) => pl.filter((_, j) => j !== i))}
-                aria-label="Retirer"
-                className="ml-auto text-foreground-subtle transition-colors hover:text-hp"
-              >
-                <X size={13} />
-              </button>
+              {pool.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setPool((pl) => pl.filter((_, j) => j !== i))}
+                  aria-label="Retirer"
+                  className="ml-auto text-foreground-subtle transition-colors hover:text-hp"
+                >
+                  <X size={13} />
+                </button>
+              )}
             </div>
           ))}
         </div>
+
+        {/* Modificateur intégré — signe (+/−) + valeur libre */}
+        <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground-subtle">
+            Modif.
+          </span>
+          <button
+            type="button"
+            onClick={() => setModSign(1)}
+            aria-label="Modificateur positif"
+            aria-pressed={modSign === 1}
+            className={`flex size-7 items-center justify-center rounded-md border transition-colors ${
+              modSign === 1
+                ? "border-endu/50 bg-endu/15 text-endu"
+                : "border-border text-foreground-subtle hover:text-foreground"
+            }`}
+          >
+            <Plus size={13} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setModSign(-1)}
+            aria-label="Modificateur négatif"
+            aria-pressed={modSign === -1}
+            className={`flex size-7 items-center justify-center rounded-md border transition-colors ${
+              modSign === -1
+                ? "border-hp/50 bg-hp/15 text-hp"
+                : "border-border text-foreground-subtle hover:text-foreground"
+            }`}
+          >
+            <Minus size={13} />
+          </button>
+          <input
+            type="number"
+            min={0}
+            value={modValue}
+            onChange={(e) => setModValue(Math.max(0, +e.target.value || 0))}
+            aria-label="Valeur du modificateur"
+            className="h-7 w-16 rounded-md border border-border bg-background/40 text-center font-mono text-sm tabular-nums slashed-zero text-foreground outline-none [appearance:textfield] focus:border-primary/40 [&::-webkit-inner-spin-button]:appearance-none"
+          />
+        </div>
+
         <button
           type="button"
           onClick={rollPool}
@@ -193,29 +212,5 @@ export function QuickRollPanel({
         </button>
       </section>
     </div>
-  );
-}
-
-function ModBtn({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`h-8 rounded-md border font-mono text-[11px] tabular-nums transition-colors ${
-        active
-          ? "border-primary/40 bg-primary/15 text-primary"
-          : "border-border text-foreground-muted hover:bg-surface-overlay hover:text-foreground"
-      }`}
-    >
-      {label}
-    </button>
   );
 }

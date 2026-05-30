@@ -14,6 +14,7 @@ import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { VitalsHeader } from "./VitalsHeader";
+import { PaliersRewards } from "./PaliersRewards";
 import { ConditionsPanel } from "./ConditionsPanel";
 import { RuneInventory } from "./RuneInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
@@ -227,7 +228,10 @@ export default function CharacterSheet({
         <div
           role="tablist"
           aria-label="Sections de la fiche"
-          className="sticky top-0 z-20 flex w-full items-center gap-1 rounded-lg border border-border bg-background/95 p-1 backdrop-blur-xl"
+          // top piloté par chaque coque : 0 dans le cockpit (scroll du pane
+          // central), 3.5rem sous la top-bar de l'AppShell (scroll document).
+          style={{ top: "var(--sheet-tabs-top, 0px)" }}
+          className="sticky z-20 flex w-full items-center gap-1 rounded-lg border border-border bg-background/95 p-1 backdrop-blur-xl"
         >
           {(
             [
@@ -283,6 +287,10 @@ export default function CharacterSheet({
             )}
 
             <EnduranceActionPanel onActionCost={onActionCost} />
+
+            {/* Récompenses des paliers (visible à tous ; le « comment atteindre »
+                reste dans l'onglet Évolution, privé MJ). */}
+            <PaliersRewards character={character} />
           </div>
         </TabsContent>
 
