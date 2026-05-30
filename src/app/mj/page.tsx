@@ -1,8 +1,15 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { loadAllCharacters, loadCharacter } from "@/lib/load-character";
+import { getCampaignContext, loadStatusNotes } from "@/lib/campaign";
 import { listTrainingRequestsForMJ } from "@/lib/actions";
 import { CockpitShell } from "@/components/cockpit/CockpitShell";
+import {
+  CampaignSelector,
+  CampaignStatusLive,
+  SessionTimerLive,
+} from "@/components/cockpit/CampaignControls";
+import { StatusNotesPanel } from "@/components/cockpit/StatusNotesPanel";
 import {
   MJCharacterClient,
   MJQuickRoll,
@@ -21,13 +28,23 @@ export default async function MjDashboardPage({
   if (!session?.user) redirect("/signin?callbackUrl=/mj");
   if (session.user.role !== "mj") redirect("/me");
 
-  const [allChars, params, pendingRequests] = await Promise.all([
+  const [allChars, params, pendingRequests, ctx] = await Promise.all([
     loadAllCharacters(),
     searchParams,
     listTrainingRequestsForMJ(),
+    getCampaignContext(),
   ]);
   const selectedId = params.id ?? allChars[0]?.id;
-  const selected = selectedId ? await loadCharacter(selectedId) : null;
+  const [selected, statusNotes] = await Promise.all([
+    selectedId ? loadCharacter(selectedId) : Promise.resolve(null),
+    selectedId ? loadStatusNotes(selectedId) : Promise.resolve([]),
+  ]);
+
+  const sessionDate = ctx.session.date.toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 
   return (
     <CockpitShell
@@ -36,6 +53,31 @@ export default async function MjDashboardPage({
         role: session.user.role,
         image: session.user.image ?? null,
       }}
+      campaignName={ctx.campaign.name}
+      sessionNumber={ctx.session.number}
+      sessionDate={sessionDate}
+      campaignSelector={
+        <CampaignSelector
+          campaign={{ id: ctx.campaign.id, name: ctx.campaign.name }}
+          campaigns={ctx.campaigns}
+        />
+      }
+      campaignStatus={
+        <CampaignStatusLive
+          campaignId={ctx.campaign.id}
+          threatLevel={ctx.campaign.threatLevel}
+          morale={ctx.campaign.partyMorale}
+          questsActive={ctx.campaign.questsActive}
+          downtimeDays={ctx.campaign.downtimeDays}
+        />
+      }
+      sessionTimer={
+        <SessionTimerLive
+          sessionId={ctx.session.id}
+          elapsedSeconds={ctx.session.elapsedSeconds}
+          running={ctx.session.running}
+        />
+      }
       roster={
         <>
           <RosterNav characters={allChars} selectedId={selectedId} />
@@ -44,7 +86,10 @@ export default async function MjDashboardPage({
       }
       rollPanel={
         selected ? (
-          <MJQuickRoll characterId={selected.id} characterName={selected.name} />
+          <div className="flex flex-col gap-3">
+            <MJQuickRoll characterId={selected.id} characterName={selected.name} />
+            <StatusNotesPanel characterId={selected.id} notes={statusNotes} />
+          </div>
         ) : undefined
       }
     >

@@ -56,6 +56,9 @@ export function CockpitShell({
   roster,
   children,
   rollPanel,
+  campaignSelector,
+  campaignStatus,
+  sessionTimer,
 }: {
   user: ShellUser;
   campaignName?: string;
@@ -64,6 +67,9 @@ export function CockpitShell({
   roster: ReactNode;
   children: ReactNode;
   rollPanel?: ReactNode;
+  campaignSelector?: ReactNode;
+  campaignStatus?: ReactNode;
+  sessionTimer?: ReactNode;
 }) {
   const openPalette = () =>
     document.dispatchEvent(
@@ -109,8 +115,8 @@ export function CockpitShell({
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-border p-3">
-          <CampaignStatus />
-          <SessionTimer />
+          {campaignStatus ?? <CampaignStatus />}
+          {sessionTimer ?? <SessionTimer />}
         </div>
       </aside>
 
@@ -118,13 +124,15 @@ export function CockpitShell({
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-md border border-border bg-card/60 px-2.5 py-1.5 text-sm text-foreground transition-colors hover:bg-surface-overlay"
-          >
-            <span className="truncate font-medium">{campaignName}</span>
-            <ChevronDown size={14} className="text-foreground-subtle" />
-          </button>
+          {campaignSelector ?? (
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-md border border-border bg-card/60 px-2.5 py-1.5 text-sm text-foreground transition-colors hover:bg-surface-overlay"
+            >
+              <span className="truncate font-medium">{campaignName}</span>
+              <ChevronDown size={14} className="text-foreground-subtle" />
+            </button>
+          )}
 
           {user.role === "mj" && (
             <span className="hidden items-center gap-1.5 rounded-md border border-primary/35 bg-primary/12 px-2 py-1 font-mono text-[11px] uppercase tracking-wide text-primary sm:flex">

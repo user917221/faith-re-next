@@ -216,6 +216,48 @@ export const trainingRequests = pgTable("training_request", {
   note: text("note"),
 });
 
+// Campagne : 1 table de jeu = 1 campagne active. Statut narratif (menace,
+// moral, quêtes, repos) piloté par le MJ, affiché dans la sidebar cockpit.
+export const campaigns = pgTable("campaign", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  threatLevel: integer("threat_level").default(3).notNull(), // 0..5
+  partyMorale: integer("party_morale").default(3).notNull(), // 0..5
+  questsActive: integer("quests_active").default(0).notNull(),
+  downtimeDays: integer("downtime_days").default(0).notNull(),
+  isActive: integer("is_active").default(0).notNull(), // une seule active
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Séance de jeu (NB : « session » est pris par Auth.js → `game_session`).
+// Minuteur persistant : elapsedSeconds accumulé + timerStartedAt (null = pause).
+export const gameSessions = pgTable("game_session", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  number: integer("number").default(1).notNull(),
+  date: timestamp("date").defaultNow().notNull(),
+  elapsedSeconds: integer("elapsed_seconds").default(0).notNull(),
+  timerStartedAt: timestamp("timer_started_at"), // null = en pause
+  isActive: integer("is_active").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Notes de statut sur un perso (MJ/joueur) : add/remove, auteur + horodatage.
+export const statusNotes = pgTable("status_note", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  characterId: uuid("character_id")
+    .notNull()
+    .references(() => characters.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  authorUserId: text("author_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  authorName: text("author_name").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ---------------- Relations ----------------
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -230,12 +272,35 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
   skills: many(characterSkills),
   runesInventory: many(characterRunes),
   conditions: many(conditions),
+  statusNotes: many(statusNotes),
 }));
 
 export const conditionsRelations = relations(conditions, ({ one }) => ({
   character: one(characters, {
     fields: [conditions.characterId],
     references: [characters.id],
+  }),
+}));
+
+export const campaignsRelations = relations(campaigns, ({ many }) => ({
+  sessions: many(gameSessions),
+}));
+
+export const gameSessionsRelations = relations(gameSessions, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [gameSessions.campaignId],
+    references: [campaigns.id],
+  }),
+}));
+
+export const statusNotesRelations = relations(statusNotes, ({ one }) => ({
+  character: one(characters, {
+    fields: [statusNotes.characterId],
+    references: [characters.id],
+  }),
+  author: one(users, {
+    fields: [statusNotes.authorUserId],
+    references: [users.id],
   }),
 }));
 
@@ -294,3 +359,6 @@ export type PublicRoll = typeof publicRolls.$inferSelect;
 export type Condition = typeof conditions.$inferSelect;
 export type NewCondition = typeof conditions.$inferInsert;
 export type ConditionKind = (typeof conditionKindEnum.enumValues)[number];
+export type Campaign = typeof campaigns.$inferSelect;
+export type GameSession = typeof gameSessions.$inferSelect;
+export type StatusNote = typeof statusNotes.$inferSelect;

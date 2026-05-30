@@ -43,6 +43,18 @@ export {
 } from "./combat";
 
 export {
+  updateCampaignStatus,
+  setActiveCampaign,
+  createCampaign,
+  advanceSession,
+  startSessionTimer,
+  pauseSessionTimer,
+  addStatusNote,
+  removeStatusNote,
+  type CampaignStatusPatch,
+} from "./campaign";
+
+export {
   requestTraining,
   approveTraining,
   rejectTraining,
