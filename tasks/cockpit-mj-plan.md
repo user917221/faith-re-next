@@ -15,14 +15,16 @@ Auth+rôles, DB Neon/Drizzle, `characters` (vitals/xp/entraînements/flux/avatar
 
 ---
 
-## Phase 1 — Shell cockpit & layout (le squelette) · ~2 j
+## Phase 1 — Shell cockpit & layout (le squelette) · ~2 j ✅ FAIT (2026-05-30, option B sobre)
 Le plus gros saut visuel : passer de « sidebar + 1 contenu » à la grille cockpit.
-- [ ] `AppShell` → top bar enrichie : sélecteur de campagne, badge **GM Mode** (crown), `Session N`, date, ⌘K, avatar.
-- [ ] `AppSidebar` → nav complète (Dashboard / Roster / Sessions / Journal / Maps / NPCs / Items / Rules / Dice / Settings) + bloc **Campaign Status** + **Session Timer** en pied.
-- [ ] Nouvelle route `/dashboard` (ou refonte `/mj`) : grille 3 colonnes responsive **Roster | Fiche centrale | Roll panel** (`ResizablePanelGroup` déjà dispo).
-- [ ] Bottom bar : « Last saved », GM Screen, **Player View** (toggle), **Export PDF**.
-- [ ] État sélection : cliquer un perso du roster → charge le panneau central (state + URL `?c=<id>`).
-- [ ] Build vert + capture Playwright.
+- [x] `CockpitShell` → top bar enrichie : sélecteur de campagne (stub), badge **Mode MJ** (crown, si role=mj), `Session N`, date, ⌘K, avatar.
+- [x] Nav-sidebar → nav complète (Dashboard / Roster / Sessions / Journal / Maps / NPCs / Items / Règles / Dés / Réglages) + bloc **Campaign Status** + **Session Timer** en pied.
+- [x] Refonte `/mj` : grille 3 panneaux **Roster | Fiche centrale | Jet Rapide** (panes flex `w-72` responsive md/xl — _pas ResizablePanelGroup : différé, fixed-width suffit Phase 1_). Données réelles (RosterNav + PendingTrainingPanel + MJCharacterClient câblé server actions). Banc d'essai public `/cockpit` consomme le même shell (mock).
+- [x] Bottom bar : « Sauvegardé », Écran MJ, **Vue joueur**, **Export PDF** (visuels ; toggles câblés Phase 8).
+- [x] État sélection : roster → fiche centrale via `<Link href=/mj?id=>` (URL `?id=`, pas `?c=`).
+- [x] Build vert (exit 0) + capture Playwright `/cockpit` OK. Commit `8894df0` poussé master.
+
+_Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne + Session N/date + Session Timer persistance + Campaign Status (Phase 5) ; toggles bottom bar (Phase 8) ; nav-sidebar non-Dashboard inerte (phases 5-7). `QuickRollPanel` = mock `Math.random` (moteur réel Phase 3).
 
 ## Phase 2 — Stats de combat + conditions · ~1.5 j
 - [ ] Schema (`db/schema.ts`) : ajouter `initiative`, `armor`, `movement`, `proficiency` (ou dérivés) sur `character` ; nouvelle table `condition` (characterId, label, kind: focused/wounded/buff/debuff/flux, color). `drizzle-kit push`.

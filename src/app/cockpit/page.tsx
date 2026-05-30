@@ -8,7 +8,13 @@
 
 import { useCallback, useState } from "react";
 import CharacterSheet from "@/components/character-sheet";
-import type { Character, VitalType } from "@/components/character-sheet/types";
+import type {
+  Character,
+  CombatStatKey,
+  ConditionItem,
+  ConditionKind,
+  VitalType,
+} from "@/components/character-sheet/types";
 import { ALL_SKILLS } from "@/lib/skills";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
@@ -46,15 +52,44 @@ function mk(id: string, name: string, hp: number, maxHp: number): Character {
     technicalPalier: 1,
     technicalLabel: "Initié",
     tier: "T3",
+    initiative: 3,
+    armor: 2,
+    movement: 4,
+    proficiency: 2,
+    race: null,
+    pronouns: null,
+    charClass: null,
+    conditions: [],
     runesInventory: [],
   };
 }
 
 const INITIAL: Character[] = [
-  mk("c1", "Seraphina", 42, 42),
-  mk("c2", "Darius", 56, 56),
+  {
+    ...mk("c1", "Seraphina", 42, 42),
+    race: "Sylvenne",
+    pronouns: "elle/elle",
+    charClass: "Tisseuse de Flux",
+    initiative: 5,
+    armor: 1,
+    conditions: [
+      { id: "x1", label: "Concentrée", kind: "focus" },
+      { id: "x2", label: "Bénédiction", kind: "buff" },
+    ],
+  },
+  {
+    ...mk("c2", "Darius", 56, 56),
+    race: "Humain",
+    charClass: "Garde du Serment",
+    armor: 6,
+    initiative: 1,
+    conditions: [{ id: "x3", label: "Saignement", kind: "wound" }],
+  },
   mk("c3", "Mira", 38, 38),
-  mk("c4", "Joric", 29, 36),
+  {
+    ...mk("c4", "Joric", 29, 36),
+    conditions: [{ id: "x4", label: "Étourdi", kind: "debuff" }],
+  },
   mk("c5", "Elowen", 31, 31),
   mk("c6", "Calder", 27, 27),
 ];
@@ -104,6 +139,35 @@ export default function CockpitPreview() {
       patch(selId, (c) => ({
         ...c,
         currentFlux: Math.max(0, Math.min(c.maxFlux, c.currentFlux + delta)),
+      }));
+    },
+    [patch, selId],
+  );
+
+  const onCombatStatChange = useCallback(
+    async (key: CombatStatKey, delta: number) => {
+      patch(selId, (c) => ({ ...c, [key]: Math.max(0, c[key] + delta) }));
+    },
+    [patch, selId],
+  );
+
+  const onAddCondition = useCallback(
+    async (input: { label: string; kind: ConditionKind }) => {
+      const next: ConditionItem = {
+        id: `cond-${Math.round(performance.now())}`,
+        label: input.label,
+        kind: input.kind,
+      };
+      patch(selId, (c) => ({ ...c, conditions: [...c.conditions, next] }));
+    },
+    [patch, selId],
+  );
+
+  const onRemoveCondition = useCallback(
+    async (conditionId: string) => {
+      patch(selId, (c) => ({
+        ...c,
+        conditions: c.conditions.filter((x) => x.id !== conditionId),
       }));
     },
     [patch, selId],
@@ -172,6 +236,9 @@ export default function CockpitPreview() {
         onVitalChange={onVitalChange}
         onSkillChange={onSkillChange}
         onFluxChange={onFluxChange}
+        onCombatStatChange={onCombatStatChange}
+        onAddCondition={onAddCondition}
+        onRemoveCondition={onRemoveCondition}
       />
     </CockpitShell>
   );

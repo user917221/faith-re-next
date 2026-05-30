@@ -26,6 +26,14 @@ import type { AdapterAccountType } from "next-auth/adapters";
 export const userRoleEnum = pgEnum("user_role", ["mj", "player", "spectator"]);
 export const requestStatusEnum = pgEnum("request_status", ["pending", "approved", "rejected"]);
 export const runeTypeEnum = pgEnum("rune_type", ["utilitaire", "armement", "predefinie"]);
+// Nature d'une condition active (pilote la couleur du chip côté UI).
+export const conditionKindEnum = pgEnum("condition_kind", [
+  "buff", // bénéfique (vert)
+  "debuff", // pénalité (rouge)
+  "wound", // blessure / saignement (orange-rouge)
+  "focus", // concentration / canalisation (cyan)
+  "neutral", // marqueur narratif (gris)
+]);
 
 // ---------------- Auth.js tables (drizzle adapter spec) ----------------
 
@@ -99,6 +107,15 @@ export const characters = pgTable("character", {
   technicalTrainings: integer("technical_trainings").default(0).notNull(),
   // combats réels (condition de palier de Flux)
   combatsReal: integer("combats_real").default(0).notNull(),
+  // stats de combat (cockpit MJ — Phase 2)
+  initiative: integer("initiative").default(0).notNull(),
+  armor: integer("armor").default(0).notNull(),
+  movement: integer("movement").default(4).notNull(), // cases / ~5 m
+  proficiency: integer("proficiency").default(2).notNull(), // bonus de maîtrise
+  // tags d'identité (cockpit MJ — Phase 2 ; édition fine en Phase 6 BIO)
+  race: text("race"),
+  pronouns: text("pronouns"),
+  charClass: text("char_class"),
   // vitals runtime (les max sont dérivés)
   currentHp: integer("current_hp").default(45).notNull(),
   currentMental: integer("current_mental").default(45).notNull(),
@@ -140,6 +157,18 @@ export const characterRunes = pgTable("character_rune", {
   name: text("name").notNull(),
   type: runeTypeEnum("type").notNull(),
   description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Conditions actives d'un perso (états : focalisé, blessé, buff, debuff…).
+// Affichées en chips colorés dans le cockpit. Add/remove par MJ ou owner.
+export const conditions = pgTable("condition", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  characterId: uuid("character_id")
+    .notNull()
+    .references(() => characters.id, { onDelete: "cascade" }),
+  label: text("label").notNull(),
+  kind: conditionKindEnum("kind").default("neutral").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -200,6 +229,14 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
   }),
   skills: many(characterSkills),
   runesInventory: many(characterRunes),
+  conditions: many(conditions),
+}));
+
+export const conditionsRelations = relations(conditions, ({ one }) => ({
+  character: one(characters, {
+    fields: [conditions.characterId],
+    references: [characters.id],
+  }),
 }));
 
 export const characterRunesRelations = relations(characterRunes, ({ one }) => ({
@@ -254,3 +291,6 @@ export type TrainingRequest = typeof trainingRequests.$inferSelect;
 export type CharacterRune = typeof characterRunes.$inferSelect;
 export type NewCharacterRune = typeof characterRunes.$inferInsert;
 export type PublicRoll = typeof publicRolls.$inferSelect;
+export type Condition = typeof conditions.$inferSelect;
+export type NewCondition = typeof conditions.$inferInsert;
+export type ConditionKind = (typeof conditionKindEnum.enumValues)[number];

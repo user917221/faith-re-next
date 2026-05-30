@@ -47,6 +47,9 @@ import {
   updateTechnicalTrainings,
   addRune,
   removeRune,
+  updateCombatStats,
+  addCondition,
+  removeCondition,
   type TrainingRequestWithChar,
 } from "@/lib/actions";
 
@@ -411,6 +414,33 @@ export function MJCharacterClient({ character }: { character: Character }) {
           throw new Error(res.reason);
         }
         toast("Rune retirée");
+        refresh();
+      }}
+      onCombatStatChange={async (key, delta) => {
+        const res = await updateCombatStats(character.id, {
+          [key]: character[key] + delta,
+        });
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        refresh();
+      }}
+      onAddCondition={async (input) => {
+        const res = await addCondition(character.id, input);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast.success(`Condition « ${input.label} »`);
+        refresh();
+      }}
+      onRemoveCondition={async (conditionId) => {
+        const res = await removeCondition(conditionId);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
         refresh();
       }}
     />

@@ -5,4 +5,7 @@ export type {
   ActionType,
   VitalType,
   CharacterSheetProps,
+  CombatStatKey,
+  ConditionItem,
+  ConditionKind,
 } from "./types";

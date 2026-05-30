@@ -36,6 +36,13 @@ export {
 export { addRune, removeRune } from "./runes";
 
 export {
+  updateCombatStats,
+  addCondition,
+  removeCondition,
+  type CombatStatsPatch,
+} from "./combat";
+
+export {
   requestTraining,
   approveTraining,
   rejectTraining,

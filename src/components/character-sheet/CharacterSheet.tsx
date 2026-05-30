@@ -14,6 +14,8 @@ import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { VitalsHeader } from "./VitalsHeader";
+import { CombatStatsBanner } from "./CombatStatsBanner";
+import { ConditionsPanel } from "./ConditionsPanel";
 import { RuneInventory } from "./RuneInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
@@ -61,6 +63,9 @@ export default function CharacterSheet({
   onTechnicalChange,
   onAddRune,
   onRemoveRune,
+  onCombatStatChange,
+  onAddCondition,
+  onRemoveCondition,
 }: CharacterSheetProps) {
   const allocated = countAllocatedPoints(character.skills);
   const isCapped = allocated >= SKILL_CAP;
@@ -121,12 +126,27 @@ export default function CharacterSheet({
               <HeaderBadge>{isMJ ? "MJ" : "Joueur"}</HeaderBadge>
               <HeaderBadge>{character.tier}</HeaderBadge>
               <HeaderBadge>Flux {character.fluxLabel}</HeaderBadge>
+              {character.charClass && (
+                <HeaderBadge accent>{character.charClass}</HeaderBadge>
+              )}
             </div>
 
             <p className="mt-1.5 text-sm text-foreground-muted">
               {character.nom && <span>{character.nom}</span>}
               {character.nom && (
                 <span className="mx-2 text-foreground-subtle">·</span>
+              )}
+              {character.race && (
+                <>
+                  <span>{character.race}</span>
+                  <span className="mx-2 text-foreground-subtle">·</span>
+                </>
+              )}
+              {character.pronouns && (
+                <>
+                  <span className="font-mono text-xs">{character.pronouns}</span>
+                  <span className="mx-2 text-foreground-subtle">·</span>
+                </>
               )}
               {isMJ && (
                 <>
@@ -240,6 +260,18 @@ export default function CharacterSheet({
         {/* ─── Vitaux + actions ─── stack vertical (flux v0) ─── */}
         <TabsContent value="vitaux">
           <div className="flex flex-col gap-4">
+            {/* Stats de combat + conditions actives (Phase 2) */}
+            <CombatStatsBanner
+              character={character}
+              onCombatStatChange={onCombatStatChange}
+            />
+
+            <ConditionsPanel
+              conditions={character.conditions}
+              onAddCondition={onAddCondition}
+              onRemoveCondition={onRemoveCondition}
+            />
+
             {/* 4 jauges circulaires vitales (Santé / Mental / Endurance / Flux) */}
             <VitalsHeader
               character={character}

@@ -16,18 +16,31 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   const [name, setName] = useState(character.name);
   const [nom, setNom] = useState(character.nom);
   const [age, setAge] = useState(character.age);
+  const [race, setRace] = useState(character.race ?? "");
+  const [pronouns, setPronouns] = useState(character.pronouns ?? "");
+  const [charClass, setCharClass] = useState(character.charClass ?? "");
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
 
   const dirty =
     name.trim() !== character.name ||
     nom.trim() !== character.nom ||
-    age !== character.age;
+    age !== character.age ||
+    race.trim() !== (character.race ?? "") ||
+    pronouns.trim() !== (character.pronouns ?? "") ||
+    charClass.trim() !== (character.charClass ?? "");
 
   function save() {
     if (!onProfileChange || !dirty) return;
     startTransition(async () => {
-      await onProfileChange({ name: name.trim(), nom: nom.trim(), age });
+      await onProfileChange({
+        name: name.trim(),
+        nom: nom.trim(),
+        age,
+        race: race.trim(),
+        pronouns: pronouns.trim(),
+        charClass: charClass.trim(),
+      });
       setFeedback("Profil sauvegardé.");
       setTimeout(() => setFeedback(null), 2000);
     });
@@ -71,6 +84,50 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               type="text"
               value={nom}
               onChange={(e) => setNom(e.target.value)}
+              disabled={!onProfileChange}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="profile-race" className="text-foreground-muted">
+              Race / espèce
+            </Label>
+            <Input
+              id="profile-race"
+              type="text"
+              value={race}
+              maxLength={40}
+              placeholder="—"
+              onChange={(e) => setRace(e.target.value)}
+              disabled={!onProfileChange}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="profile-pronouns" className="text-foreground-muted">
+              Pronoms
+            </Label>
+            <Input
+              id="profile-pronouns"
+              type="text"
+              value={pronouns}
+              maxLength={40}
+              placeholder="—"
+              onChange={(e) => setPronouns(e.target.value)}
+              disabled={!onProfileChange}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="profile-class" className="text-foreground-muted">
+              Classe / rôle
+            </Label>
+            <Input
+              id="profile-class"
+              type="text"
+              value={charClass}
+              maxLength={40}
+              placeholder="—"
+              onChange={(e) => setCharClass(e.target.value)}
               disabled={!onProfileChange}
             />
           </div>

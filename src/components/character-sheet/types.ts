@@ -39,9 +39,30 @@ export type Character = {
   technicalPalier: number;
   technicalLabel: string;
   tier: string; // "T{niveau}"
+  // --- Stats de combat (Phase 2) ---
+  initiative: number;
+  armor: number;
+  movement: number;
+  proficiency: number;
+  // --- Tags d'identité (Phase 2) ---
+  race: string | null;
+  pronouns: string | null;
+  charClass: string | null;
+  // --- Conditions actives (Phase 2) ---
+  conditions: ConditionItem[];
   // --- Inventaire de runes ---
   runesInventory: RuneItem[];
 };
+
+export type ConditionKind = "buff" | "debuff" | "wound" | "focus" | "neutral";
+
+export type ConditionItem = {
+  id: string;
+  label: string;
+  kind: ConditionKind;
+};
+
+export type CombatStatKey = "initiative" | "armor" | "movement" | "proficiency";
 
 export type RuneItem = {
   id: string;
@@ -57,6 +78,9 @@ export type ProfilePatch = {
   name?: string;
   nom?: string;
   age?: number;
+  race?: string;
+  pronouns?: string;
+  charClass?: string;
 };
 
 export type PendingTrainingRequest = {
@@ -89,6 +113,13 @@ export type CharacterSheetProps = {
     description?: string;
   }) => Promise<void>;
   onRemoveRune?: (runeId: string) => Promise<void>;
+  // --- Combat & conditions (Phase 2) ---
+  onCombatStatChange?: (key: CombatStatKey, delta: number) => Promise<void>;
+  onAddCondition?: (input: {
+    label: string;
+    kind: ConditionKind;
+  }) => Promise<void>;
+  onRemoveCondition?: (conditionId: string) => Promise<void>;
   onRecoverHp?: () => Promise<{ gain: number; d1: number; d2: number; ecaille: number; newHp: number; maxHp: number }>;
   onRecoverEndurance?: () => Promise<{ gain: number; roll: number; newEndurance: number; maxEndurance: number }>;
   onTogglePresence?: () => Promise<void>;

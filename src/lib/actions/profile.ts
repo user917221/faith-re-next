@@ -10,7 +10,16 @@ type ProfilePatch = {
   name?: string;
   nom?: string;
   age?: number;
+  race?: string;
+  pronouns?: string;
+  charClass?: string;
 };
+
+// Normalise un tag d'identité optionnel : trim, cap 40, vide → null (effacement).
+function tag(v: string): string | null {
+  const t = v.trim();
+  return t.length ? t.slice(0, 40) : null;
+}
 
 export async function updateProfile(
   characterId: string,
@@ -18,7 +27,15 @@ export async function updateProfile(
 ): Promise<{ ok: true; character: { name: string; nom: string; age: number } } | { ok: false; reason: string }> {
   await assertCanEdit(characterId);
 
-  const update: Partial<{ name: string; nom: string; age: number; updatedAt: Date }> = {
+  const update: Partial<{
+    name: string;
+    nom: string;
+    age: number;
+    race: string | null;
+    pronouns: string | null;
+    charClass: string | null;
+    updatedAt: Date;
+  }> = {
     updatedAt: new Date(),
   };
 
@@ -37,6 +54,9 @@ export async function updateProfile(
     if (patch.age < 1 || patch.age > 999) return { ok: false, reason: "Âge hors plage (1–999)" };
     update.age = Math.floor(patch.age);
   }
+  if (typeof patch.race === "string") update.race = tag(patch.race);
+  if (typeof patch.pronouns === "string") update.pronouns = tag(patch.pronouns);
+  if (typeof patch.charClass === "string") update.charClass = tag(patch.charClass);
 
   const [row] = await db
     .update(characters)

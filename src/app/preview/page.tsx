@@ -5,6 +5,8 @@ import CharacterSheet from "@/components/character-sheet";
 import type {
   ActionType,
   Character,
+  CombatStatKey,
+  ConditionKind,
   VitalType,
 } from "@/components/character-sheet";
 import { ENDURANCE_COSTS, calculateLevel } from "@/lib/faith-system";
@@ -41,6 +43,17 @@ function buildMockBrad(): Character {
     technicalPalier: 1,
     technicalLabel: "Initié",
     tier: "T3",
+    initiative: 4,
+    armor: 3,
+    movement: 4,
+    proficiency: 2,
+    race: "Humain",
+    pronouns: "il/lui",
+    charClass: "Pyromancien",
+    conditions: [
+      { id: "c1", label: "Échauffé", kind: "buff" },
+      { id: "c2", label: "Concentré", kind: "focus" },
+    ],
     runesInventory: [
       { id: "r1", name: "Brasier mineur", type: "armement", description: "Inflige 1d6 feu." },
       { id: "r2", name: "Pas-léger", type: "utilitaire", description: null },
@@ -163,12 +176,57 @@ export default function PreviewPage() {
   }, [character.maxEndurance]);
 
   const onProfileChange = useCallback(
-    async (patch: { name?: string; nom?: string; age?: number }) => {
+    async (patch: {
+      name?: string;
+      nom?: string;
+      age?: number;
+      race?: string;
+      pronouns?: string;
+      charClass?: string;
+    }) => {
       await Promise.resolve();
-      setCharacter((c) => ({ ...c, ...patch }));
+      setCharacter((c) => ({
+        ...c,
+        ...patch,
+        race: patch.race !== undefined ? patch.race || null : c.race,
+        pronouns:
+          patch.pronouns !== undefined ? patch.pronouns || null : c.pronouns,
+        charClass:
+          patch.charClass !== undefined ? patch.charClass || null : c.charClass,
+      }));
     },
     [],
   );
+
+  const onCombatStatChange = useCallback(
+    async (key: CombatStatKey, delta: number) => {
+      await Promise.resolve();
+      setCharacter((c) => ({ ...c, [key]: Math.max(0, c[key] + delta) }));
+    },
+    [],
+  );
+
+  const onAddCondition = useCallback(
+    async (input: { label: string; kind: ConditionKind }) => {
+      await Promise.resolve();
+      setCharacter((c) => ({
+        ...c,
+        conditions: [
+          ...c.conditions,
+          { id: crypto.randomUUID(), label: input.label, kind: input.kind },
+        ],
+      }));
+    },
+    [],
+  );
+
+  const onRemoveCondition = useCallback(async (conditionId: string) => {
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      conditions: c.conditions.filter((x) => x.id !== conditionId),
+    }));
+  }, []);
 
   const onAddRune = useCallback(
     async (input: {
@@ -262,6 +320,9 @@ export default function PreviewPage() {
           onAddRune={onAddRune}
           onRemoveRune={onRemoveRune}
           onRequestTraining={onRequestTraining}
+          onCombatStatChange={onCombatStatChange}
+          onAddCondition={onAddCondition}
+          onRemoveCondition={onRemoveCondition}
         />
       </div>
     </main>

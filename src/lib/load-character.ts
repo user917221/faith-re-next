@@ -23,7 +23,7 @@ export type HydratedCharacter = Character;
 export async function loadCharacter(characterId: string): Promise<HydratedCharacter | null> {
   const row = await db.query.characters.findFirst({
     where: eq(characters.id, characterId),
-    with: { skills: true, runesInventory: true },
+    with: { skills: true, runesInventory: true, conditions: true },
   });
   if (!row) return null;
   return hydrate(row);
@@ -31,7 +31,7 @@ export async function loadCharacter(characterId: string): Promise<HydratedCharac
 
 export async function loadAllCharacters(): Promise<HydratedCharacter[]> {
   const rows = await db.query.characters.findMany({
-    with: { skills: true, runesInventory: true },
+    with: { skills: true, runesInventory: true, conditions: true },
   });
   return rows.map(hydrate).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -39,7 +39,7 @@ export async function loadAllCharacters(): Promise<HydratedCharacter[]> {
 export async function loadCharacterForUser(userId: string): Promise<HydratedCharacter | null> {
   const row = await db.query.characters.findFirst({
     where: eq(characters.ownerUserId, userId),
-    with: { skills: true, runesInventory: true },
+    with: { skills: true, runesInventory: true, conditions: true },
   });
   if (!row) return null;
   return hydrate(row);
@@ -52,6 +52,11 @@ type CharacterRow = typeof characters.$inferSelect & {
     name: string;
     type: "utilitaire" | "armement" | "predefinie";
     description: string | null;
+  }[];
+  conditions?: {
+    id: string;
+    label: string;
+    kind: "buff" | "debuff" | "wound" | "focus" | "neutral";
   }[];
 };
 
@@ -95,6 +100,21 @@ function hydrate(row: CharacterRow): HydratedCharacter {
     technicalPalier: techTier.palier,
     technicalLabel: techTier.label,
     tier: tierLabel(row.xp),
+    // --- Stats de combat ---
+    initiative: row.initiative,
+    armor: row.armor,
+    movement: row.movement,
+    proficiency: row.proficiency,
+    // --- Tags d'identité ---
+    race: row.race ?? null,
+    pronouns: row.pronouns ?? null,
+    charClass: row.charClass ?? null,
+    // --- Conditions actives ---
+    conditions: (row.conditions ?? []).map((c) => ({
+      id: c.id,
+      label: c.label,
+      kind: c.kind,
+    })),
     // --- Inventaire ---
     runesInventory: (row.runesInventory ?? []).map((r) => ({
       id: r.id,
