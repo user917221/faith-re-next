@@ -46,11 +46,12 @@ _Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne
 - [x] `SkillRow` enrichi : MOD + chip de palier coloré + barre de niveau, allocation+jet conservés. Table 2-col par attribut (= structure réelle FAITH:RE, équivalent CORE/SPECIALIST).
 - [~] Refonte 6 onglets (GEAR/BIO/NOTES/EFFECTS) **repoussée en Phase 6** (où le contenu existe) pour éviter coquilles vides + re-travail. Onglets actuels Vitaux/Compétences/Évolution/Profil conservés.
 
-## Phase 5 — Campagne / Sessions / Status Notes · ~1.5 j
-- [ ] Schema : `campaign` (name, threatLevel, partyMorale, questsActive, downtime), `session` (campaignId, number, date, elapsedSeconds), `status_note` (characterId, text, authorId, createdAt). Push.
-- [ ] Sélecteur de campagne (top bar) + Session N + date + **Session Timer** live (start/pause, persisté).
-- [ ] **Campaign Status** (sidebar) : Threat Level / Party Morale (barres), Quests Active, Downtime.
-- [ ] **STATUS NOTES** (panneau droit fiche) : add/edit, auteur + horodatage relatif.
+## Phase 5 — Campagne / Sessions / Status Notes · ~1.5 j ✅ FAIT (2026-05-30, commit 1def988)
+- [x] Schema : `campaign` + `game_session` (NB : `session` réservé Auth.js !) + `status_note`. Push Neon OK. Amorce paresseuse (lib/campaign.ts getCampaignContext) — pas de seed. Vérifié DB (bootstrap « Nuit des Étoiles Filantes » + Session 1).
+- [x] Sélecteur de campagne (CampaignSelector : switch/create/advanceSession) + Session N + date. **SessionTimer** live persisté (start/pause via timerStartedAt, pas de write/seconde).
+- [x] **CampaignStatus** sidebar éditable (Menace/Moral barres cliquables, Quêtes/Repos steppers) → updateCampaignStatus optimiste.
+- [x] **StatusNotesPanel** (pane droit /mj sous Jet Rapide) : add/remove, auteur + horodatage relatif. Actions add/removeStatusNote (MJ ou owner).
+- [x] CockpitShell : 3 slots (campaignSelector/campaignStatus/sessionTimer) + fallback stubs pour /cockpit.
 
 ## Phase 6 — Modules de contenu des onglets · ~3 j
 - [ ] **GEAR / ITEMS** : table `item` (characterId, name, type, qty, equipped, description) + UI inventaire (liste + équipé). _Distinct des runes._

@@ -4,7 +4,10 @@
 
 ## État courant — 2026-05-30 · Claude Code (Opus) · /loop autonome Phases 2-8
 
-> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-4. En cours : Phase 5.**
+> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-5. En cours : Phase 6.**
+
+### Phase 5 — FAIT (`1def988`) : campagne / séances / notes de statut
+3 tables Neon (`campaign`, `game_session` [pas `session` = Auth.js !], `status_note`). lib/campaign.ts (amorce paresseuse + temps live). Actions campaign.ts (statut/sélecteur/timer/notes). CockpitShell 3 slots. CampaignSelector + CampaignStatus éditable + SessionTimer persisté + StatusNotesPanel. Câblé /mj.
 
 ### Phase 4 — FAIT (`5562dbe`) : compétences rang/MOD/palier
 RANK/MOD/PROG dérivés des points (moteur de jets inchangé). `getSkillTier`+`SKILL_TIERS` (Novice/Confirmé/Expert/Maître), `SkillRow` enrichi (MOD + chip palier + barre niveau), `SkillTierLegend`. Refonte 6 onglets repoussée en Phase 6 (éviter coquilles vides).
