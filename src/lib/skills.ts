@@ -70,22 +70,22 @@ export type SkillTierInfo = {
 };
 
 export const SKILL_TIERS: SkillTierInfo[] = [
-  { key: "novice", label: "Novice", min: 0, range: "0–1", rgb: "150,150,168" },
-  { key: "trained", label: "Confirmé", min: 2, range: "2–3", rgb: "130,169,107" },
-  { key: "expert", label: "Expert", min: 4, range: "4–5", rgb: "111,166,184" },
-  { key: "master", label: "Maître", min: 6, range: "6+", rgb: "196,154,92" },
+  { key: "novice", label: "Novice", min: 0, range: "0–3", rgb: "150,150,168" },
+  { key: "trained", label: "Confirmé", min: 4, range: "4–7", rgb: "130,169,107" },
+  { key: "expert", label: "Expert", min: 8, range: "8–11", rgb: "111,166,184" },
+  { key: "master", label: "Maître", min: 12, range: "12+", rgb: "196,154,92" },
 ];
 
 /** Palier d'une compétence selon ses points. */
 export function getSkillTier(points: number): SkillTierInfo {
-  if (points >= 6) return SKILL_TIERS[3];
-  if (points >= 4) return SKILL_TIERS[2];
-  if (points >= 2) return SKILL_TIERS[1];
+  if (points >= 12) return SKILL_TIERS[3];
+  if (points >= 8) return SKILL_TIERS[2];
+  if (points >= 4) return SKILL_TIERS[1];
   return SKILL_TIERS[0];
 }
 
 // Plafond d'affichage pour la barre de niveau (un skill au-delà = plein).
-export const SKILL_DISPLAY_MAX = 8;
+export const SKILL_DISPLAY_MAX = 16;
 
 /** Score d'attribut = somme des 5 skills sous-jacents. */
 export function calculateAttribute(
