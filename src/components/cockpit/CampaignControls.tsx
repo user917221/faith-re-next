@@ -38,9 +38,15 @@ type CampaignSummary = { id: string; name: string };
 export function CampaignSelector({
   campaign,
   campaigns,
+  sessionId,
+  sessionNumber,
+  sessionName,
 }: {
   campaign: CampaignSummary;
   campaigns: CampaignSummary[];
+  sessionId?: string;
+  sessionNumber?: number;
+  sessionName?: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -101,7 +107,7 @@ export function CampaignSelector({
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
-          <div className="campaign-panel absolute left-0 z-50 mt-1.5 w-72 p-2 shadow-xl">
+          <div className="campaign-panel absolute left-0 z-50 mt-1.5 max-h-[min(75vh,34rem)] w-72 overflow-y-auto p-2 shadow-xl">
             <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-foreground-subtle">
               Campagnes
             </p>
@@ -159,6 +165,20 @@ export function CampaignSelector({
                 <Plus size={15} />
               </button>
             </div>
+
+            {sessionId !== undefined && sessionNumber !== undefined && (
+              <>
+                <div className="my-2 border-t border-border" />
+                <p className="px-2 pb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-foreground-subtle">
+                  Session courante
+                </p>
+                <SessionNameEditor
+                  sessionId={sessionId}
+                  sessionNumber={sessionNumber}
+                  sessionName={sessionName ?? null}
+                />
+              </>
+            )}
           </div>
         </>
       )}

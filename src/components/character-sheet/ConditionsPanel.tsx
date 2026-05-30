@@ -34,9 +34,8 @@ const CONDITION_PRESETS: ConditionPreset[] = [
   { label: "Saignement", kind: "wound", diceModifier: -1 },
   { label: "Sommeil", kind: "debuff", diceModifier: -2 },
   { label: "Faim", kind: "debuff", diceModifier: -1 },
-  { label: "Concentration", kind: "focus", diceModifier: 0 },
   { label: "Buff", kind: "buff", diceModifier: 2 },
-  { label: "Marqueur", kind: "neutral", diceModifier: 0 },
+  { label: "Debuff", kind: "debuff", diceModifier: -2 },
 ];
 
 export function ConditionsPanel({
@@ -194,22 +193,50 @@ export function ConditionsPanel({
                 <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground-subtle">
                   Modif dé
                 </label>
+                {/* Signe explicite : le modificateur peut être bonus (+) ou malus (−) */}
+                <div className="flex items-center overflow-hidden rounded-md border border-border">
+                  <button
+                    type="button"
+                    onClick={() => setDiceModifier((m) => -Math.abs(m))}
+                    aria-label="Malus (négatif)"
+                    aria-pressed={diceModifier < 0}
+                    className={`px-2.5 py-1 font-mono text-sm leading-none transition-colors ${
+                      diceModifier < 0
+                        ? "bg-hp/20 text-hp"
+                        : "text-foreground-subtle hover:bg-surface-overlay"
+                    }`}
+                  >
+                    −
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDiceModifier((m) => Math.abs(m))}
+                    aria-label="Bonus (positif)"
+                    aria-pressed={diceModifier >= 0}
+                    className={`px-2.5 py-1 font-mono text-sm leading-none transition-colors ${
+                      diceModifier >= 0
+                        ? "bg-endu/20 text-endu"
+                        : "text-foreground-subtle hover:bg-surface-overlay"
+                    }`}
+                  >
+                    +
+                  </button>
+                </div>
                 <input
                   type="number"
-                  min={-20}
+                  min={0}
                   max={20}
-                  value={diceModifier}
-                  onChange={(e) =>
-                    setDiceModifier(
-                      Math.max(
-                        -20,
-                        Math.min(20, parseInt(e.target.value || "0", 10) || 0),
-                      ),
-                    )
-                  }
+                  value={Math.abs(diceModifier)}
+                  onChange={(e) => {
+                    const mag = Math.max(
+                      0,
+                      Math.min(20, parseInt(e.target.value || "0", 10) || 0),
+                    );
+                    setDiceModifier(diceModifier < 0 ? -mag : mag);
+                  }}
                   onFocus={(e) => e.currentTarget.select()}
-                  aria-label="Modificateur de dé"
-                  className="h-7 w-14 rounded-md border border-border bg-background px-2 text-center font-mono text-sm tabular-nums text-foreground focus:border-primary/40 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                  aria-label="Amplitude du modificateur de dé"
+                  className="h-7 w-12 rounded-md border border-border bg-background px-2 text-center font-mono text-sm tabular-nums text-foreground focus:border-primary/40 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <div className="flex items-center gap-2">

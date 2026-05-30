@@ -11,9 +11,9 @@
  * bouton destructif pour la confirmation.
  */
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Trash2, TriangleAlert } from "lucide-react";
+import { Check, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -137,14 +137,30 @@ export function DeleteCharacterDialog({
   isSelected: boolean;
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const confirm = () => {
+  // Désarme tout seul après 3 s si on ne reconfirme pas.
+  useEffect(() => {
+    if (!confirming) return;
+    const t = setTimeout(() => setConfirming(false), 3000);
+    return () => clearTimeout(t);
+  }, [confirming]);
+
+  // 1er clic = arme (poubelle → coche rouge). 2e clic = supprime.
+  // Aucun Dialog radix : le chemin est blindé (le Dialog posait souci).
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
     startTransition(async () => {
       const res = await deleteCharacter(characterId);
       if (!res.ok) {
         toast.error(res.reason);
+        setConfirming(false);
         return;
       }
       const total =
@@ -166,67 +182,38 @@ export function DeleteCharacterDialog({
             : ""
         }.`,
       });
-      setOpen(false);
-      // Si le perso supprimé était affiché, repartir sur le roster (1er restant).
+      setConfirming(false);
       if (isSelected) router.push("/mj");
       router.refresh();
     });
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setOpen(true);
-        }}
-        aria-label={`Supprimer ${characterName}`}
-        title="Supprimer"
-        className="flex size-6 shrink-0 items-center justify-center rounded-md text-foreground-subtle opacity-60 transition-[opacity,color,background-color] hover:bg-destructive/15 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
-      >
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={isPending}
+      aria-label={
+        confirming
+          ? `Confirmer la suppression de ${characterName}`
+          : `Supprimer ${characterName}`
+      }
+      title={
+        confirming
+          ? "Cliquer encore pour confirmer la suppression"
+          : "Supprimer le personnage"
+      }
+      className={`flex size-6 shrink-0 items-center justify-center rounded-md transition-[opacity,color,background-color] focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 ${
+        confirming
+          ? "bg-destructive text-white opacity-100"
+          : "text-foreground-subtle opacity-60 hover:bg-destructive/15 hover:text-destructive group-hover:opacity-100"
+      }`}
+    >
+      {confirming ? (
+        <Check className="size-3.5" />
+      ) : (
         <Trash2 className="size-3.5" />
-      </button>
-
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <TriangleAlert className="size-4 text-destructive" />
-            Supprimer « {characterName} »
-          </DialogTitle>
-          <DialogDescription>
-            Cette action est définitive. Les données liées au personnage sont
-            supprimées en cascade :
-          </DialogDescription>
-        </DialogHeader>
-
-        <ul className="flex flex-col gap-1 text-2xs text-muted-foreground">
-          <li>• Compétences, runes, conditions, compétences de l&apos;Aléa</li>
-          <li>• Objets, notes de statut, demandes d&apos;entraînement</li>
-        </ul>
-        <p className="text-2xs text-ink-tertiary">
-          Les jets déjà inscrits au plateau sont conservés (le personnage y est
-          détaché, son nom reste affiché). Le journal de campagne n&apos;est pas
-          affecté.
-        </p>
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button type="button" variant="outline" disabled={isPending}>
-              Annuler
-            </Button>
-          </DialogClose>
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={isPending}
-            onClick={confirm}
-          >
-            Supprimer définitivement
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      )}
+    </button>
   );
 }

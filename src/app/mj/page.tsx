@@ -113,6 +113,9 @@ export default async function MjDashboardPage({
         <CampaignSelector
           campaign={{ id: ctx.campaign.id, name: ctx.campaign.name }}
           campaigns={ctx.campaigns}
+          sessionId={ctx.session.id}
+          sessionNumber={ctx.session.number}
+          sessionName={ctx.session.name}
         />
       }
       sessionTimer={
