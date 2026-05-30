@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import {
   setActiveCampaign,
   createCampaign,
+  renameCampaign,
   advanceSession,
   updateCampaignStatus,
   startSessionTimer,
@@ -74,7 +75,7 @@ export function CampaignSelector({
       }
       setNewName("");
       setOpen(false);
-      toast.success("Campagne créée");
+      toast.success("Roster créé");
       router.refresh();
     });
   };
@@ -108,11 +109,11 @@ export function CampaignSelector({
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"
           />
-          <div className="campaign-panel absolute left-0 z-50 mt-1.5 max-h-[min(75vh,34rem)] w-72 overflow-y-auto p-2 shadow-xl">
+          <div className="campaign-panel absolute left-0 z-50 mt-1.5 max-h-[min(75vh,36rem)] w-72 !overflow-y-auto p-2 shadow-xl">
             <p className="px-2 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-foreground-subtle">
-              Campagnes
+              Rosters / Campagnes
             </p>
-            <div className="flex max-h-56 flex-col gap-0.5 overflow-y-auto">
+            <div className="flex flex-col gap-0.5">
               {campaigns.map((c) => {
                 const active = c.id === campaign.id;
                 return (
@@ -152,7 +153,7 @@ export function CampaignSelector({
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && create()}
-                placeholder="Nouvelle campagne…"
+                placeholder="Nouveau Roster / Campagne…"
                 maxLength={80}
                 className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
               />
@@ -160,12 +161,21 @@ export function CampaignSelector({
                 type="button"
                 disabled={isPending || !newName.trim()}
                 onClick={create}
-                aria-label="Créer la campagne"
+                aria-label="Créer le roster"
                 className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background transition-opacity hover:opacity-90 disabled:opacity-40"
               >
                 <Plus size={15} />
               </button>
             </div>
+
+            <div className="my-2 border-t border-border" />
+            <p className="px-2 pb-1 font-mono text-[10px] uppercase tracking-[0.14em] text-foreground-subtle">
+              Roster / Campagne active
+            </p>
+            <CampaignNameEditor
+              campaignId={campaign.id}
+              campaignName={campaign.name}
+            />
 
             {sessionId !== undefined && sessionNumber !== undefined && (
               <>
@@ -458,6 +468,126 @@ function SessionNameEditor({
           <Trash2 size={12} />
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * CampaignNameEditor — titre de campagne renommable (roster).
+ * Persiste via renameCampaign (MJ-only côté serveur).
+ */
+function CampaignNameEditor({
+  campaignId,
+  campaignName,
+}: {
+  campaignId: string;
+  campaignName: string;
+}) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(campaignName);
+  const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setValue(campaignName);
+  }, [campaignName, campaignId]);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const open = () => {
+    setValue(campaignName);
+    setEditing(true);
+  };
+  const cancel = () => {
+    setValue(campaignName);
+    setEditing(false);
+  };
+  const save = () => {
+    const next = value.trim();
+    if (!next) {
+      toast.error("Le nom du roster ne peut pas être vide");
+      return;
+    }
+    if (next === campaignName) {
+      setEditing(false);
+      return;
+    }
+    startTransition(async () => {
+      const res = await renameCampaign(campaignId, next);
+      if (!res.ok) {
+        toast.error(res.reason);
+        return;
+      }
+      setEditing(false);
+      toast.success(`Roster renommé en « ${next} »`);
+      router.refresh();
+    });
+  };
+
+  if (editing) {
+    return (
+      <div className="campaign-subpanel flex items-center gap-1.5 p-2">
+        <input
+          ref={inputRef}
+          value={value}
+          maxLength={80}
+          disabled={isPending}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              save();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              cancel();
+            }
+          }}
+          className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={save}
+          disabled={isPending}
+          aria-label="Valider le nom du roster"
+          title="Valider"
+          className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-primary transition-colors hover:bg-surface-overlay disabled:opacity-40"
+        >
+          <Check size={13} />
+        </button>
+        <button
+          type="button"
+          onClick={cancel}
+          disabled={isPending}
+          aria-label="Annuler"
+          title="Annuler"
+          className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay disabled:opacity-40"
+        >
+          <X size={13} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="campaign-subpanel flex items-center justify-between gap-2 p-2">
+      <div className="flex min-w-0 flex-col">
+        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground-subtle">
+          Nom du Roster (Campagne)
+        </p>
+        <p className="truncate text-sm font-medium text-foreground">{campaignName}</p>
+      </div>
+      <button
+        type="button"
+        onClick={open}
+        aria-label="Renommer le roster"
+        title="Renommer le roster"
+        className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
+      >
+        <Pencil size={12} />
+      </button>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, Trash2, Loader2 } from "lucide-react";
 import { RUNE_TYPES, RUNE_TYPE_LABEL, type RuneType } from "@/lib/faith-system";
 import {
   Empty,
@@ -20,12 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { RuneItem, RuneRarity } from "./types";
-
-/**
- * Inventaire de runes (onglet « Runes »). Runes groupées par catégorie
- * (Armement / Utilitaire / Prédéfinie), chaque rune avec niveau (±), rareté
- * (cycle) et dégâts (éditable). Add/remove. Lecture seule sans handlers.
- */
 
 const RARITY_ORDER: RuneRarity[] = [
   "commune",
@@ -66,14 +60,17 @@ type Props = {
 function DamageField({
   value,
   onCommit,
+  disabled,
 }: {
   value: string | null;
   onCommit: (v: string) => void;
+  disabled: boolean;
 }) {
   const [v, setV] = useState(value ?? "");
   return (
-    <input
+    <Input
       value={v}
+      disabled={disabled}
       onChange={(e) => setV(e.target.value)}
       onBlur={() => v !== (value ?? "") && onCommit(v)}
       onKeyDown={(e) => {
@@ -82,7 +79,7 @@ function DamageField({
       maxLength={24}
       placeholder="—"
       aria-label="Dégâts"
-      className="h-6 w-20 rounded border border-border bg-background px-1.5 text-center font-mono text-xs tabular-nums text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
+      className="h-6 w-20 bg-background text-center font-mono text-xs tabular-nums text-foreground placeholder:text-foreground-subtle focus-visible:border-primary/40 focus-visible:ring-0"
     />
   );
 }
@@ -91,17 +88,20 @@ function DamageField({
 function ArmorField({
   value,
   onCommit,
+  disabled,
 }: {
   value: number;
   onCommit: (v: number) => void;
+  disabled: boolean;
 }) {
   const [v, setV] = useState(String(value ?? 0));
   return (
-    <input
+    <Input
       type="number"
       min={0}
       max={99}
       value={v}
+      disabled={disabled}
       onChange={(e) => setV(e.target.value)}
       onBlur={() => {
         const n = Math.max(0, Math.min(99, parseInt(v || "0", 10) || 0));
@@ -112,7 +112,7 @@ function ArmorField({
       }}
       placeholder="0"
       aria-label="Armure"
-      className="h-6 w-12 rounded border border-border bg-background px-1.5 text-center font-mono text-xs tabular-nums text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+      className="h-6 w-12 bg-background text-center font-mono text-xs tabular-nums text-foreground placeholder:text-foreground-subtle focus-visible:border-primary/40 focus-visible:ring-0 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
     />
   );
 }
@@ -127,28 +127,40 @@ function RuneRow({
   onUpdateRune?: UpdateFn;
 }) {
   const [isPending, startTransition] = useTransition();
-  const run = (fn: () => Promise<void>) => startTransition(() => fn());
+  const [activeAction, setActiveAction] = useState<"level" | "rarity" | "damage" | "armor" | "qty" | "delete" | null>(null);
+  
+  const run = (action: "level" | "rarity" | "damage" | "armor" | "qty" | "delete", fn: () => Promise<void>) => {
+    setActiveAction(action);
+    startTransition(async () => {
+      try {
+        await fn();
+      } finally {
+        setActiveAction(null);
+      }
+    });
+  };
+
   const meta = RARITY_META[rune.rarity];
 
   const cycleRarity = () => {
     if (!onUpdateRune) return;
     const next =
       RARITY_ORDER[(RARITY_ORDER.indexOf(rune.rarity) + 1) % RARITY_ORDER.length];
-    run(() => onUpdateRune(rune.id, { rarity: next }));
+    run("rarity", () => onUpdateRune(rune.id, { rarity: next }));
   };
 
   return (
-    <div className="rounded-md border border-border bg-background/25 p-3">
+    <div className="rounded-md border border-border bg-background/25 p-3 flex flex-col gap-2">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-foreground">
             <span className="truncate">{rune.name}</span>
-            <button
+            <Button
               type="button"
               onClick={cycleRarity}
               disabled={!onUpdateRune || isPending}
               title={onUpdateRune ? "Changer la rareté" : undefined}
-              className="rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wide"
+              className="h-5 rounded px-1.5 py-0 font-mono text-[9px] uppercase tracking-wide flex items-center justify-center hover:bg-transparent"
               style={{
                 background: `rgba(${meta.rgb},0.14)`,
                 border: `1px solid rgba(${meta.rgb},0.34)`,
@@ -156,11 +168,14 @@ function RuneRow({
                 cursor: onUpdateRune ? "pointer" : "default",
               }}
             >
+              {isPending && activeAction === "rarity" ? (
+                <Loader2 size={8} className="animate-spin mr-1" />
+              ) : null}
               {meta.label}
-            </button>
+            </Button>
           </p>
           {rune.description ? (
-            <p className="mt-0.5 text-xs text-foreground-muted">
+            <p className="mt-0.5 text-xs text-foreground-subtle">
               {rune.description}
             </p>
           ) : null}
@@ -173,44 +188,56 @@ function RuneRow({
             aria-label={`Supprimer ${rune.name}`}
             title="Supprimer"
             disabled={isPending}
-            onClick={() => run(() => onRemoveRune(rune.id))}
-            className="shrink-0 text-foreground-muted hover:text-destructive"
+            onClick={() => run("delete", () => onRemoveRune(rune.id))}
+            className="shrink-0 text-foreground-muted hover:text-destructive animate-fade-in"
           >
-            <Trash2 className="size-3.5" />
+            {isPending && activeAction === "delete" ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="size-3.5" />
+            )}
           </Button>
         )}
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-2">
+      <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border/40 pt-2">
         {/* Niveau */}
         <span className="flex items-center gap-1.5">
           <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground-subtle">
             Niveau
           </span>
           {onUpdateRune && (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-xs"
               aria-label="Niveau −1"
               disabled={isPending || rune.level <= 1}
-              onClick={() => run(() => onUpdateRune(rune.id, { level: rune.level - 1 }))}
-              className="flex size-5 items-center justify-center rounded border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+              onClick={() => run("level", () => onUpdateRune(rune.id, { level: rune.level - 1 }))}
+              className="size-5 rounded text-foreground-muted"
             >
               <Minus size={10} />
-            </button>
+            </Button>
           )}
-          <span className="w-5 text-center font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
-            {rune.level}
+          <span className="w-5 text-center font-mono text-xs font-semibold tabular-nums slashed-zero text-foreground flex items-center justify-center h-5">
+            {isPending && activeAction === "level" ? (
+              <Loader2 size={10} className="animate-spin text-primary" />
+            ) : (
+              rune.level
+            )}
           </span>
           {onUpdateRune && (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-xs"
               aria-label="Niveau +1"
               disabled={isPending}
-              onClick={() => run(() => onUpdateRune(rune.id, { level: rune.level + 1 }))}
-              className="flex size-5 items-center justify-center rounded border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+              onClick={() => run("level", () => onUpdateRune(rune.id, { level: rune.level + 1 }))}
+              className="size-5 rounded text-foreground-muted"
             >
               <Plus size={10} />
-            </button>
+            </Button>
           )}
         </span>
 
@@ -222,7 +249,8 @@ function RuneRow({
           {onUpdateRune ? (
             <DamageField
               value={rune.damage}
-              onCommit={(d) => run(() => onUpdateRune(rune.id, { damage: d }))}
+              disabled={isPending}
+              onCommit={(d) => run("damage", () => onUpdateRune(rune.id, { damage: d }))}
             />
           ) : (
             <span className="font-mono text-xs tabular-nums text-foreground">
@@ -239,7 +267,8 @@ function RuneRow({
           {onUpdateRune ? (
             <ArmorField
               value={rune.armor}
-              onCommit={(a) => run(() => onUpdateRune(rune.id, { armor: a }))}
+              disabled={isPending}
+              onCommit={(a) => run("armor", () => onUpdateRune(rune.id, { armor: a }))}
             />
           ) : (
             <span className="font-mono text-xs tabular-nums text-foreground">
@@ -254,29 +283,37 @@ function RuneRow({
             Qté
           </span>
           {onUpdateRune && (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-xs"
               aria-label="Quantité −1"
               disabled={isPending || rune.qty <= 1}
-              onClick={() => run(() => onUpdateRune(rune.id, { qty: rune.qty - 1 }))}
-              className="flex size-5 items-center justify-center rounded border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+              onClick={() => run("qty", () => onUpdateRune(rune.id, { qty: rune.qty - 1 }))}
+              className="size-5 rounded text-foreground-muted"
             >
               <Minus size={10} />
-            </button>
+            </Button>
           )}
-          <span className="w-5 text-center font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
-            {rune.qty}
+          <span className="w-5 text-center font-mono text-xs font-semibold tabular-nums slashed-zero text-foreground flex items-center justify-center h-5">
+            {isPending && activeAction === "qty" ? (
+              <Loader2 size={10} className="animate-spin text-primary" />
+            ) : (
+              rune.qty
+            )}
           </span>
           {onUpdateRune && (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-xs"
               aria-label="Quantité +1"
               disabled={isPending}
-              onClick={() => run(() => onUpdateRune(rune.id, { qty: rune.qty + 1 }))}
-              className="flex size-5 items-center justify-center rounded border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+              onClick={() => run("qty", () => onUpdateRune(rune.id, { qty: rune.qty + 1 }))}
+              className="size-5 rounded text-foreground-muted"
             >
               <Plus size={10} />
-            </button>
+            </Button>
           )}
         </span>
       </div>
@@ -317,7 +354,7 @@ function AddRuneForm({
   }
 
   return (
-    <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+    <div className="mt-3.5 flex flex-col gap-2 border-t border-border pt-3.5">
       <div className="flex flex-wrap items-center gap-2">
         <Input
           aria-label="Nom de la rune"
@@ -331,14 +368,14 @@ function AddRuneForm({
             }
           }}
           disabled={isPending}
-          className="h-8 min-w-0 flex-1"
+          className="h-8 min-w-0 flex-1 bg-background"
         />
         <Select
           value={type}
           onValueChange={(val) => setType(val as RuneType)}
           disabled={isPending}
         >
-          <SelectTrigger size="sm" aria-label="Catégorie de rune" className="w-36">
+          <SelectTrigger size="sm" aria-label="Catégorie de rune" className="w-36 bg-background">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -363,7 +400,7 @@ function AddRuneForm({
             }
           }}
           disabled={isPending}
-          className="h-8 min-w-0 flex-1 text-xs"
+          className="h-8 min-w-0 flex-1 text-xs bg-background"
         />
         <Button
           type="button"
@@ -371,9 +408,16 @@ function AddRuneForm({
           onClick={submit}
           disabled={!canSubmit}
           aria-label="Ajouter la rune"
+          className="px-3"
         >
-          <Plus className="size-3.5" />
-          Ajouter
+          {isPending ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <>
+              <Plus className="size-3.5" />
+              Ajouter
+            </>
+          )}
         </Button>
       </div>
     </div>

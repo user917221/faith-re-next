@@ -125,40 +125,40 @@
    ============================================================ */
 :root {
   /* surfaces */
-  --background: #070706;
-  --foreground: #f1eee6;
-  --card: #11100d;
-  --card-foreground: #f1eee6;
-  --popover: #171510;
-  --popover-foreground: #f1eee6;
-  --surface-3: #1d1a15;
-  --surface-4: #242019;
+  --background: #010102;
+  --foreground: #f7f8f8;
+  --card: #0f1011;
+  --card-foreground: #f7f8f8;
+  --popover: #141516;
+  --popover-foreground: #f7f8f8;
+  --surface-3: #18191a;
+  --surface-4: #191a1b;
 
   /* lavande (accent unique) */
-  --primary: #c49a5c;
-  --primary-foreground: #0b0906;
-  --primary-hover: #dfb875;
-  --primary-focus: #a77737;
-  --primary-deep: #735025;
+  --primary: #5e6ad2;
+  --primary-foreground: #ffffff;
+  --primary-hover: #828fff;
+  --primary-focus: #5e69d1;
+  --primary-deep: #3c4485;
 
-  --secondary: #1a1814;
-  --secondary-foreground: #f1eee6;
-  --muted: #191714;
-  --muted-foreground: #9c9487;
-  --accent: #201c16;
-  --accent-foreground: #f1eee6;
+  --secondary: #18191a;
+  --secondary-foreground: #f7f8f8;
+  --muted: #18191a;
+  --muted-foreground: #8a8f98;
+  --accent: #141516;
+  --accent-foreground: #f7f8f8;
 
-  /* ink ladder — remappé sur la triade texte v0 (foreground-muted/subtle) */
-  --ink-muted: #b9b0a2;
-  --ink-subtle: #8d8578;
-  --ink-tertiary: #5e574c;
+  /* ink ladder */
+  --ink-muted: #d0d6e0;
+  --ink-subtle: #8a8f98;
+  --ink-tertiary: #62666d;
 
   /* hairlines */
-  --border: #302a22;
-  --input: #302a22;
-  --hairline-strong: #514637;
-  --hairline-tertiary: #6a5b45;
-  --ring: #c49a5c;
+  --border: #23252a;
+  --input: #23252a;
+  --hairline-strong: #34343a;
+  --hairline-tertiary: #3e3e44;
+  --ring: #5e6ad2;
 
   /* vitaux JDR */
   --hp: #c85f50;
@@ -171,73 +171,73 @@
   /* sémantique */
   --destructive: #c85f50;
   --success: #82a96b;
-  --warning: #c49a5c;
+  --warning: #5e6ad2;
 
   /* charts (lavande + vitaux) */
-  --chart-1: #c49a5c;
+  --chart-1: #5e6ad2;
   --chart-2: #6fa6b8;
   --chart-3: #82a96b;
   --chart-4: #c85f50;
-  --chart-5: #b9b0a2;
+  --chart-5: #d0d6e0;
 
   /* sidebar (= canvas/surface Linear) */
-  --sidebar: #0c0b09;
-  --sidebar-foreground: #f1eee6;
-  --sidebar-primary: #c49a5c;
-  --sidebar-primary-foreground: #0b0906;
-  --sidebar-accent: #1c1914;
-  --sidebar-accent-foreground: #f1eee6;
-  --sidebar-border: #302a22;
-  --sidebar-ring: #c49a5c;
+  --sidebar: #010102;
+  --sidebar-foreground: #f7f8f8;
+  --sidebar-primary: #5e6ad2;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0f1011;
+  --sidebar-accent-foreground: #f7f8f8;
+  --sidebar-border: #23252a;
+  --sidebar-ring: #5e6ad2;
 
   --radius: 0.5rem;
 
   /* tokens v0 (preview /v0 — design généré) */
-  --surface: #11100d;
-  --surface-raised: #171510;
-  --surface-overlay: #201c16;
-  --foreground-muted: #b9b0a2;
-  --foreground-subtle: #6f675a;
-  --border-strong: rgba(233, 220, 194, 0.16);
-  --accent: #201c16;
-  --accent-dim: rgba(196, 154, 92, 0.16);
-  --accent-foreground: #f1eee6;
+  --surface: #0f1011;
+  --surface-raised: #141516;
+  --surface-overlay: #18191a;
+  --foreground-muted: #d0d6e0;
+  --foreground-subtle: #8a8f98;
+  --border-strong: rgba(255, 255, 255, 0.08);
+  --accent: #18191a;
+  --accent-dim: rgba(94, 106, 210, 0.16);
+  --accent-foreground: #f7f8f8;
   /* Famille acier sobre — cool désaturée, mais assez lumineuse pour que « plein » se lise */
   --gauge-sante: #c85f50;
   --gauge-mental: #6fa6b8;
   --gauge-endurance: #82a96b;
-  --gauge-flux: #c8bda7;
-  --gauge-track: rgba(233, 220, 194, 0.075);
+  --gauge-flux: #8a8f98;
+  --gauge-track: rgba(255, 255, 255, 0.06);
 }
 
 .dark {
-  --background: #070706;
-  --foreground: #f1eee6;
-  --card: #11100d;
-  --card-foreground: #f1eee6;
-  --popover: #171510;
-  --popover-foreground: #f1eee6;
-  --surface-3: #1d1a15;
-  --surface-4: #242019;
-  --primary: #c49a5c;
-  --primary-foreground: #0b0906;
-  --primary-hover: #dfb875;
-  --primary-focus: #a77737;
-  --primary-deep: #735025;
-  --secondary: #1a1814;
-  --secondary-foreground: #f1eee6;
-  --muted: #191714;
-  --muted-foreground: #9c9487;
-  --accent: #201c16;
-  --accent-foreground: #f1eee6;
-  --ink-muted: #b9b0a2;
-  --ink-subtle: #8d8578;
-  --ink-tertiary: #5e574c;
-  --border: #302a22;
-  --input: #302a22;
-  --hairline-strong: #514637;
-  --hairline-tertiary: #6a5b45;
-  --ring: #c49a5c;
+  --background: #010102;
+  --foreground: #f7f8f8;
+  --card: #0f1011;
+  --card-foreground: #f7f8f8;
+  --popover: #141516;
+  --popover-foreground: #f7f8f8;
+  --surface-3: #18191a;
+  --surface-4: #191a1b;
+  --primary: #5e6ad2;
+  --primary-foreground: #ffffff;
+  --primary-hover: #828fff;
+  --primary-focus: #5e69d1;
+  --primary-deep: #3c4485;
+  --secondary: #18191a;
+  --secondary-foreground: #f7f8f8;
+  --muted: #18191a;
+  --muted-foreground: #8a8f98;
+  --accent: #141516;
+  --accent-foreground: #f7f8f8;
+  --ink-muted: #d0d6e0;
+  --ink-subtle: #8a8f98;
+  --ink-tertiary: #62666d;
+  --border: #23252a;
+  --input: #23252a;
+  --hairline-strong: #34343a;
+  --hairline-tertiary: #3e3e44;
+  --ring: #5e6ad2;
   --hp: #c85f50;
   --hp-deep: #8e3e35;
   --mhp: #6fa6b8;
@@ -246,20 +246,20 @@
   --endu-deep: #587746;
   --destructive: #c85f50;
   --success: #82a96b;
-  --warning: #c49a5c;
-  --chart-1: #c49a5c;
+  --warning: #5e6ad2;
+  --chart-1: #5e6ad2;
   --chart-2: #6fa6b8;
   --chart-3: #82a96b;
   --chart-4: #c85f50;
-  --chart-5: #b9b0a2;
-  --sidebar: #0c0b09;
-  --sidebar-foreground: #f1eee6;
-  --sidebar-primary: #c49a5c;
-  --sidebar-primary-foreground: #0b0906;
-  --sidebar-accent: #1c1914;
-  --sidebar-accent-foreground: #f1eee6;
-  --sidebar-border: #302a22;
-  --sidebar-ring: #c49a5c;
+  --chart-5: #d0d6e0;
+  --sidebar: #010102;
+  --sidebar-foreground: #f7f8f8;
+  --sidebar-primary: #5e6ad2;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0f1011;
+  --sidebar-accent-foreground: #f7f8f8;
+  --sidebar-border: #23252a;
+  --sidebar-ring: #5e6ad2;
 }
 
 @layer base {

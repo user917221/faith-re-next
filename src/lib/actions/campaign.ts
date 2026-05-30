@@ -231,6 +231,35 @@ export async function removeStatusNote(
   return { ok: true };
 }
 
+// ---------------- renameCampaign ----------------
+
+/**
+ * renameCampaign — renomme une campagne existante (MJ).
+ * Max 80 chars (cohérent avec createCampaign).
+ */
+export async function renameCampaign(
+  campaignId: string,
+  name: string,
+): Promise<ActionResult<Record<never, never>>> {
+  await requireMJ();
+  const c = await db.query.campaigns.findFirst({
+    where: eq(campaigns.id, campaignId),
+  });
+  if (!c) return { ok: false, reason: "Campagne introuvable" };
+
+  const clean = (name ?? "").trim();
+  if (!clean) return { ok: false, reason: "Nom de campagne requis" };
+  if (clean.length > 80) return { ok: false, reason: "Nom trop long (80 max)" };
+
+  await db
+    .update(campaigns)
+    .set({ name: clean })
+    .where(eq(campaigns.id, campaignId));
+
+  revalidatePath("/mj");
+  return { ok: true };
+}
+
 // ---------------- renameSession (#85) ----------------
 
 /**

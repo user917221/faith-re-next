@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Loader2 } from "lucide-react";
 import { AvatarUpload } from "./AvatarUpload";
 import type { Character, ProfilePatch } from "./types";
 
@@ -56,9 +58,6 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
     });
   }
 
-  const textareaCls =
-    "w-full resize-none rounded-md border border-border bg-background px-2.5 py-2 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none disabled:opacity-60";
-
   return (
     <section
       className="campaign-panel"
@@ -85,7 +84,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={!onProfileChange}
+              disabled={!onProfileChange || isPending}
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -97,7 +96,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               type="text"
               value={nom}
               onChange={(e) => setNom(e.target.value)}
-              disabled={!onProfileChange}
+              disabled={!onProfileChange || isPending}
             />
           </div>
         </div>
@@ -113,7 +112,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               maxLength={40}
               placeholder="—"
               onChange={(e) => setRace(e.target.value)}
-              disabled={!onProfileChange}
+              disabled={!onProfileChange || isPending}
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -127,7 +126,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               maxLength={40}
               placeholder="—"
               onChange={(e) => setPronouns(e.target.value)}
-              disabled={!onProfileChange}
+              disabled={!onProfileChange || isPending}
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -141,7 +140,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               maxLength={40}
               placeholder="—"
               onChange={(e) => setCharClass(e.target.value)}
-              disabled={!onProfileChange}
+              disabled={!onProfileChange || isPending}
             />
           </div>
         </div>
@@ -151,7 +150,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             name={name}
             value={avatarUrl}
             onChange={setAvatarUrl}
-            disabled={!onProfileChange}
+            disabled={!onProfileChange || isPending}
           />
           <Input
             id="profile-avatar"
@@ -160,7 +159,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             maxLength={500}
             placeholder="ou colle une URL https://…"
             onChange={(e) => setAvatarUrl(e.target.value)}
-            disabled={!onProfileChange}
+            disabled={!onProfileChange || isPending}
             className="font-mono text-xs"
           />
         </div>
@@ -168,30 +167,30 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
           <Label htmlFor="profile-bio" className="text-foreground-muted">
             Bio / historique
           </Label>
-          <textarea
+          <Textarea
             id="profile-bio"
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            disabled={!onProfileChange}
+            disabled={!onProfileChange || isPending}
             rows={3}
             maxLength={1000}
             placeholder="Quelques lignes sur le passé du personnage…"
-            className={textareaCls}
+            className="resize-none"
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="profile-notes" className="text-foreground-muted">
             Notes personnelles
           </Label>
-          <textarea
+          <Textarea
             id="profile-notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            disabled={!onProfileChange}
+            disabled={!onProfileChange || isPending}
             rows={2}
             maxLength={1000}
             placeholder="Notes privées du joueur…"
-            className={textareaCls}
+            className="resize-none"
           />
         </div>
         <div className="flex items-end justify-between gap-3">
@@ -206,7 +205,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               max={999}
               value={age}
               onChange={(e) => setAge(parseInt(e.target.value, 10) || 0)}
-              disabled={!onProfileChange}
+              disabled={!onProfileChange || isPending}
               className="w-24 font-mono tabular-nums slashed-zero"
             />
           </div>
@@ -214,7 +213,9 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             type="button"
             disabled={!onProfileChange || !dirty || isPending}
             onClick={save}
+            className="gap-2"
           >
+            {isPending && <Loader2 size={14} className="animate-spin" />}
             {isPending ? "Enregistrement…" : "Enregistrer"}
           </Button>
         </div>

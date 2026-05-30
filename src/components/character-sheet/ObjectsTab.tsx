@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState, useTransition } from "react";
-import { Gem, Minus, Plus, Sparkles, Trash2 } from "lucide-react";
+import { Gem, Minus, Plus, Sparkles, Trash2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,15 +93,21 @@ function LightCrystalsSection({
         <Gem className="size-5 text-primary" aria-hidden />
         {onUpdate ? (
           <div className="flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-xs"
               aria-label="Cristaux −1"
               disabled={isPending || value <= 0}
               onClick={() => commit(value - 1)}
-              className="flex size-7 items-center justify-center rounded-md border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+              className="flex size-7 items-center justify-center rounded-md"
             >
-              <Minus size={13} />
-            </button>
+              {isPending ? (
+                <Loader2 size={12} className="animate-spin text-primary" />
+              ) : (
+                <Minus size={13} />
+              )}
+            </Button>
             <Input
               type="number"
               inputMode="numeric"
@@ -118,17 +124,23 @@ function LightCrystalsSection({
                   e.currentTarget.blur();
                 }
               }}
-              className="h-10 w-20 text-center font-mono text-lg font-semibold tabular-nums slashed-zero"
+              className="h-10 w-20 text-center font-mono text-lg font-semibold tabular-nums slashed-zero bg-background"
             />
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="icon-xs"
               aria-label="Cristaux +1"
               disabled={isPending || value >= 999}
               onClick={() => commit(value + 1)}
-              className="flex size-7 items-center justify-center rounded-md border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+              className="flex size-7 items-center justify-center rounded-md"
             >
-              <Plus size={13} />
-            </button>
+              {isPending ? (
+                <Loader2 size={12} className="animate-spin text-primary" />
+              ) : (
+                <Plus size={13} />
+              )}
+            </Button>
           </div>
         ) : (
           <span className="font-mono text-2xl font-semibold tabular-nums slashed-zero text-foreground">
@@ -154,6 +166,7 @@ function CompetencesAleaSection({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [activeDeletingId, setActiveDeletingId] = useState<string | null>(null);
 
   const trimmedName = name.trim();
   const canSubmit = trimmedName.length > 0 && !isPending && Boolean(onAdd);
@@ -165,6 +178,18 @@ function CompetencesAleaSection({
       await onAdd({ name: trimmedName, description: desc.length ? desc : undefined });
       setName("");
       setDescription("");
+    });
+  };
+
+  const handleRemove = (id: string) => {
+    if (!onRemove) return;
+    setActiveDeletingId(id);
+    startTransition(async () => {
+      try {
+        await onRemove(id);
+      } finally {
+        setActiveDeletingId(null);
+      }
     });
   };
 
@@ -193,7 +218,7 @@ function CompetencesAleaSection({
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">{c.name}</p>
                   {c.description ? (
-                    <p className="mt-0.5 text-xs text-foreground-muted">
+                    <p className="mt-0.5 text-xs text-foreground-subtle leading-relaxed">
                       {c.description}
                     </p>
                   ) : null}
@@ -206,10 +231,14 @@ function CompetencesAleaSection({
                     aria-label={`Supprimer ${c.name}`}
                     title="Supprimer"
                     disabled={isPending}
-                    onClick={() => startTransition(() => onRemove(c.id))}
+                    onClick={() => handleRemove(c.id)}
                     className="shrink-0 text-foreground-muted hover:text-destructive"
                   >
-                    <Trash2 className="size-3.5" />
+                    {isPending && activeDeletingId === c.id ? (
+                      <Loader2 size={13} className="animate-spin text-destructive" />
+                    ) : (
+                      <Trash2 className="size-3.5" />
+                    )}
                   </Button>
                 )}
               </div>
@@ -232,7 +261,7 @@ function CompetencesAleaSection({
         )}
 
         {onAdd ? (
-          <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+          <div className="mt-3.5 flex flex-col gap-2 border-t border-border pt-3.5">
             <Input
               aria-label="Nom de la compétence"
               placeholder="Nom de la compétence"
@@ -245,7 +274,7 @@ function CompetencesAleaSection({
                 }
               }}
               disabled={isPending}
-              className="h-8"
+              className="h-8 bg-background"
             />
             <div className="flex items-center gap-2">
               <Input
@@ -260,7 +289,7 @@ function CompetencesAleaSection({
                   }
                 }}
                 disabled={isPending}
-                className="h-8 min-w-0 flex-1 text-xs"
+                className="h-8 min-w-0 flex-1 text-xs bg-background"
               />
               <Button
                 type="button"
@@ -268,9 +297,16 @@ function CompetencesAleaSection({
                 onClick={submit}
                 disabled={!canSubmit}
                 aria-label="Ajouter la compétence"
+                className="px-3"
               >
-                <Plus className="size-3.5" />
-                Ajouter
+                {isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <>
+                    <Plus className="size-3.5" />
+                    Ajouter
+                  </>
+                )}
               </Button>
             </div>
           </div>

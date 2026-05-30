@@ -1,9 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 
 /**
@@ -83,23 +84,32 @@ export function AvatarUpload({
       </Avatar>
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             disabled={disabled || busy}
             onClick={() => inputRef.current?.click()}
-            className="flex items-center gap-1.5 rounded-md border border-border bg-background/40 px-2.5 py-1.5 text-xs text-foreground-muted transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-40"
+            className="h-8 gap-1.5 text-xs text-foreground-muted"
           >
-            <Upload size={13} /> {busy ? "Traitement…" : "Téléverser"}
-          </button>
+            {busy ? (
+              <Loader2 size={13} className="animate-spin" />
+            ) : (
+              <Upload size={13} />
+            )}
+            {busy ? "Traitement…" : "Téléverser"}
+          </Button>
           {value && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               disabled={disabled || busy}
               onClick={() => onChange("")}
-              className="flex items-center gap-1 text-xs text-foreground-subtle transition-colors hover:text-hp"
+              className="h-8 gap-1 text-xs text-foreground-subtle hover:text-hp hover:bg-hp/10"
             >
               <X size={12} /> Retirer
-            </button>
+            </Button>
           )}
         </div>
         <span className="font-mono text-[10px] text-foreground-subtle">

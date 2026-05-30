@@ -13,8 +13,11 @@
  */
 
 import { useState, useTransition } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
 import type { ConditionItem, ConditionKind, ConditionPreset } from "./types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 const KIND_META: Record<
   ConditionKind,
@@ -57,6 +60,7 @@ export function ConditionsPanel({
   const [kind, setKind] = useState<ConditionKind>("neutral");
   const [diceModifier, setDiceModifier] = useState<number>(0);
   const [isPending, startTransition] = useTransition();
+  const [activeDeletingId, setActiveDeletingId] = useState<string | null>(null);
 
   const selectPreset = (p: ConditionPreset) => {
     setLabel(p.label);
@@ -80,6 +84,18 @@ export function ConditionsPanel({
     });
   };
 
+  const handleRemove = (id: string) => {
+    if (!onRemoveCondition) return;
+    setActiveDeletingId(id);
+    startTransition(async () => {
+      try {
+        await onRemoveCondition(id);
+      } finally {
+        setActiveDeletingId(null);
+      }
+    });
+  };
+
   return (
     <section className="campaign-panel">
       <header className="campaign-header-line flex items-center justify-between px-4 py-2.5">
@@ -87,14 +103,16 @@ export function ConditionsPanel({
           Conditions
         </p>
         {editable && (
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="xs"
             onClick={() => setAdding((v) => !v)}
             aria-expanded={adding}
-            className="flex items-center gap-1 rounded-md border border-border bg-background/40 px-2 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-foreground-subtle transition-colors hover:border-primary/40 hover:text-foreground"
+            className="flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.12em]"
           >
             <Plus size={11} /> Ajouter
-          </button>
+          </Button>
         )}
       </header>
 
@@ -108,13 +126,15 @@ export function ConditionsPanel({
             {conditions.map((c) => {
               const meta = KIND_META[c.kind];
               const mod = c.diceModifier ?? 0;
+              const isDeleting = activeDeletingId === c.id && isPending;
               return (
-                <span
+                <Badge
                   key={c.id}
-                  className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium"
+                  variant="outline"
+                  className="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium border rounded-md"
                   style={{
                     background: `rgba(${meta.rgb},0.12)`,
-                    border: `1px solid rgba(${meta.rgb},0.32)`,
+                    borderColor: `rgba(${meta.rgb},0.32)`,
                     color: `rgb(${meta.rgb})`,
                   }}
                   title={meta.label}
@@ -134,16 +154,18 @@ export function ConditionsPanel({
                     <button
                       type="button"
                       aria-label={`Retirer ${c.label}`}
-                      onClick={() =>
-                        startTransition(() => onRemoveCondition(c.id))
-                      }
+                      onClick={() => handleRemove(c.id)}
                       disabled={isPending}
-                      className="ml-0.5 rounded-sm opacity-60 transition-opacity hover:opacity-100 disabled:opacity-30"
+                      className="ml-0.5 rounded-sm opacity-60 transition-opacity hover:opacity-100 disabled:opacity-30 flex items-center justify-center size-3"
                     >
-                      <X size={12} />
+                      {isDeleting ? (
+                        <Loader2 size={10} className="animate-spin text-inherit" />
+                      ) : (
+                        <X size={11} />
+                      )}
                     </button>
                   )}
-                </span>
+                </Badge>
               );
             })}
           </div>
@@ -157,11 +179,13 @@ export function ConditionsPanel({
                 const meta = KIND_META[p.kind];
                 const active = label === p.label && kind === p.kind;
                 return (
-                  <button
+                  <Button
                     key={p.label}
                     type="button"
+                    variant="ghost"
+                    size="xs"
                     onClick={() => selectPreset(p)}
-                    className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors"
+                    className="font-mono text-[10px] uppercase tracking-[0.1em]"
                     style={{
                       background: active
                         ? `rgba(${meta.rgb},0.16)`
@@ -171,12 +195,12 @@ export function ConditionsPanel({
                     }}
                   >
                     {p.label}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
 
-            <input
+            <Input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               onKeyDown={(e) => {
@@ -185,7 +209,8 @@ export function ConditionsPanel({
               }}
               maxLength={40}
               placeholder="État (ex. Concentré, Saignement…)"
-              className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
+              disabled={isPending}
+              className="h-9 w-full bg-background"
             />
 
             <div className="flex items-center justify-between gap-2">
@@ -194,35 +219,39 @@ export function ConditionsPanel({
                   Modif dé
                 </label>
                 {/* Signe explicite : le modificateur peut être bonus (+) ou malus (−) */}
-                <div className="flex items-center overflow-hidden rounded-md border border-border">
-                  <button
+                <div className="flex items-center overflow-hidden rounded-md border border-border h-7">
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="xs"
                     onClick={() => setDiceModifier((m) => -Math.abs(m))}
                     aria-label="Malus (négatif)"
                     aria-pressed={diceModifier < 0}
-                    className={`px-2.5 py-1 font-mono text-sm leading-none transition-colors ${
+                    className={`h-full rounded-none px-2.5 font-mono text-sm leading-none border-r border-border transition-colors ${
                       diceModifier < 0
-                        ? "bg-hp/20 text-hp"
+                        ? "bg-hp/20 text-hp hover:bg-hp/30 hover:text-hp"
                         : "text-foreground-subtle hover:bg-surface-overlay"
                     }`}
                   >
                     −
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="xs"
                     onClick={() => setDiceModifier((m) => Math.abs(m))}
                     aria-label="Bonus (positif)"
                     aria-pressed={diceModifier >= 0}
-                    className={`px-2.5 py-1 font-mono text-sm leading-none transition-colors ${
+                    className={`h-full rounded-none px-2.5 font-mono text-sm leading-none transition-colors ${
                       diceModifier >= 0
-                        ? "bg-endu/20 text-endu"
+                        ? "bg-endu/20 text-endu hover:bg-endu/30 hover:text-endu"
                         : "text-foreground-subtle hover:bg-surface-overlay"
                     }`}
                   >
                     +
-                  </button>
+                  </Button>
                 </div>
-                <input
+                <Input
                   type="number"
                   min={0}
                   max={20}
@@ -235,26 +264,34 @@ export function ConditionsPanel({
                     setDiceModifier(diceModifier < 0 ? -mag : mag);
                   }}
                   onFocus={(e) => e.currentTarget.select()}
+                  disabled={isPending}
                   aria-label="Amplitude du modificateur de dé"
-                  className="h-7 w-12 rounded-md border border-border bg-background px-2 text-center font-mono text-sm tabular-nums text-foreground focus:border-primary/40 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                  className="h-7 w-12 bg-background p-0 text-center font-mono text-sm tabular-nums text-foreground [appearance:textfield] focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none focus-visible:border-primary/40"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="xs"
                   onClick={resetForm}
-                  className="rounded-md px-2.5 py-1 text-xs text-foreground-subtle transition-colors hover:text-foreground"
+                  className="text-foreground-subtle"
                 >
                   Annuler
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  size="xs"
                   onClick={submit}
                   disabled={isPending || !label.trim()}
-                  className="rounded-md bg-foreground px-3 py-1 text-xs font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+                  className="px-3"
                 >
-                  Ajouter
-                </button>
+                  {isPending ? (
+                    <Loader2 size={11} className="animate-spin" />
+                  ) : (
+                    "Ajouter"
+                  )}
+                </Button>
               </div>
             </div>
           </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Heart, Wind, Dices } from "lucide-react";
+import { Heart, Wind, Dices, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type RecoveryResult =
   | { kind: "hp"; gain: number; d1: number; d2: number; ecaille: number; newHp: number; maxHp: number }
@@ -19,30 +20,37 @@ type Props = {
  */
 export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
   const [isPending, startTransition] = useTransition();
+  const [activeAction, setActiveAction] = useState<"hp" | "endu" | null>(null);
   const [lastResult, setLastResult] = useState<RecoveryResult | null>(null);
 
   if (!onRecoverHp && !onRecoverEndurance) return null;
 
   function doHp() {
     if (!onRecoverHp) return;
+    setActiveAction("hp");
     startTransition(async () => {
       try {
         const r = await onRecoverHp();
         setLastResult({ kind: "hp", ...r });
       } catch (e) {
         setLastResult({ kind: "error", message: e instanceof Error ? e.message : "Erreur" });
+      } finally {
+        setActiveAction(null);
       }
     });
   }
 
   function doEndu() {
     if (!onRecoverEndurance) return;
+    setActiveAction("endu");
     startTransition(async () => {
       try {
         const r = await onRecoverEndurance();
         setLastResult({ kind: "endu", ...r });
       } catch (e) {
         setLastResult({ kind: "error", message: e instanceof Error ? e.message : "Erreur" });
+      } finally {
+        setActiveAction(null);
       }
     });
   }
@@ -71,6 +79,7 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
           label="Régénérer Santé"
           formula="(2d6 + Écaillé) / 2"
           disabled={!onRecoverHp || isPending}
+          loading={activeAction === "hp" && isPending}
           onClick={doHp}
         />
         <RecoveryButton
@@ -78,6 +87,7 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
           label="Reprendre souffle"
           formula="1d50 / 2"
           disabled={!onRecoverEndurance || isPending}
+          loading={activeAction === "endu" && isPending}
           onClick={doEndu}
         />
       </div>
@@ -133,32 +143,39 @@ function RecoveryButton({
   label,
   formula,
   disabled,
+  loading,
   onClick,
 }: {
   icon: typeof Heart;
   label: string;
   formula: string;
   disabled: boolean;
+  loading: boolean;
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       disabled={disabled}
       onClick={onClick}
-      className="group flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-overlay/50 disabled:cursor-not-allowed disabled:opacity-50"
+      className="group flex h-auto w-full items-center justify-start gap-4 rounded-none border-0 p-5 text-left transition-colors hover:bg-surface-overlay/50 focus-visible:ring-1 focus-visible:ring-ring"
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background/45 text-foreground-subtle transition-colors group-hover:border-primary/30 group-hover:text-primary">
-        <Icon size={14} aria-hidden />
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background/45 text-foreground-subtle transition-colors group-hover/button:border-primary/30 group-hover/button:text-primary">
+        {loading ? (
+          <Loader2 size={14} className="animate-spin" />
+        ) : (
+          <Icon size={14} aria-hidden />
+        )}
       </span>
-      <span className="flex flex-col">
-        <span className="text-sm text-foreground-muted transition-colors group-hover:text-foreground">
+      <span className="flex flex-col gap-0.5">
+        <span className="text-sm font-normal text-foreground-muted transition-colors group-hover/button:text-foreground">
           {label}
         </span>
         <span className="font-mono text-[10px] tabular-nums tracking-wide text-foreground-subtle">
           {formula}
         </span>
       </span>
-    </button>
+    </Button>
   );
 }

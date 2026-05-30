@@ -8,11 +8,12 @@ import {
   type AttributeName,
 } from "@/lib/skills";
 import { getSkillCap, calculateLevel } from "@/lib/faith-system";
-import { Brain, Eye, Shield, Crosshair, Dices } from "lucide-react";
+import { Brain, Eye, Shield, Crosshair, Dices, Loader2 } from "lucide-react";
 import { ConstellationGlyph } from "@/components/glyphs";
 import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { VitalsHeader } from "./VitalsHeader";
 import { PaliersRewards } from "./PaliersRewards";
 import { XpBar } from "./XpBar";
@@ -154,17 +155,13 @@ export default function CharacterSheet({
                   <span className="mx-2 text-foreground-subtle">·</span>
                 </>
               )}
-              {isMJ && (
-                <>
-                  <span>
-                    Niv.{" "}
-                    <span className="font-mono tabular-nums slashed-zero">
-                      {derivedLevel}
-                    </span>
-                  </span>
-                  <span className="mx-2 text-foreground-subtle">·</span>
-                </>
-              )}
+              <span>
+                Niv.{" "}
+                <span className="font-mono tabular-nums slashed-zero">
+                  {derivedLevel}
+                </span>
+              </span>
+              <span className="mx-2 text-foreground-subtle">·</span>
               <span className="font-mono tabular-nums slashed-zero">
                 {character.age || "?"}
               </span>{" "}
@@ -241,13 +238,12 @@ export default function CharacterSheet({
         onValueChange={(v) => setTab(v as TabValue)}
         className="gap-5"
       >
-        <div
-          role="tablist"
+        <TabsList
           aria-label="Sections de la fiche"
           // top piloté par chaque coque : 0 dans le cockpit (scroll du pane
           // central), 3.5rem sous la top-bar de l'AppShell (scroll document).
           style={{ top: "var(--sheet-tabs-top, 0px)" }}
-          className="sticky z-20 flex w-full items-center gap-1 rounded-lg border border-border bg-background/95 p-1 backdrop-blur-xl"
+          className="sticky z-20 flex w-full h-auto items-center gap-1 rounded-lg border border-border bg-background/95 p-1 backdrop-blur-xl"
         >
           {(
             [
@@ -257,26 +253,16 @@ export default function CharacterSheet({
               ...(isMJ ? [["evolution", "Évolution"]] : []),
               ["profil", "Profil"],
             ] as [TabValue, string][]
-          ).map(([value, label]) => {
-            const active = tab === value;
-            return (
-              <button
-                key={value}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setTab(value)}
-                className={`flex-1 whitespace-nowrap rounded-md px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors ${
-                  active
-                    ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
-                    : "text-foreground-subtle hover:bg-surface-overlay/60 hover:text-foreground"
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+          ).map(([value, label]) => (
+            <TabsTrigger
+              key={value}
+              value={value}
+              className="flex-1 whitespace-nowrap rounded-md px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors text-foreground-subtle hover:bg-surface-overlay/60 hover:text-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground shadow-primary/25 shadow-none data-[state=active]:shadow-sm"
+            >
+              {label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
         {/* ─── Vitaux + actions ─── stack vertical (flux v0) ─── */}
         <TabsContent value="vitaux">
@@ -345,22 +331,24 @@ export default function CharacterSheet({
                       aria-hidden
                     />
                     {openAttrRoll ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={openAttrRoll}
                         title={`Lancer un jet d'attribut ${attr}`}
                         aria-label={`Lancer un jet d'attribut ${attr}`}
-                        className="group flex shrink-0 items-center gap-1.5 rounded-md border border-transparent px-2 py-1 transition-colors hover:border-primary/30 hover:bg-primary/10"
+                        className="group flex shrink-0 items-center gap-1.5 h-auto px-2 py-1 border border-transparent hover:border-primary/30 hover:bg-primary/10"
                       >
                         <span className="font-mono text-lg font-semibold tabular-nums slashed-zero text-foreground">
                           {score}
                         </span>
                         <Dices
                           size={13}
-                          className="text-foreground-subtle transition-colors group-hover:text-primary"
+                          className="text-foreground-subtle transition-colors group-hover/button:text-primary"
                           aria-hidden
                         />
-                      </button>
+                      </Button>
                     ) : (
                       <span className="shrink-0 font-mono text-lg font-semibold tabular-nums slashed-zero text-foreground">
                         {score}
@@ -481,7 +469,6 @@ function HeaderBadge({
   );
 }
 
-/* Petit toggle de présence inline — variante texte Linear (lien lavande/ghost) */
 function PresenceToggle({
   isPresent,
   onToggle,
@@ -492,17 +479,25 @@ function PresenceToggle({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="xs"
       disabled={isPending}
       onClick={() => startTransition(() => onToggle())}
       className={
         isPresent
-          ? "focus-grimoire rounded-md px-1.5 text-xs text-ink-tertiary transition-colors hover:text-foreground disabled:opacity-40"
-          : "focus-grimoire rounded-md px-1.5 text-xs font-medium text-primary transition-colors hover:text-primary-hover disabled:opacity-40"
+          ? "h-6 rounded-md px-2 text-xs text-ink-tertiary hover:text-foreground hover:bg-transparent"
+          : "h-6 rounded-md px-2 text-xs font-medium text-primary hover:text-primary-hover hover:bg-transparent"
       }
     >
-      {isPresent ? "Quitter" : "Rejoindre"}
-    </button>
+      {isPending ? (
+        <Loader2 className="size-3 animate-spin" />
+      ) : isPresent ? (
+        "Quitter"
+      ) : (
+        "Rejoindre"
+      )}
+    </Button>
   );
 }

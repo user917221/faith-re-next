@@ -70,6 +70,7 @@ export {
   updateCampaignStatus,
   setActiveCampaign,
   createCampaign,
+  renameCampaign,
   advanceSession,
   startSessionTimer,
   pauseSessionTimer,

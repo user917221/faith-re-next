@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Loader2 } from "lucide-react";
 import { CountUp } from "./CountUp";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 /**
  * Jauge vitale circulaire — arc avec gap bas (compteur sobre, design v0).
@@ -79,13 +82,13 @@ export function VitalGauge({
   };
 
   return (
-    <div className="campaign-subpanel flex w-full max-w-[10rem] flex-col items-center gap-2 p-3">
+    <div className="campaign-subpanel flex w-full max-w-[10rem] flex-col items-center gap-2 p-3 transition-opacity duration-300">
       {/* Anneau */}
       <div className="relative" style={{ width: size, height: size }}>
         <svg
           width={size}
           height={size}
-          className="block"
+          className={cn("block", isPending && "animate-pulse")}
           style={{ transform: `rotate(${rotationDeg}deg)` }}
           aria-hidden="true"
         >
@@ -108,6 +111,7 @@ export function VitalGauge({
             strokeWidth={strokeWidth}
             strokeDasharray={`${dashFill} ${dashGap + (circumference - dashTotal)}`}
             strokeLinecap="round"
+            className={cn(isPending && "transition-none")}
             style={{
               transition: "stroke-dasharray 0.5s cubic-bezier(.4,0,.2,1)",
             }}
@@ -132,35 +136,41 @@ export function VitalGauge({
                       : "var(--foreground)",
             }}
           />
-          <span className="text-foreground-subtle mt-0.5 font-mono text-[10px] tracking-[0.14em] tabular-nums slashed-zero">
-            /{max}
-          </span>
+          {isPending ? (
+            <Loader2 className="mt-1 size-3 animate-spin text-primary" aria-hidden="true" />
+          ) : (
+            <span className="text-foreground-subtle mt-0.5 font-mono text-[10px] tracking-[0.14em] tabular-nums slashed-zero">
+              /{max}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Label + slot badge (hauteur réservée pour aligner les colonnes) */}
       <div className="flex h-7 flex-col items-center justify-start gap-0.5">
-        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-muted">
+        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           {label}
         </span>
         <span className="text-foreground-subtle font-mono text-[10px] tracking-widest tabular-nums">
-          {badge || " "}
+          {badge || " "}
         </span>
       </div>
 
       {/* Ajusteur sobre — câblé serveur (dégât / soin avec montant) */}
       {onAdjust && (
-        <div className="flex items-center gap-1">
-          <button
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="icon-xs"
             onClick={() => adjust(-amount)}
             disabled={isPending}
-            className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:border-hairline-strong hover:bg-surface-overlay hover:text-foreground disabled:opacity-40"
+            className="size-6 text-foreground-muted hover:text-foreground"
             aria-label={`Infliger ${amount} à ${label}`}
             title={`Dégât −${amount}`}
           >
-            <Minus size={11} />
-          </button>
-          <input
+            <Minus className="size-3" />
+          </Button>
+          <Input
             type="number"
             min={1}
             max={999}
@@ -171,17 +181,19 @@ export function VitalGauge({
             onFocus={(e) => e.currentTarget.select()}
             disabled={isPending}
             aria-label={`Montant pour ${label}`}
-            className="h-6 w-10 rounded-md border border-border bg-background/50 text-center font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted outline-none [appearance:textfield] focus:border-border-strong [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="h-6 w-11 bg-background/50 text-center font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted outline-none [appearance:textfield] focus-visible:border-primary/40 focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
-          <button
+          <Button
+            variant="outline"
+            size="icon-xs"
             onClick={() => adjust(amount)}
             disabled={isPending}
-            className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:border-hairline-strong hover:bg-surface-overlay hover:text-foreground disabled:opacity-40"
+            className="size-6 text-foreground-muted hover:text-foreground"
             aria-label={`Soigner ${amount} de ${label}`}
             title={`Soin +${amount}`}
           >
-            <Plus size={11} />
-          </button>
+            <Plus className="size-3" />
+          </Button>
         </div>
       )}
 
