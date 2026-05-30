@@ -93,15 +93,43 @@ export async function removeNpc(
   return { ok: true };
 }
 
-export async function updateNpcDisposition(
+export async function updateNpc(
   npcId: string,
-  disposition: NpcDisposition,
+  patch: {
+    name?: string;
+    role?: string;
+    disposition?: NpcDisposition;
+    description?: string;
+  },
 ): Promise<Result<Record<never, never>>> {
   await assertMJ();
-  if (!DISPOSITIONS.includes(disposition)) {
-    return { ok: false, reason: "Disposition invalide" };
+
+  const set: Partial<{
+    name: string;
+    role: string | null;
+    disposition: NpcDisposition;
+    description: string | null;
+  }> = {};
+
+  if (typeof patch.name === "string") {
+    const v = patch.name.trim();
+    if (!v) return { ok: false, reason: "Nom requis" };
+    set.name = v.slice(0, 80);
   }
-  await db.update(npcs).set({ disposition }).where(eq(npcs.id, npcId));
+  if (typeof patch.role === "string") {
+    const v = patch.role.trim();
+    set.role = v.length ? v.slice(0, 80) : null;
+  }
+  if (patch.disposition && DISPOSITIONS.includes(patch.disposition)) {
+    set.disposition = patch.disposition;
+  }
+  if (typeof patch.description === "string") {
+    const v = patch.description.trim();
+    set.description = v.length ? v.slice(0, 2000) : null;
+  }
+  if (Object.keys(set).length === 0) return { ok: true };
+
+  await db.update(npcs).set(set).where(eq(npcs.id, npcId));
   revalidatePath("/mj");
   return { ok: true };
 }

@@ -33,7 +33,7 @@ export {
   updateFlux,
 } from "./flux";
 
-export { addRune, removeRune } from "./runes";
+export { addRune, removeRune, updateRune } from "./runes";
 
 export { addItem, removeItem, toggleEquip, updateItemQty } from "./items";
 
@@ -42,7 +42,7 @@ export {
   removeJournalEntry,
   addNpc,
   removeNpc,
-  updateNpcDisposition,
+  updateNpc,
 } from "./world";
 
 export {

@@ -27,7 +27,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 import { CommandMenu } from "@/components/app-shell/CommandMenu";
 import type { ShellUser } from "@/components/app-shell/AppSidebar";
-import { CampaignStatus } from "./CampaignStatus";
 import { SessionTimer } from "./SessionTimer";
 import { QuickRollPanel } from "./QuickRollPanel";
 
@@ -59,7 +58,6 @@ export function CockpitShell({
   children,
   rollPanel,
   campaignSelector,
-  campaignStatus,
   sessionTimer,
   activeView = "dashboard",
   playerView = false,
@@ -72,7 +70,6 @@ export function CockpitShell({
   children: ReactNode;
   rollPanel?: ReactNode;
   campaignSelector?: ReactNode;
-  campaignStatus?: ReactNode;
   sessionTimer?: ReactNode;
   activeView?: string;
   playerView?: boolean;
@@ -136,7 +133,6 @@ export function CockpitShell({
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-border p-3">
-          {campaignStatus ?? <CampaignStatus />}
           {sessionTimer ?? <SessionTimer />}
         </div>
       </aside>

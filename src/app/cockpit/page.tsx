@@ -16,6 +16,8 @@ import type {
   ConditionKind,
   ItemEntry,
   ItemKind,
+  RuneItem,
+  RuneRarity,
   VitalType,
 } from "@/components/character-sheet/types";
 import { ALL_SKILLS } from "@/lib/skills";
@@ -130,6 +132,11 @@ const INITIAL: Character[] = [
       { id: "i2", name: "Cotte tissée", type: "armure", qty: 1, equipped: true, description: null },
       { id: "i3", name: "Fiole de Flux", type: "consommable", qty: 3, equipped: false, description: "Restaure 20 de Flux." },
       { id: "i4", name: "Corde de soie", type: "objet", qty: 1, equipped: false, description: null },
+    ],
+    runesInventory: [
+      { id: "r1", name: "Lame de brume", type: "armement", description: "Tranchant spectral.", level: 4, rarity: "legendaire", damage: "1d8+2" },
+      { id: "r2", name: "Voile de Flux", type: "utilitaire", description: "Dissimule la porteuse.", level: 2, rarity: "rare", damage: null },
+      { id: "r3", name: "Sceau d'ancrage", type: "predefinie", description: null, level: 1, rarity: "commune", damage: null },
     ],
   },
   {
@@ -293,6 +300,54 @@ function CockpitInner() {
     [patch, selId],
   );
 
+  const onAddRune = useCallback(
+    async (input: { name: string; type: RuneItem["type"]; description?: string }) => {
+      const next: RuneItem = {
+        id: `rune-${Math.round(performance.now())}`,
+        name: input.name,
+        type: input.type,
+        description: input.description ?? null,
+        level: 1,
+        rarity: "commune",
+        damage: null,
+      };
+      patch(selId, (c) => ({ ...c, runesInventory: [...c.runesInventory, next] }));
+    },
+    [patch, selId],
+  );
+
+  const onRemoveRune = useCallback(
+    async (runeId: string) => {
+      patch(selId, (c) => ({
+        ...c,
+        runesInventory: c.runesInventory.filter((r) => r.id !== runeId),
+      }));
+    },
+    [patch, selId],
+  );
+
+  const onUpdateRune = useCallback(
+    async (
+      runeId: string,
+      rp: { level?: number; rarity?: RuneRarity; damage?: string },
+    ) => {
+      patch(selId, (c) => ({
+        ...c,
+        runesInventory: c.runesInventory.map((r) =>
+          r.id === runeId
+            ? {
+                ...r,
+                level: rp.level ?? r.level,
+                rarity: rp.rarity ?? r.rarity,
+                damage: rp.damage !== undefined ? rp.damage || null : r.damage,
+              }
+            : r,
+        ),
+      }));
+    },
+    [patch, selId],
+  );
+
   let center: React.ReactNode;
   if (view === "journal") {
     center = (
@@ -313,10 +368,9 @@ function CockpitInner() {
         onCombatStatChange={onCombatStatChange}
         onAddCondition={onAddCondition}
         onRemoveCondition={onRemoveCondition}
-        onAddItem={onAddItem}
-        onRemoveItem={onRemoveItem}
-        onToggleEquip={onToggleEquip}
-        onUpdateItemQty={onUpdateItemQty}
+        onAddRune={onAddRune}
+        onRemoveRune={onRemoveRune}
+        onUpdateRune={onUpdateRune}
       />
     );
   }

@@ -49,6 +49,7 @@ import {
   updateTechnicalTrainings,
   addRune,
   removeRune,
+  updateRune,
   updateCombatStats,
   addCondition,
   removeCondition,
@@ -426,6 +427,10 @@ export function MJCharacterClient({
           throw new Error(res.reason);
         }
         toast("Rune retirée");
+        refresh();
+      }}
+      onUpdateRune={async (runeId, patch) => {
+        await updateRune(character.id, runeId, patch);
         refresh();
       }}
       onCombatStatChange={async (key, delta) => {

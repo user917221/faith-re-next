@@ -10,4 +10,6 @@ export type {
   ConditionKind,
   ItemEntry,
   ItemKind,
+  RuneItem,
+  RuneRarity,
 } from "./types";

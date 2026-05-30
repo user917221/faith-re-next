@@ -52,6 +52,9 @@ type CharacterRow = typeof characters.$inferSelect & {
     name: string;
     type: "utilitaire" | "armement" | "predefinie";
     description: string | null;
+    level: number;
+    rarity: "commune" | "rare" | "epique" | "legendaire";
+    damage: string | null;
   }[];
   conditions?: {
     id: string;
@@ -141,6 +144,9 @@ function hydrate(row: CharacterRow): HydratedCharacter {
       name: r.name,
       type: r.type,
       description: r.description,
+      level: r.level,
+      rarity: r.rarity,
+      damage: r.damage,
     })),
   };
 }

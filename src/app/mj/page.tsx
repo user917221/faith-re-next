@@ -11,7 +11,6 @@ import { listTrainingRequestsForMJ } from "@/lib/actions";
 import { CockpitShell } from "@/components/cockpit/CockpitShell";
 import {
   CampaignSelector,
-  CampaignStatusLive,
   SessionTimerLive,
 } from "@/components/cockpit/CampaignControls";
 import { StatusNotesPanel } from "@/components/cockpit/StatusNotesPanel";
@@ -100,15 +99,6 @@ export default async function MjDashboardPage({
         <CampaignSelector
           campaign={{ id: ctx.campaign.id, name: ctx.campaign.name }}
           campaigns={ctx.campaigns}
-        />
-      }
-      campaignStatus={
-        <CampaignStatusLive
-          campaignId={ctx.campaign.id}
-          threatLevel={ctx.campaign.threatLevel}
-          morale={ctx.campaign.partyMorale}
-          questsActive={ctx.campaign.questsActive}
-          downtimeDays={ctx.campaign.downtimeDays}
         />
       }
       sessionTimer={

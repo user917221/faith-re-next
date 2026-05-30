@@ -26,6 +26,12 @@ import type { AdapterAccountType } from "next-auth/adapters";
 export const userRoleEnum = pgEnum("user_role", ["mj", "player", "spectator"]);
 export const requestStatusEnum = pgEnum("request_status", ["pending", "approved", "rejected"]);
 export const runeTypeEnum = pgEnum("rune_type", ["utilitaire", "armement", "predefinie"]);
+export const runeRarityEnum = pgEnum("rune_rarity", [
+  "commune",
+  "rare",
+  "epique",
+  "legendaire",
+]);
 export const itemTypeEnum = pgEnum("item_type", [
   "arme",
   "armure",
@@ -171,6 +177,10 @@ export const characterRunes = pgTable("character_rune", {
   name: text("name").notNull(),
   type: runeTypeEnum("type").notNull(),
   description: text("description"),
+  // attributs de rune (niveau / rareté / dégâts) — pilotés en jeu
+  level: integer("level").default(1).notNull(),
+  rarity: runeRarityEnum("rarity").default("commune").notNull(),
+  damage: text("damage"), // ex. "1d8", "2d6+1", "5" — libre
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -433,6 +443,7 @@ export type CharacterSkill = typeof characterSkills.$inferSelect;
 export type TrainingRequest = typeof trainingRequests.$inferSelect;
 export type CharacterRune = typeof characterRunes.$inferSelect;
 export type NewCharacterRune = typeof characterRunes.$inferInsert;
+export type RuneRarity = (typeof runeRarityEnum.enumValues)[number];
 export type PublicRoll = typeof publicRolls.$inferSelect;
 export type Condition = typeof conditions.$inferSelect;
 export type NewCondition = typeof conditions.$inferInsert;

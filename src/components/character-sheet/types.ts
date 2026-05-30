@@ -80,11 +80,16 @@ export type ConditionItem = {
 
 export type CombatStatKey = "initiative" | "armor" | "movement" | "proficiency";
 
+export type RuneRarity = "commune" | "rare" | "epique" | "legendaire";
+
 export type RuneItem = {
   id: string;
   name: string;
   type: "utilitaire" | "armement" | "predefinie";
   description: string | null;
+  level: number;
+  rarity: RuneRarity;
+  damage: string | null;
 };
 
 export type ActionType = keyof typeof ENDURANCE_COSTS;
@@ -132,6 +137,10 @@ export type CharacterSheetProps = {
     description?: string;
   }) => Promise<void>;
   onRemoveRune?: (runeId: string) => Promise<void>;
+  onUpdateRune?: (
+    runeId: string,
+    patch: { level?: number; rarity?: RuneRarity; damage?: string },
+  ) => Promise<void>;
   // --- Combat & conditions (Phase 2) ---
   onCombatStatChange?: (key: CombatStatKey, delta: number) => Promise<void>;
   onAddCondition?: (input: {

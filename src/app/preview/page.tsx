@@ -9,6 +9,7 @@ import type {
   ConditionKind,
   ItemEntry,
   ItemKind,
+  RuneRarity,
   VitalType,
 } from "@/components/character-sheet";
 import { ENDURANCE_COSTS, calculateLevel } from "@/lib/faith-system";
@@ -64,9 +65,9 @@ function buildMockBrad(): Character {
       { id: "it3", name: "Potion de soin", type: "consommable", qty: 2, equipped: false, description: "Rend 2d6 PV." },
     ],
     runesInventory: [
-      { id: "r1", name: "Brasier mineur", type: "armement", description: "Inflige 1d6 feu." },
-      { id: "r2", name: "Pas-léger", type: "utilitaire", description: null },
-      { id: "r3", name: "Sceau de garde", type: "predefinie", description: null },
+      { id: "r1", name: "Brasier mineur", type: "armement", description: "Inflige 1d6 feu.", level: 3, rarity: "rare", damage: "1d6" },
+      { id: "r2", name: "Pas-léger", type: "utilitaire", description: null, level: 1, rarity: "commune", damage: null },
+      { id: "r3", name: "Sceau de garde", type: "predefinie", description: null, level: 2, rarity: "epique", damage: null },
     ],
   };
 }
@@ -314,6 +315,9 @@ export default function PreviewPage() {
             name: input.name,
             type: input.type,
             description: input.description ?? null,
+            level: 1,
+            rarity: "commune",
+            damage: null,
           },
         ],
       }));
@@ -328,6 +332,29 @@ export default function PreviewPage() {
       runesInventory: c.runesInventory.filter((r) => r.id !== runeId),
     }));
   }, []);
+
+  const onUpdateRune = useCallback(
+    async (
+      runeId: string,
+      patch: { level?: number; rarity?: RuneRarity; damage?: string },
+    ) => {
+      await Promise.resolve();
+      setCharacter((c) => ({
+        ...c,
+        runesInventory: c.runesInventory.map((r) =>
+          r.id === runeId
+            ? {
+                ...r,
+                level: patch.level ?? r.level,
+                rarity: patch.rarity ?? r.rarity,
+                damage: patch.damage !== undefined ? patch.damage || null : r.damage,
+              }
+            : r,
+        ),
+      }));
+    },
+    [],
+  );
 
   const onRequestTraining = useCallback(async (note?: string) => {
     console.log("[preview] onRequestTraining", note ?? "(sans note)");
@@ -389,6 +416,7 @@ export default function PreviewPage() {
           onProfileChange={onProfileChange}
           onAddRune={onAddRune}
           onRemoveRune={onRemoveRune}
+          onUpdateRune={onUpdateRune}
           onRequestTraining={onRequestTraining}
           onCombatStatChange={onCombatStatChange}
           onAddCondition={onAddCondition}

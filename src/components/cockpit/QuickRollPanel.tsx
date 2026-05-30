@@ -4,42 +4,28 @@ import { useState, useTransition } from "react";
 import { Dices, X } from "lucide-react";
 
 /**
- * Quick-Roll panel (cockpit MJ) — sélecteur de dé + display + modificateurs + pool.
+ * Lanceur de dés (cockpit MJ) — un seul type de jet : le **Pool de Dés**.
+ * Dés disponibles : d6 / d8 / d50 / d100. Modificateur plat optionnel.
  *
- * Contrôlé : si `onRoll` est fourni (cockpit /mj réel → `rollPublicPool`), le jet
- * est persisté côté serveur et apparaît sur /plateau. Sinon, fallback local
- * (Math.random) pour l'aperçu public /cockpit sans BDD.
+ * Contrôlé : si `onRoll` est fourni (cockpit /mj réel → `rollPublicPool`), le
+ * jet est persisté et apparaît sur /plateau. Sinon, fallback local (Math.random).
  */
-const DICE = [4, 6, 8, 10, 12, 20, 100];
+const DICE = [6, 8, 50, 100];
 
 type PoolDie = { sides: number; count: number };
-type Keep = "all" | "highest" | "lowest";
-type RollInput = { dice: PoolDie[]; modifier: number; keep: Keep };
+type RollInput = { dice: PoolDie[]; modifier: number; keep: "all" | "highest" | "lowest" };
 type RollResult = { total: number; isCritSucc: boolean; isCritFail: boolean };
 type Display = { total: number; crit: "succ" | "fail" | null; label: string };
 
 const d = (sides: number) => 1 + Math.floor(Math.random() * sides);
 
-function localRoll({ dice, modifier, keep }: RollInput): RollResult {
+function localRoll({ dice, modifier }: RollInput): RollResult {
   const flat = dice.flatMap((g) => Array<number>(g.count).fill(g.sides));
   const rolls = flat.map((s) => d(s));
-  let kept: number;
-  let isCritSucc = false;
-  let isCritFail = false;
-  if (keep === "highest" || keep === "lowest") {
-    const pick = keep === "highest" ? (a: number, b: number) => a > b : (a: number, b: number) => a < b;
-    const idx = rolls.reduce((best, r, i) => (pick(r, rolls[best]) ? i : best), 0);
-    kept = rolls[idx];
-    isCritSucc = kept === flat[idx];
-    isCritFail = kept === 1;
-  } else {
-    kept = rolls.reduce((a, b) => a + b, 0);
-    if (flat.length === 1) {
-      isCritSucc = rolls[0] === flat[0];
-      isCritFail = rolls[0] === 1;
-    }
-  }
-  return { total: kept + modifier, isCritSucc, isCritFail };
+  const total = rolls.reduce((a, b) => a + b, 0) + modifier;
+  const isCritSucc = flat.length === 1 && rolls[0] === flat[0];
+  const isCritFail = flat.length === 1 && rolls[0] === 1;
+  return { total, isCritSucc, isCritFail };
 }
 
 export function QuickRollPanel({
@@ -49,7 +35,6 @@ export function QuickRollPanel({
   characterName?: string;
   onRoll?: (input: RollInput) => Promise<RollResult | null>;
 } = {}) {
-  const [die, setDie] = useState(20);
   const [mods, setMods] = useState(0);
   const [pool, setPool] = useState<PoolDie[]>([
     { sides: 6, count: 2 },
@@ -58,7 +43,12 @@ export function QuickRollPanel({
   const [display, setDisplay] = useState<Display | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const doRoll = (input: RollInput, label: string) => {
+  const modLabel = mods ? ` ${mods > 0 ? "+" : "−"}${Math.abs(mods)}` : "";
+
+  const rollPool = () => {
+    if (pool.length === 0) return;
+    const input: RollInput = { dice: pool, modifier: mods, keep: "all" };
+    const label = pool.map((p) => `${p.count}d${p.sides}`).join(" + ") + modLabel;
     startTransition(async () => {
       const res = onRoll ? await onRoll(input) : localRoll(input);
       if (!res) return;
@@ -70,20 +60,6 @@ export function QuickRollPanel({
     });
   };
 
-  const modLabel = mods ? ` ${mods > 0 ? "+" : "−"}${Math.abs(mods)}` : "";
-  const rollSingle = () =>
-    doRoll({ dice: [{ sides: die, count: 1 }], modifier: mods, keep: "all" }, `d${die}${modLabel}`);
-  const rollAdvantage = () =>
-    doRoll(
-      { dice: [{ sides: die, count: 2 }], modifier: mods, keep: "highest" },
-      `d${die} av.${modLabel}`,
-    );
-  const rollPool = () => {
-    const label =
-      pool.map((p) => `${p.count}d${p.sides}`).join(" + ") + modLabel;
-    doRoll({ dice: pool, modifier: mods, keep: "all" }, label);
-  };
-
   const critColor =
     display?.crit === "succ"
       ? "var(--endu)"
@@ -93,29 +69,17 @@ export function QuickRollPanel({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Jet rapide */}
+      {/* Résultat */}
       <section className="campaign-panel">
         <div className="campaign-header-line flex items-center justify-between px-4 py-3">
           <h2 className="min-w-0 truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-            Jet rapide
+            Pool de dés
             {characterName && (
               <span className="ml-1.5 normal-case tracking-normal text-foreground-muted">
                 · {characterName}
               </span>
             )}
           </h2>
-          <select
-            value={die}
-            onChange={(e) => setDie(+e.target.value)}
-            aria-label="Type de dé"
-            className="rounded-md border border-border bg-background/40 px-1.5 py-0.5 font-mono text-[11px] text-foreground-muted outline-none"
-          >
-            {DICE.map((n) => (
-              <option key={n} value={n}>
-                d{n}
-              </option>
-            ))}
-          </select>
         </div>
         <div className="flex flex-col items-center gap-1 px-4 py-5">
           <span
@@ -131,26 +95,8 @@ export function QuickRollPanel({
                 : display.crit === "fail"
                   ? `Échec critique · ${display.label}`
                   : `Jet ${display.label}`
-              : `Jet d${die}${modLabel}`}
+              : "Construis ton pool de dés"}
           </span>
-        </div>
-        <div className="grid grid-cols-2 gap-2 px-4 pb-4">
-          <button
-            type="button"
-            onClick={rollSingle}
-            disabled={isPending}
-            className="flex h-9 items-center justify-center gap-2 rounded-md bg-foreground text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
-          >
-            <Dices size={14} /> Lancer
-          </button>
-          <button
-            type="button"
-            onClick={rollAdvantage}
-            disabled={isPending}
-            className="flex h-9 items-center justify-center gap-2 rounded-md border border-border text-sm text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground disabled:opacity-50"
-          >
-            Avantage
-          </button>
         </div>
       </section>
 

@@ -14,10 +14,8 @@ import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { VitalsHeader } from "./VitalsHeader";
-import { CombatStatsBanner } from "./CombatStatsBanner";
 import { ConditionsPanel } from "./ConditionsPanel";
 import { RuneInventory } from "./RuneInventory";
-import { ItemInventory } from "./ItemInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
 import { SkillTierLegend } from "./SkillTierLegend";
@@ -42,7 +40,7 @@ type DrawerCtx = RollContext & {
   skillName: string | null;
 };
 
-type TabValue = "vitaux" | "competences" | "equipement" | "evolution" | "profil";
+type TabValue = "vitaux" | "competences" | "runes" | "evolution" | "profil";
 
 export default function CharacterSheet({
   character,
@@ -65,13 +63,9 @@ export default function CharacterSheet({
   onTechnicalChange,
   onAddRune,
   onRemoveRune,
-  onCombatStatChange,
+  onUpdateRune,
   onAddCondition,
   onRemoveCondition,
-  onAddItem,
-  onRemoveItem,
-  onToggleEquip,
-  onUpdateItemQty,
 }: CharacterSheetProps) {
   const allocated = countAllocatedPoints(character.skills);
   const isCapped = allocated >= SKILL_CAP;
@@ -233,13 +227,13 @@ export default function CharacterSheet({
         <div
           role="tablist"
           aria-label="Sections de la fiche"
-          className="sticky top-16 z-10 flex w-full items-center gap-1 rounded-lg border border-border bg-background/90 p-1 backdrop-blur-xl"
+          className="sticky top-0 z-20 flex w-full items-center gap-1 rounded-lg border border-border bg-background/95 p-1 backdrop-blur-xl"
         >
           {(
             [
               ["vitaux", "Vitaux"],
-              ["competences", "Compétences"],
-              ["equipement", "Équipement"],
+              ["competences", "Stats"],
+              ["runes", "Runes"],
               ...(isMJ ? [["evolution", "Évolution"]] : []),
               ["profil", "Profil"],
             ] as [TabValue, string][]
@@ -267,12 +261,7 @@ export default function CharacterSheet({
         {/* ─── Vitaux + actions ─── stack vertical (flux v0) ─── */}
         <TabsContent value="vitaux">
           <div className="flex flex-col gap-4">
-            {/* Stats de combat + conditions actives (Phase 2) */}
-            <CombatStatsBanner
-              character={character}
-              onCombatStatChange={onCombatStatChange}
-            />
-
+            {/* Conditions actives */}
             <ConditionsPanel
               conditions={character.conditions}
               onAddCondition={onAddCondition}
@@ -370,14 +359,13 @@ export default function CharacterSheet({
           </div>
         </TabsContent>
 
-        {/* ─── Équipement — inventaire d'objets (Phase 6) ─── */}
-        <TabsContent value="equipement">
-          <ItemInventory
-            items={character.items}
-            onAddItem={onAddItem}
-            onRemoveItem={onRemoveItem}
-            onToggleEquip={onToggleEquip}
-            onUpdateItemQty={onUpdateItemQty}
+        {/* ─── Runes — inventaire de runes (niveau / rareté / dégâts) ─── */}
+        <TabsContent value="runes">
+          <RuneInventory
+            runes={character.runesInventory}
+            onAddRune={onAddRune}
+            onRemoveRune={onRemoveRune}
+            onUpdateRune={onUpdateRune}
           />
         </TabsContent>
 
@@ -401,12 +389,6 @@ export default function CharacterSheet({
             <ProfileEditor
               character={character}
               onProfileChange={onProfileChange}
-            />
-
-            <RuneInventory
-              runes={character.runesInventory}
-              onAddRune={onAddRune}
-              onRemoveRune={onRemoveRune}
             />
 
             {!isMJ && onRequestTraining && (
