@@ -9,6 +9,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar, type ShellUser } from "./AppSidebar";
 import { CommandMenu } from "./CommandMenu";
+import { KeepWarmToggle } from "./KeepWarmToggle";
 
 /**
  * Coquille applicative — sidebar persistante + topbar + palette ⌘K.
@@ -44,6 +45,7 @@ export function AppShell({
               Table active
             </span>
           </div>
+          <KeepWarmToggle className="ml-auto" />
           <button
             type="button"
             aria-label="Rechercher (⌘K)"
@@ -52,7 +54,7 @@ export function AppShell({
                 new KeyboardEvent("keydown", { key: "k", metaKey: true }),
               );
             }}
-            className="ml-auto flex h-8 items-center gap-2 rounded-md border border-border bg-card/80 px-2.5 text-xs text-foreground-muted transition-colors hover:border-hairline-strong hover:bg-surface-overlay hover:text-foreground"
+            className="flex h-8 items-center gap-2 rounded-md border border-border bg-card/80 px-2.5 text-xs text-foreground-muted transition-colors hover:border-hairline-strong hover:bg-surface-overlay hover:text-foreground"
           >
             <Search className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Palette</span>

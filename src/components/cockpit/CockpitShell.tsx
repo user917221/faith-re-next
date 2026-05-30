@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { KeepWarmToggle } from "@/components/app-shell/KeepWarmToggle";
 import {
   LayoutDashboard,
   Users,
@@ -174,11 +175,12 @@ export function CockpitShell({
             <span className="tabular-nums">{sessionDate}</span>
           </div>
 
+          <KeepWarmToggle className="ml-auto" />
           <button
             type="button"
             aria-label="Rechercher (⌘K)"
             onClick={openPalette}
-            className="ml-auto flex h-8 items-center gap-2 rounded-md border border-border bg-card/80 px-2.5 text-xs text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
+            className="flex h-8 items-center gap-2 rounded-md border border-border bg-card/80 px-2.5 text-xs text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
           >
             <Search className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Rechercher</span>
