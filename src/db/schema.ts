@@ -32,6 +32,11 @@ export const itemTypeEnum = pgEnum("item_type", [
   "objet",
   "consommable",
 ]);
+export const npcDispositionEnum = pgEnum("npc_disposition", [
+  "allie",
+  "neutre",
+  "hostile",
+]);
 // Nature d'une condition active (pilote la couleur du chip côté UI).
 export const conditionKindEnum = pgEnum("condition_kind", [
   "buff", // bénéfique (vert)
@@ -282,6 +287,31 @@ export const statusNotes = pgTable("status_note", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Journal de campagne : entrées chronologiques (résumés de séance, événements).
+export const journalEntries = pgTable("journal_entry", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  sessionNumber: integer("session_number").default(1).notNull(),
+  title: text("title").notNull(),
+  body: text("body").default("").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// PNJ de campagne : fiche légère (nom, rôle, disposition, description).
+export const npcs = pgTable("npc", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  role: text("role"),
+  disposition: npcDispositionEnum("disposition").default("neutre").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // ---------------- Relations ----------------
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -316,6 +346,22 @@ export const conditionsRelations = relations(conditions, ({ one }) => ({
 
 export const campaignsRelations = relations(campaigns, ({ many }) => ({
   sessions: many(gameSessions),
+  journalEntries: many(journalEntries),
+  npcs: many(npcs),
+}));
+
+export const journalEntriesRelations = relations(journalEntries, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [journalEntries.campaignId],
+    references: [campaigns.id],
+  }),
+}));
+
+export const npcsRelations = relations(npcs, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [npcs.campaignId],
+    references: [campaigns.id],
+  }),
 }));
 
 export const gameSessionsRelations = relations(gameSessions, ({ one }) => ({
@@ -396,3 +442,6 @@ export type GameSession = typeof gameSessions.$inferSelect;
 export type StatusNote = typeof statusNotes.$inferSelect;
 export type Item = typeof items.$inferSelect;
 export type NewItem = typeof items.$inferInsert;
+export type JournalEntry = typeof journalEntries.$inferSelect;
+export type Npc = typeof npcs.$inferSelect;
+export type NpcDisposition = (typeof npcDispositionEnum.enumValues)[number];

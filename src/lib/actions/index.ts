@@ -38,6 +38,14 @@ export { addRune, removeRune } from "./runes";
 export { addItem, removeItem, toggleEquip, updateItemQty } from "./items";
 
 export {
+  addJournalEntry,
+  removeJournalEntry,
+  addNpc,
+  removeNpc,
+  updateNpcDisposition,
+} from "./world";
+
+export {
   updateCombatStats,
   addCondition,
   removeCondition,

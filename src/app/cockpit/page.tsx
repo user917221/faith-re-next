@@ -6,7 +6,8 @@
  * et une fiche mock interactifs.
  */
 
-import { useCallback, useState } from "react";
+import { Suspense, useCallback, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import CharacterSheet from "@/components/character-sheet";
 import type {
   Character,
@@ -22,6 +23,32 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 import { CockpitShell } from "@/components/cockpit/CockpitShell";
 import { QuickRollPanel } from "@/components/cockpit/QuickRollPanel";
+import { JournalView } from "@/components/cockpit/JournalView";
+import { NpcsView } from "@/components/cockpit/NpcsView";
+import { RulesView } from "@/components/cockpit/RulesView";
+
+const MOCK_JOURNAL = [
+  {
+    id: "j1",
+    title: "L'embuscade au col de Givre",
+    body: "La compagnie tombe sur une patrouille hostile. Seraphina tisse un mur de brume ; Darius tient la ligne. Butin : une carte ancienne.",
+    sessionNumber: 14,
+    createdAt: new Date("2025-04-26T20:00:00"),
+  },
+  {
+    id: "j2",
+    title: "Le pacte du marchand",
+    body: "Négociation tendue avec Orin le Borgne. Accord conclu, mais une dette plane.",
+    sessionNumber: 13,
+    createdAt: new Date("2025-04-12T20:00:00"),
+  },
+];
+
+const MOCK_NPCS = [
+  { id: "n1", name: "Orin le Borgne", role: "Marchand d'reliques", disposition: "neutre" as const, description: "Connaît tout le monde, ne fait confiance à personne." },
+  { id: "n2", name: "Dame Sève", role: "Gardienne du Bosquet", disposition: "allie" as const, description: "Alliée de Seraphina depuis l'Académie." },
+  { id: "n3", name: "Le Cendreux", role: "Chef de meute", disposition: "hostile" as const, description: "Traque la compagnie depuis le col." },
+];
 
 const SKILLS: Record<string, number> = Object.fromEntries(
   ALL_SKILLS.map((s) => [s, 1]),
@@ -123,6 +150,15 @@ const INITIAL: Character[] = [
 ];
 
 export default function CockpitPreview() {
+  return (
+    <Suspense fallback={null}>
+      <CockpitInner />
+    </Suspense>
+  );
+}
+
+function CockpitInner() {
+  const view = useSearchParams().get("view") ?? "dashboard";
   const [chars, setChars] = useState<Character[]>(INITIAL);
   const [selId, setSelId] = useState("c1");
   const selected = chars.find((c) => c.id === selId) ?? chars[0];
@@ -255,9 +291,38 @@ export default function CockpitPreview() {
     [patch, selId],
   );
 
+  let center: React.ReactNode;
+  if (view === "journal") {
+    center = (
+      <JournalView campaignId="mock" entries={MOCK_JOURNAL} currentSession={14} canEdit />
+    );
+  } else if (view === "npcs") {
+    center = <NpcsView campaignId="mock" npcs={MOCK_NPCS} canEdit />;
+  } else if (view === "regles") {
+    center = <RulesView />;
+  } else {
+    center = (
+      <CharacterSheet
+        character={selected}
+        isMJ
+        onVitalChange={onVitalChange}
+        onSkillChange={onSkillChange}
+        onFluxChange={onFluxChange}
+        onCombatStatChange={onCombatStatChange}
+        onAddCondition={onAddCondition}
+        onRemoveCondition={onRemoveCondition}
+        onAddItem={onAddItem}
+        onRemoveItem={onRemoveItem}
+        onToggleEquip={onToggleEquip}
+        onUpdateItemQty={onUpdateItemQty}
+      />
+    );
+  }
+
   return (
     <CockpitShell
       user={{ name: "Game Master", role: "mj", image: null }}
+      activeView={view}
       rollPanel={<QuickRollPanel characterName={selected.name} />}
       roster={
         <div className="campaign-panel">
@@ -313,20 +378,7 @@ export default function CockpitPreview() {
         </div>
       }
     >
-      <CharacterSheet
-        character={selected}
-        isMJ
-        onVitalChange={onVitalChange}
-        onSkillChange={onSkillChange}
-        onFluxChange={onFluxChange}
-        onCombatStatChange={onCombatStatChange}
-        onAddCondition={onAddCondition}
-        onRemoveCondition={onRemoveCondition}
-        onAddItem={onAddItem}
-        onRemoveItem={onRemoveItem}
-        onToggleEquip={onToggleEquip}
-        onUpdateItemQty={onUpdateItemQty}
-      />
+      {center}
     </CockpitShell>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import Link from "next/link";
 import {
   LayoutDashboard,
   Users,
@@ -29,15 +30,15 @@ import { CampaignStatus } from "./CampaignStatus";
 import { SessionTimer } from "./SessionTimer";
 import { QuickRollPanel } from "./QuickRollPanel";
 
-const NAV = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true },
+const NAV: { label: string; icon: typeof LayoutDashboard; view?: string }[] = [
+  { label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
   { label: "Roster", icon: Users },
   { label: "Sessions", icon: CalendarDays },
-  { label: "Journal", icon: BookText },
+  { label: "Journal", icon: BookText, view: "journal" },
   { label: "Maps", icon: Map },
-  { label: "NPCs", icon: UserCircle2 },
+  { label: "NPCs", icon: UserCircle2, view: "npcs" },
   { label: "Items", icon: Package },
-  { label: "Règles", icon: Scale },
+  { label: "Règles", icon: Scale, view: "regles" },
   { label: "Dés", icon: Dices },
   { label: "Réglages", icon: Settings },
 ];
@@ -59,6 +60,7 @@ export function CockpitShell({
   campaignSelector,
   campaignStatus,
   sessionTimer,
+  activeView = "dashboard",
 }: {
   user: ShellUser;
   campaignName?: string;
@@ -70,6 +72,7 @@ export function CockpitShell({
   campaignSelector?: ReactNode;
   campaignStatus?: ReactNode;
   sessionTimer?: ReactNode;
+  activeView?: string;
 }) {
   const openPalette = () =>
     document.dispatchEvent(
@@ -98,20 +101,25 @@ export function CockpitShell({
           <p className="px-1 pb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
             Navigation
           </p>
-          {NAV.map(({ label, icon: Icon, active }) => (
-            <button
-              key={label}
-              type="button"
-              className={`flex h-9 items-center gap-2.5 rounded-md border px-2.5 text-sm transition-colors ${
-                active
-                  ? "border-primary/30 bg-primary/12 text-primary"
-                  : "border-transparent text-foreground-muted hover:border-border hover:bg-surface-overlay hover:text-foreground"
-              }`}
-            >
-              <Icon size={16} />
-              <span>{label}</span>
-            </button>
-          ))}
+          {NAV.map(({ label, icon: Icon, view }) => {
+            const active = view !== undefined && view === activeView;
+            const cls = `flex h-9 items-center gap-2.5 rounded-md border px-2.5 text-sm transition-colors ${
+              active
+                ? "border-primary/30 bg-primary/12 text-primary"
+                : "border-transparent text-foreground-muted hover:border-border hover:bg-surface-overlay hover:text-foreground"
+            }`;
+            return view ? (
+              <Link key={label} href={`?view=${view}`} className={cls}>
+                <Icon size={16} />
+                <span>{label}</span>
+              </Link>
+            ) : (
+              <button key={label} type="button" className={cls}>
+                <Icon size={16} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-border p-3">

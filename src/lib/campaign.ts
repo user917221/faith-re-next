@@ -7,7 +7,13 @@
  */
 import { and, eq, desc } from "drizzle-orm";
 import { db } from "@/db";
-import { campaigns, gameSessions, statusNotes } from "@/db/schema";
+import {
+  campaigns,
+  gameSessions,
+  statusNotes,
+  journalEntries,
+  npcs,
+} from "@/db/schema";
 
 export type CampaignSummary = { id: string; name: string };
 
@@ -104,6 +110,39 @@ export async function getCampaignContext(): Promise<CampaignContext> {
     },
     campaigns: all,
   };
+}
+
+/** Charge le journal d'une campagne (récent d'abord). */
+export async function loadJournalEntries(campaignId: string) {
+  const rows = await db
+    .select()
+    .from(journalEntries)
+    .where(eq(journalEntries.campaignId, campaignId))
+    .orderBy(desc(journalEntries.createdAt))
+    .limit(100);
+  return rows.map((r) => ({
+    id: r.id,
+    title: r.title,
+    body: r.body,
+    sessionNumber: r.sessionNumber,
+    createdAt: r.createdAt,
+  }));
+}
+
+/** Charge les PNJ d'une campagne (alphabétique). */
+export async function loadNpcs(campaignId: string) {
+  const rows = await db
+    .select()
+    .from(npcs)
+    .where(eq(npcs.campaignId, campaignId))
+    .orderBy(npcs.name);
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    role: r.role,
+    disposition: r.disposition,
+    description: r.description,
+  }));
 }
 
 /** Charge les notes de statut d'un perso (récentes d'abord). */

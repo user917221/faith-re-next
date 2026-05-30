@@ -31,6 +31,14 @@ export async function assertCanEdit(characterId: string) {
   return { session, character };
 }
 
+/** Garde MJ sans personnage cible (campagne, journal, PNJ…). */
+export async function assertMJ() {
+  const session = await auth();
+  if (!session?.user) throw new Error("UNAUTHORIZED");
+  if (session.user.role !== "mj") throw new Error("FORBIDDEN_MJ_ONLY");
+  return { session };
+}
+
 export async function assertMJOnly(characterId: string) {
   const session = await auth();
   if (!session?.user || session.user.role !== "mj") {
