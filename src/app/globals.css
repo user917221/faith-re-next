@@ -210,15 +210,15 @@
 }
 
 .dark {
-  /* surfaces - Pitch Black theme */
+  /* surfaces - Pitch Black & Matte Anthracite Layering */
   --background: #000000;
   --foreground: #f7f8f8;
-  --card: #09090b;
+  --card: rgba(10, 10, 14, 0.72);
   --card-foreground: #f7f8f8;
-  --popover: #09090b;
+  --popover: rgba(5, 5, 5, 0.95);
   --popover-foreground: #f7f8f8;
-  --surface-3: #18181b;
-  --surface-4: #27272a;
+  --surface-3: rgba(24, 24, 28, 0.85);
+  --surface-4: rgba(32, 32, 38, 0.9);
 
   /* lavande */
   --primary: #5e6ad2;
@@ -227,11 +227,11 @@
   --primary-focus: #5e69d1;
   --primary-deep: #3c4485;
 
-  --secondary: #18181b;
+  --secondary: rgba(22, 22, 28, 0.85);
   --secondary-foreground: #f7f8f8;
-  --muted: #18181b;
+  --muted: rgba(18, 18, 22, 0.85);
   --muted-foreground: #a1a1aa;
-  --accent: #09090b;
+  --accent: rgba(30, 30, 38, 0.5);
   --accent-foreground: #f7f8f8;
 
   /* ink ladder */
@@ -239,11 +239,11 @@
   --ink-subtle: #a1a1aa;
   --ink-tertiary: #71717a;
 
-  /* hairlines */
-  --border: #27272a;
-  --input: #27272a;
-  --hairline-strong: #3f3f46;
-  --hairline-tertiary: #52525b;
+  /* hairlines - Ultra-thin crisp borders */
+  --border: rgba(255, 255, 255, 0.065);
+  --input: rgba(10, 10, 14, 0.6);
+  --hairline-strong: rgba(255, 255, 255, 0.12);
+  --hairline-tertiary: rgba(255, 255, 255, 0.18);
   --ring: #5e6ad2;
 
   /* vitaux JDR */
@@ -271,19 +271,19 @@
   --sidebar-foreground: #f7f8f8;
   --sidebar-primary: #5e6ad2;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #09090b;
+  --sidebar-accent: rgba(10, 10, 14, 0.72);
   --sidebar-accent-foreground: #f7f8f8;
-  --sidebar-border: #27272a;
+  --sidebar-border: rgba(255, 255, 255, 0.065);
   --sidebar-ring: #5e6ad2;
 
   /* tokens v0 */
-  --surface: #09090b;
-  --surface-raised: #0f1011;
-  --surface-overlay: #18181b;
+  --surface: rgba(10, 10, 14, 0.72);
+  --surface-raised: rgba(16, 16, 20, 0.85);
+  --surface-overlay: rgba(24, 24, 28, 0.85);
   --foreground-muted: #e4e4e7;
   --foreground-subtle: #a1a1aa;
-  --border-strong: rgba(255, 255, 255, 0.04);
-  --accent: #18181b;
+  --border-strong: rgba(255, 255, 255, 0.06);
+  --accent: rgba(24, 24, 28, 0.85);
   --accent-dim: rgba(94, 106, 210, 0.16);
   --accent-foreground: #f7f8f8;
   --gauge-sante: #c85f50;
@@ -397,20 +397,20 @@ body > * { position: relative; z-index: 1; }
    ============================================================ */
 .glass {
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 8px;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    0 8px 32px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 .dark .glass {
-  background: linear-gradient(180deg, rgba(9, 9, 11, 0.96), rgba(0, 0, 0, 0.98));
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+  background: rgba(10, 10, 14, 0.72);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.065);
   box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    0 24px 60px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 /* .glass-strong / .card-grimoire / .card-hero supprimés (verre lourd grimoire,
    direction v0 → utiliser .glass aligné v0 ci-dessus ou <Card> shadcn) */
@@ -690,17 +690,22 @@ body > * { position: relative; z-index: 1; }
 .campaign-panel {
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--border);
+  border: 1px solid rgba(0, 0, 0, 0.07);
   border-radius: 8px;
-  background: var(--card);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.03),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .dark .campaign-panel {
-  background: linear-gradient(180deg, rgba(9, 9, 11, 0.98), rgba(0, 0, 0, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  background: rgba(10, 10, 14, 0.72);
+  backdrop-filter: blur(24px);
   box-shadow:
-    0 18px 60px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.015);
+    0 24px 60px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .campaign-panel::before {
@@ -709,19 +714,65 @@ body > * { position: relative; z-index: 1; }
   inset: 0 0 auto;
   height: 1px;
   pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(94, 106, 210, 0.35), transparent);
+  background: linear-gradient(90deg, transparent, rgba(94, 106, 210, 0.3), transparent);
   opacity: 0.45;
 }
 
 .campaign-subpanel {
-  border: 1px solid var(--border);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 7px;
-  background: var(--secondary);
+  background: rgba(240, 240, 245, 0.7);
+}
+
+.dark .campaign-subpanel {
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(22, 22, 28, 0.85);
+  backdrop-filter: blur(10px);
 }
 
 .campaign-header-line {
-  border-bottom: 1px solid var(--border);
-  background: var(--accent);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.dark .campaign-header-line {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================================
+   Iconography & Symbol Layout Polish
+   ============================================================ */
+/* Standardize Lucide icons with uniform thin strokes and transitions */
+svg.lucide {
+  stroke-width: 1.8px !important;
+  transition: stroke 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+}
+
+/* Subtle micro-animations for icons on hoverable items */
+button:hover svg.lucide,
+[role="tab"]:hover svg.lucide,
+[role="button"]:hover svg.lucide,
+a:hover svg.lucide {
+  transform: scale(1.06);
+}
+
+/* Beautiful structural wrapper for interactive icons */
+.icon-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--secondary);
+  padding: 0.35rem;
+  color: var(--ink-subtle);
+  transition: all 0.15s ease;
+}
+.icon-box:hover {
+  color: var(--foreground);
+  border-color: rgba(94, 106, 210, 0.4);
+  background: var(--surface-overlay);
 }
 
 /* ============================================================
