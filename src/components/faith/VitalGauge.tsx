@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Minus, Plus } from "lucide-react";
 import { CountUp } from "./CountUp";
 
@@ -42,8 +42,7 @@ export function VitalGauge({
   const [amount, setAmount] = useState(step);
   const [isPending, startTransition] = useTransition();
   // Valeur optimiste : snappe immédiatement au clic, réconciliée à la confirmation serveur.
-  const [displayValue, setDisplayValue] = useState(value);
-  useEffect(() => setDisplayValue(value), [value]);
+  const displayValue = value;
 
   const radius = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -68,14 +67,13 @@ export function VitalGauge({
   const adjust = (delta: number) => {
     if (!onAdjust) return;
     // Snap optimiste immédiat (la valeur bouge avant le retour serveur).
-    setDisplayValue((v) => Math.max(0, Math.min(max, v + delta)));
     startTransition(async () => {
       await onAdjust(delta);
     });
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="campaign-subpanel flex w-full max-w-[10rem] flex-col items-center gap-2 p-3">
       {/* Anneau */}
       <div className="relative" style={{ width: size, height: size }}>
         <svg
@@ -115,12 +113,12 @@ export function VitalGauge({
         >
           <CountUp
             value={displayValue}
-            className="font-mono text-xl font-semibold leading-none tracking-tight tabular-nums slashed-zero"
+            className="font-mono text-2xl font-semibold leading-none tabular-nums slashed-zero"
             style={{
               color: isLow ? "var(--hp)" : isEmpty ? color : "var(--foreground)",
             }}
           />
-          <span className="text-foreground-subtle mt-0.5 font-mono text-[10px] tracking-widest tabular-nums slashed-zero">
+          <span className="text-foreground-subtle mt-0.5 font-mono text-[10px] tracking-[0.14em] tabular-nums slashed-zero">
             /{max}
           </span>
         </div>
@@ -142,7 +140,7 @@ export function VitalGauge({
           <button
             onClick={() => adjust(-amount)}
             disabled={isPending}
-            className="text-foreground-muted hover:bg-surface-overlay hover:text-foreground flex h-6 w-6 items-center justify-center rounded border border-border transition-colors disabled:opacity-40"
+            className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:border-hairline-strong hover:bg-surface-overlay hover:text-foreground disabled:opacity-40"
             aria-label={`Infliger ${amount} à ${label}`}
             title={`Dégât −${amount}`}
           >
@@ -159,12 +157,12 @@ export function VitalGauge({
             onFocus={(e) => e.currentTarget.select()}
             disabled={isPending}
             aria-label={`Montant pour ${label}`}
-            className="border-border bg-surface-overlay text-foreground-muted focus:border-border-strong h-6 w-10 rounded border text-center font-mono text-[11px] tabular-nums slashed-zero outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="h-6 w-10 rounded-md border border-border bg-background/50 text-center font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted outline-none [appearance:textfield] focus:border-border-strong [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <button
             onClick={() => adjust(amount)}
             disabled={isPending}
-            className="text-foreground-muted hover:bg-surface-overlay hover:text-foreground flex h-6 w-6 items-center justify-center rounded border border-border transition-colors disabled:opacity-40"
+            className="flex h-6 w-6 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:border-hairline-strong hover:bg-surface-overlay hover:text-foreground disabled:opacity-40"
             aria-label={`Soigner ${amount} de ${label}`}
             title={`Soin +${amount}`}
           >

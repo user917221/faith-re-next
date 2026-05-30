@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Command, Search, Sparkles } from "lucide-react";
 import {
   SidebarInset,
   SidebarProvider,
@@ -29,15 +29,21 @@ export function AppShell({
     <SidebarProvider>
       <AppSidebar user={user} active={active} />
       <CommandMenu user={user} />
-      <SidebarInset>
-        <header className="sticky top-0 z-20 flex h-12 shrink-0 items-center gap-2 border-b border-border bg-background/80 px-4 backdrop-blur-sm">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-1 h-4" />
-          {title && (
-            <span className="text-sm font-medium tracking-tight text-foreground">
-              {title}
+      <SidebarInset className="bg-transparent">
+        <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b border-border/80 bg-background/88 px-4 backdrop-blur-xl">
+          <SidebarTrigger className="-ml-1 border border-border/70 bg-card/60 text-ink-muted hover:bg-surface-overlay hover:text-foreground" />
+          <Separator orientation="vertical" className="mr-1 h-5 bg-border/80" />
+          <div className="min-w-0">
+            {title && (
+              <span className="block truncate text-sm font-semibold text-foreground">
+                {title}
+              </span>
+            )}
+            <span className="hidden text-[10px] font-mono uppercase tracking-[0.16em] text-foreground-subtle sm:flex sm:items-center sm:gap-1.5">
+              <Sparkles className="size-3 text-primary/80" />
+              Table active
             </span>
-          )}
+          </div>
           <button
             type="button"
             aria-label="Rechercher (⌘K)"
@@ -46,16 +52,17 @@ export function AppShell({
                 new KeyboardEvent("keydown", { key: "k", metaKey: true }),
               );
             }}
-            className="ml-auto flex items-center gap-2 rounded-md border border-white/[0.07] bg-white/[0.04] px-2.5 py-1 text-xs text-foreground-muted transition-colors hover:bg-white/[0.06] hover:text-foreground"
+            className="ml-auto flex h-8 items-center gap-2 rounded-md border border-border bg-card/80 px-2.5 text-xs text-foreground-muted transition-colors hover:border-hairline-strong hover:bg-surface-overlay hover:text-foreground"
           >
             <Search className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Rechercher</span>
-            <kbd className="tabular hidden rounded border border-white/[0.07] bg-white/[0.04] px-1 font-mono text-[10px] sm:inline">
+            <span className="hidden sm:inline">Palette</span>
+            <kbd className="tabular hidden items-center gap-1 rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-ink-muted sm:flex">
+              <Command className="size-2.5" />
               ⌘K
             </kbd>
           </button>
         </header>
-        <div className="flex-1 p-4 lg:p-6">{children}</div>
+        <div className="flex-1 p-4 lg:p-6 xl:p-8">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

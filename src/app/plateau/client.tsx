@@ -956,7 +956,7 @@ function CarnetRow({ item }: { item: FeedItem }) {
 function Carnet({ items }: { items: FeedItem[] }) {
   return (
     <Card className="min-w-0 gap-0 py-0">
-      <CardHeader className="sticky top-0 z-10 flex flex-row items-baseline justify-between gap-2 rounded-t-lg border-b bg-[rgba(17,19,24,0.98)] px-4 py-3">
+      <CardHeader className="campaign-header-line sticky top-0 z-10 flex flex-row items-baseline justify-between gap-2 px-4 py-3">
         <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Carnet des jets
         </CardTitle>

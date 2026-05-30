@@ -4,7 +4,6 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { characters, publicRolls } from "@/db/schema";
 import { revalidatePath } from "next/cache";
-import { auth } from "@/lib/auth";
 import {
   BASE_HP,
   BASE_MHP,

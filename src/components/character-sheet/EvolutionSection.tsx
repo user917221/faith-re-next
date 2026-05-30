@@ -31,7 +31,7 @@ type Props = {
 /** Chip pilule v0 — palier / label sobre. */
 function TierChip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-0.5 font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted">
+    <span className="inline-flex items-center rounded-md border border-border bg-background/45 px-2 py-0.5 font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted">
       {children}
     </span>
   );
@@ -72,7 +72,7 @@ function StepperCounter({
       >
         −
       </Button>
-      <span className="flex-1 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 text-center font-mono tabular-nums slashed-zero text-foreground">
+      <span className="flex-1 rounded-md border border-border bg-background/45 px-2 py-1 text-center font-mono tabular-nums slashed-zero text-foreground">
         {value}
       </span>
       <Button
@@ -170,18 +170,13 @@ export function EvolutionSection({
 
   return (
     <section
-      className="overflow-hidden rounded-xl border border-border"
-      style={{
-        background: "rgba(17,19,24,0.98)",
-        boxShadow:
-          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}
+      className="campaign-panel"
     >
-      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+      <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
         <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           Évolution
         </h2>
-        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 font-mono text-[10px] tracking-widest text-foreground-muted">
+        <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 font-mono text-[10px] tracking-widest text-primary">
           privé MJ
         </span>
       </div>
@@ -274,7 +269,7 @@ export function EvolutionSection({
           </span>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Physique (= endurance) */}
-            <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
+            <div className="campaign-subpanel flex flex-col gap-2.5 p-3">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Physique
@@ -316,7 +311,7 @@ export function EvolutionSection({
             </div>
 
             {/* Flux */}
-            <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
+            <div className="campaign-subpanel flex flex-col gap-2.5 p-3">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Flux
@@ -368,7 +363,7 @@ export function EvolutionSection({
             </div>
 
             {/* Technique */}
-            <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
+            <div className="campaign-subpanel flex flex-col gap-2.5 p-3">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Technique
@@ -479,7 +474,7 @@ export function EvolutionSection({
           </div>
 
           {/* Palier de Flux — le « level up » que le MJ doit voir */}
-          <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
+          <div className="campaign-subpanel flex flex-col gap-2.5 p-3">
             <div className="flex items-baseline justify-between gap-2">
               <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                 Palier de Flux

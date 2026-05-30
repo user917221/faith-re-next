@@ -29,7 +29,6 @@ export function CountUp({
     const from = fromRef.current;
     const to = value;
     if (from === to) {
-      setDisplay(to);
       return;
     }
 
@@ -38,8 +37,10 @@ export function CountUp({
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) {
       fromRef.current = to;
-      setDisplay(to);
-      return;
+      rafRef.current = requestAnimationFrame(() => setDisplay(to));
+      return () => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      };
     }
 
     let start: number | null = null;

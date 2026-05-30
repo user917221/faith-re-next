@@ -11,7 +11,7 @@
 
 import { db } from "./index";
 import { users } from "./schema";
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 
 const MJ_IDS = (process.env.MJ_DISCORD_ID || "")
   .split(",")

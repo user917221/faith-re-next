@@ -142,7 +142,7 @@ export default async function HomePage() {
                 Les invitations sont accordées par le MJ. Demande l&apos;accès
                 à la table avant de tenter ta première convocation. Ton rôle
                 est promu MJ si ton Discord ID correspond à{" "}
-                <code className="tabular rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 font-mono text-foreground-muted">
+                <code className="tabular rounded-md border border-border bg-background/45 px-2 py-1 font-mono text-foreground-muted">
                   MJ_DISCORD_ID
                 </code>
                 .

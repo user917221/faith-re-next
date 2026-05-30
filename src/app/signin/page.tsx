@@ -51,7 +51,7 @@ export default function SignInPage({
           {/* Note MJ */}
           <p className="text-xs leading-relaxed text-ink-tertiary">
             MJ&nbsp;? Ton rôle est promu automatiquement si ton Discord ID correspond à{" "}
-            <code className="tabular rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 font-mono text-foreground-muted">
+            <code className="tabular rounded-md border border-border bg-background/45 px-2 py-1 font-mono text-foreground-muted">
               MJ_DISCORD_ID
             </code>
             .

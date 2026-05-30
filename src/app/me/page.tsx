@@ -64,7 +64,7 @@ export default async function MePage() {
       <AppShell user={shellUser} active="me" title="Ma fiche">
         <div className="mx-auto flex max-w-2xl flex-col gap-6">
           {availableRows.length === 0 ? (
-            <Empty className="rounded-xl border border-border bg-surface">
+            <Empty className="campaign-panel">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <Sparkles className="text-ink-tertiary" />
@@ -76,7 +76,7 @@ export default async function MePage() {
               </EmptyHeader>
             </Empty>
           ) : (
-            <Empty className="rounded-xl border border-border bg-surface">
+            <Empty className="campaign-panel">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <Sparkles className="text-ink-tertiary" />
@@ -88,7 +88,7 @@ export default async function MePage() {
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <div className="w-full overflow-hidden rounded-xl border border-border bg-surface divide-y divide-border">
+                <div className="campaign-subpanel w-full overflow-hidden divide-y divide-border">
                   {availableRows.map((c) => (
                     <form
                       key={c.id}

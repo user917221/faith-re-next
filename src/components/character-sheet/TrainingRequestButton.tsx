@@ -10,11 +10,6 @@ type Props = {
   onRequestTraining?: (note?: string) => Promise<void>;
 };
 
-const SURFACE: React.CSSProperties = {
-  background: "rgba(17,19,24,0.98)",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-};
-
 /** Demande d'entraînement (joueur) — surface sobre (direction v0). */
 export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
   const [note, setNote] = useState("");
@@ -41,12 +36,11 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
   if (pending) {
     return (
       <section
-        className="overflow-hidden rounded-xl border border-border"
-        style={SURFACE}
+        className="campaign-panel"
       >
-        <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+        <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
           <h2 className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[10px] tracking-widest text-foreground-muted">
+            <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] tracking-widest text-primary">
               En attente
             </span>
             Entraînement
@@ -71,10 +65,9 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
 
   return (
     <section
-      className="overflow-hidden rounded-xl border border-border"
-      style={SURFACE}
+      className="campaign-panel"
     >
-      <div className="border-b border-border px-5 py-3.5">
+      <div className="campaign-header-line px-5 py-3.5">
         <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           Entraînement endurance
         </h2>
@@ -105,12 +98,11 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
 }
 
 function RelativeTime({ date }: { date: Date }) {
-  const ms = Date.now() - new Date(date).getTime();
-  const minutes = Math.floor(ms / 60000);
-  if (minutes < 1) return <>à l&apos;instant</>;
-  if (minutes < 60) return <>il y a {minutes} min</>;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return <>il y a {hours} h</>;
-  const days = Math.floor(hours / 24);
-  return <>il y a {days} j</>;
+  const formatted = new Date(date).toLocaleString("fr-FR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return <>{formatted}</>;
 }

@@ -188,14 +188,9 @@ export function RuneInventory({ runes, onAddRune, onRemoveRune }: Props) {
 
   return (
     <section
-      className="overflow-hidden rounded-xl border border-border"
-      style={{
-        background: "rgba(17,19,24,0.98)",
-        boxShadow:
-          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}
+      className="campaign-panel"
     >
-      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+      <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
         <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           Inventaire de runes
         </h2>

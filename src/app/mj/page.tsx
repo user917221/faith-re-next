@@ -54,7 +54,7 @@ export default async function MjDashboardPage({
             <Card>
               <CardContent className="p-10 text-center text-sm text-ink-tertiary">
                 Aucun personnage. Run{" "}
-                <code className="font-mono tabular-nums rounded-sm border border-white/[0.07] bg-white/[0.04] px-1 py-0.5 text-muted-foreground">
+                <code className="font-mono tabular-nums rounded-sm border border-border bg-background/45 px-1 py-0.5 text-muted-foreground">
                   pnpm db:seed
                 </code>{" "}
                 pour initialiser le roster.

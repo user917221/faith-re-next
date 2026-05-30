@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Dices } from "lucide-react";
 import {
   Sheet,
@@ -51,13 +51,11 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
   const [isPending, startTransition] = useTransition();
 
   // Reset state à chaque ouverture
-  useEffect(() => {
-    if (context) {
-      setMode("preset");
-      setDd(8);
-      setCustom(10);
-    }
-  }, [context]);
+  function resetDifficulty() {
+    setMode("preset");
+    setDd(8);
+    setCustom(10);
+  }
 
   const effectiveDD =
     mode === "libre" ? null : mode === "free" ? Math.max(1, Math.min(30, custom)) : dd;
@@ -72,7 +70,10 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
     <Sheet
       open={!!context}
       onOpenChange={(open) => {
-        if (!open && !isPending) onClose();
+        if (!open && !isPending) {
+          resetDifficulty();
+          onClose();
+        }
       }}
     >
       <SheetContent

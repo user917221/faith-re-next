@@ -57,7 +57,6 @@ export default function PreviewPage() {
   // ces handlers, donc on simule un await microtask pour valider le pending state.
   const onSkillChange = useCallback(
     async (skillName: string, delta: 1 | -1) => {
-      // eslint-disable-next-line no-console
       console.log("[preview] onSkillChange", skillName, delta);
       await Promise.resolve();
       setCharacter((c) => ({
@@ -73,7 +72,6 @@ export default function PreviewPage() {
 
   const onVitalChange = useCallback(
     async (type: VitalType, delta: number) => {
-      // eslint-disable-next-line no-console
       console.log("[preview] onVitalChange", type, delta);
       await Promise.resolve();
       setCharacter((c) => {
@@ -106,7 +104,6 @@ export default function PreviewPage() {
 
   const onActionCost = useCallback(async (actionType: ActionType) => {
     const cost = ENDURANCE_COSTS[actionType].cost;
-    // eslint-disable-next-line no-console
     console.log("[preview] onActionCost", actionType, "-" + cost);
     await Promise.resolve();
     setCharacter((c) => ({
@@ -116,14 +113,12 @@ export default function PreviewPage() {
   }, []);
 
   const onXpChange = useCallback(async (newXp: number) => {
-    // eslint-disable-next-line no-console
     console.log("[preview] onXpChange", newXp);
     await Promise.resolve();
     setCharacter((c) => ({ ...c, xp: newXp, level: calculateLevel(newXp) }));
   }, []);
 
   const onTrainingChange = useCallback(async (delta: 1 | -1) => {
-    // eslint-disable-next-line no-console
     console.log("[preview] onTrainingChange", delta);
     await Promise.resolve();
     setCharacter((c) => ({
@@ -133,7 +128,6 @@ export default function PreviewPage() {
   }, []);
 
   const onFluxChange = useCallback(async (delta: number) => {
-    // eslint-disable-next-line no-console
     console.log("[preview] onFluxChange", delta);
     await Promise.resolve();
     setCharacter((c) => ({
@@ -208,7 +202,6 @@ export default function PreviewPage() {
   }, []);
 
   const onRequestTraining = useCallback(async (note?: string) => {
-    // eslint-disable-next-line no-console
     console.log("[preview] onRequestTraining", note ?? "(sans note)");
     await Promise.resolve();
   }, []);

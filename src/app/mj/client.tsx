@@ -70,8 +70,8 @@ export function RosterNav({
   const presentCount = characters.filter((c) => c.isPresent).length;
 
   return (
-    <div className="sticky top-[4.5rem] overflow-hidden rounded-xl border border-border bg-[rgba(17,19,24,0.98)] shadow-[0_1px_3px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)]">
-      <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+    <div className="campaign-panel sticky top-[5rem]">
+      <header className="campaign-header-line flex items-center justify-between gap-2 px-4 py-3">
         <p className="label-grimoire">Roster</p>
         <span className="tabular text-xs text-ink-tertiary">
           <span className="text-foreground">{characters.length}</span> / 4
@@ -92,7 +92,7 @@ export function RosterNav({
                   <Link
                     href={`/mj?id=${c.id}`}
                     className={`group block !py-3 !px-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                      isActive ? "!border-l-primary bg-muted" : ""
+                      isActive ? "!border-l-primary bg-primary/10" : ""
                     }`}
                     aria-current={isActive ? "page" : undefined}
                   >
@@ -111,7 +111,7 @@ export function RosterNav({
                           </Avatar>
                           <span
                             aria-hidden
-                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-[rgba(17,19,24,0.98)] ${
+                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-card ${
                               c.isPresent ? "presence-led-on" : "presence-led-off"
                             }`}
                           />
@@ -128,7 +128,7 @@ export function RosterNav({
                       </span>
                       <Badge
                         variant="outline"
-                        className="shrink-0 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 font-mono tabular-nums text-[11px] text-foreground-muted"
+                        className="shrink-0 rounded-md border border-border bg-background/45 px-2 py-1 font-mono tabular-nums text-[11px] text-foreground-muted"
                       >
                         Niv. {c.level}
                       </Badge>

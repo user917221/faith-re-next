@@ -18,12 +18,7 @@ type Props = {
 export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) {
   return (
     <section
-      className="rounded-xl border border-border p-5"
-      style={{
-        background: "rgba(17,19,24,0.98)",
-        boxShadow:
-          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}
+      className="campaign-panel p-5"
       aria-label="Jauges de vitalité"
     >
       <div className="mb-4 flex items-center justify-between">
@@ -31,9 +26,9 @@ export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) 
           État vital
         </h2>
         <span
-          className={`rounded-full border px-2 py-0.5 font-mono text-[10px] ${
+          className={`rounded-md border px-2 py-0.5 font-mono text-[10px] ${
             character.isPresent
-              ? "border-border bg-surface-overlay text-foreground-subtle"
+              ? "border-primary/25 bg-primary/10 text-primary"
               : "border-border/60 text-foreground-subtle/60"
           }`}
         >

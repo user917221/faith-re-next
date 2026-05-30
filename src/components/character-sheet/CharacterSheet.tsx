@@ -75,34 +75,27 @@ export default function CharacterSheet({
   const attributes = Object.keys(SKILL_GROUPS) as AttributeName[];
 
   return (
-    <div className="relative z-[2] flex flex-col gap-6">
+    <div className="relative z-[2] flex flex-col gap-5">
       {/* ─── Identité — carte header (v0 + glyphe signature) ─── */}
-      <header
-        className="relative overflow-hidden rounded-xl border border-border p-5"
-        style={{
-          background: "rgba(17,19,24,0.98)",
-          boxShadow:
-            "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-        }}
-      >
+      <header className="campaign-panel p-5 lg:p-6">
         {/* Glyphe signature FAITH:RE — filigrane d'angle (identité, pas déco) */}
         <ConstellationGlyph
           size={148}
           aria-hidden
-          className="pointer-events-none absolute -right-9 -top-10 text-foreground opacity-[0.045]"
+          className="pointer-events-none absolute -right-9 -top-10 text-primary opacity-[0.08]"
         />
 
         {/* Ligne identité */}
-        <div className="relative flex items-center gap-3.5">
+        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-5">
           <div className="relative shrink-0">
-            <Avatar className="size-12 rounded-xl ring-1 ring-border">
+            <Avatar className="size-14 rounded-lg ring-1 ring-border">
               <AvatarImage
                 src={character.avatarUrl ?? undefined}
                 alt=""
-                className="rounded-xl"
+                className="rounded-lg"
               />
               <AvatarFallback
-                className="rounded-xl text-sm font-semibold"
+                className="rounded-lg text-sm font-semibold"
                 style={avatarFallbackStyle(character.name)}
               >
                 {initialsOf(character.name, character.nom)}
@@ -122,7 +115,7 @@ export default function CharacterSheet({
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-lg font-semibold tracking-tight text-foreground">
+              <h1 className="text-2xl font-semibold text-foreground lg:text-3xl">
                 {character.name}
               </h1>
               <HeaderBadge>{isMJ ? "MJ" : "Joueur"}</HeaderBadge>
@@ -130,7 +123,7 @@ export default function CharacterSheet({
               <HeaderBadge>Flux {character.fluxLabel}</HeaderBadge>
             </div>
 
-            <p className="mt-1 text-sm text-foreground-muted">
+            <p className="mt-1.5 text-sm text-foreground-muted">
               {character.nom && <span>{character.nom}</span>}
               {character.nom && (
                 <span className="mx-2 text-foreground-subtle">·</span>
@@ -155,7 +148,7 @@ export default function CharacterSheet({
 
           {/* Présence — chip + toggle (à droite) */}
           {onTogglePresence && (
-            <div className="flex shrink-0 items-center gap-2.5 self-center rounded-md border border-border bg-surface-overlay px-3 py-1.5">
+            <div className="campaign-subpanel flex shrink-0 items-center gap-2.5 self-start px-3 py-2 lg:self-center">
               <span
                 className={`inline-block h-2 w-2 rounded-full ${
                   character.isPresent ? "presence-led-on" : "presence-led-off"
@@ -163,7 +156,7 @@ export default function CharacterSheet({
                 aria-hidden
               />
               <span
-                className={`text-xs uppercase tracking-[0.08em] ${
+                className={`font-mono text-[10px] uppercase tracking-[0.14em] ${
                   character.isPresent ? "text-endu" : "text-foreground-subtle"
                 }`}
               >
@@ -179,7 +172,7 @@ export default function CharacterSheet({
 
         {/* Rangée d'attributs — pied de carte pleine largeur (ledger horizontal) */}
         <div
-          className="relative mt-4 grid grid-cols-4 divide-x divide-border border-t border-border pt-3"
+          className="campaign-subpanel relative mt-5 grid grid-cols-2 divide-x divide-y divide-border sm:grid-cols-4 sm:divide-y-0"
           role="list"
           aria-label="Attributs"
         >
@@ -190,10 +183,10 @@ export default function CharacterSheet({
                 key={short}
                 role="listitem"
                 title={name}
-                className="flex items-center justify-center gap-2 px-2"
+                className="flex items-center justify-center gap-2 px-3 py-3"
               >
                 <Icon size={11} className="text-foreground-subtle" aria-hidden />
-                <span className="text-[10px] font-medium uppercase tracking-widest text-foreground-subtle">
+                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                   {short}
                 </span>
                 <span className="font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
@@ -214,7 +207,7 @@ export default function CharacterSheet({
         <div
           role="tablist"
           aria-label="Sections de la fiche"
-          className="sticky top-0 z-10 flex w-full items-center gap-1 rounded-full border border-border bg-surface-overlay p-1"
+          className="sticky top-16 z-10 flex w-full items-center gap-1 rounded-lg border border-border bg-background/90 p-1 backdrop-blur-xl"
         >
           {(
             [
@@ -232,9 +225,9 @@ export default function CharacterSheet({
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTab(value)}
-                className={`flex-1 whitespace-nowrap rounded-full px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors ${
+                className={`flex-1 whitespace-nowrap rounded-md px-3.5 py-2 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors ${
                   active
-                    ? "bg-foreground text-background"
+                    ? "bg-primary text-primary-foreground"
                     : "text-foreground-subtle hover:text-foreground-muted"
                 }`}
               >
@@ -286,21 +279,13 @@ export default function CharacterSheet({
                 : null;
 
               return (
-                <section
-                  key={attr}
-                  className="overflow-hidden rounded-xl border border-border"
-                  style={{
-                    background: "rgba(17,19,24,0.98)",
-                    boxShadow:
-                      "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-                  }}
-                >
-                  <header className="flex items-center border-b border-border px-5 py-3">
+                <section key={attr} className="campaign-panel">
+                  <header className="campaign-header-line flex items-center px-5 py-3">
                     <span className="shrink-0 font-mono text-xs font-medium uppercase tracking-[0.12em] text-foreground-muted">
                       {attr}
                     </span>
                     <span
-                      className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/18"
+                      className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/16"
                       aria-hidden
                     />
                     {openAttrRoll ? (
@@ -309,7 +294,7 @@ export default function CharacterSheet({
                         onClick={openAttrRoll}
                         title={`Lancer un jet d'attribut ${attr}`}
                         aria-label={`Lancer un jet d'attribut ${attr}`}
-                        className="group flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-surface-overlay"
+                        className="group flex shrink-0 items-center gap-1.5 rounded-md border border-transparent px-2 py-1 transition-colors hover:border-primary/30 hover:bg-primary/10"
                       >
                         <span className="font-mono text-lg font-semibold tabular-nums slashed-zero text-foreground">
                           {score}
@@ -413,17 +398,17 @@ function HeaderBadge({
 }) {
   return (
     <span
-      className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest"
+      className="inline-flex items-center rounded-md px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em]"
       style={
         accent
           ? {
-              background: "rgba(94,106,210,0.18)",
-              border: "1px solid rgba(94,106,210,0.35)",
-              color: "#a5abf0",
+              background: "rgba(196,154,92,0.18)",
+              border: "1px solid rgba(196,154,92,0.35)",
+              color: "var(--primary-hover)",
             }
           : {
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,244,214,0.045)",
+              border: "1px solid var(--border)",
               color: "var(--foreground-muted)",
             }
       }

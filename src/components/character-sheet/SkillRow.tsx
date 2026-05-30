@@ -78,7 +78,7 @@ export function SkillRow({
       )}
 
       <span
-        className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/18"
+        className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/16"
         aria-hidden
       />
 

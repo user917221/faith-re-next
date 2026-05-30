@@ -15,7 +15,6 @@ const DATABASE_URL =
   process.env.DATABASE_URL ?? "postgresql://stub:stub@stub.invalid/stub";
 
 if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "production") {
-  // eslint-disable-next-line no-console
   console.warn(
     "[db] DATABASE_URL absent — utilisation d'un client stub. Copie .env.example vers .env.local pour exécuter des requêtes réelles.",
   );

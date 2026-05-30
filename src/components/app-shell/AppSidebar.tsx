@@ -23,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CrestGlyph } from "@/components/glyphs";
 import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 
 export type ShellUser = {
@@ -53,34 +54,53 @@ export function AppSidebar({
   ];
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-foreground">
-            <Dices className="h-4 w-4" />
+    <Sidebar collapsible="icon" className="border-sidebar-border/90">
+      <SidebarHeader className="border-b border-sidebar-border/80 p-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-primary/35 bg-primary/12 text-primary shadow-[inset_0_1px_0_rgba(255,244,214,0.08)]">
+            <CrestGlyph size={22} />
           </div>
-          <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-semibold tracking-tight text-foreground">
+          <div className="flex min-w-0 flex-col group-data-[collapsible=icon]:hidden">
+            <span className="truncate text-sm font-semibold text-foreground">
               FAITH&nbsp;:&nbsp;RE
             </span>
-            <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
-              Compagnon
+            <span className="mt-0.5 text-[10px] font-mono uppercase tracking-[0.16em] text-foreground-subtle">
+              Campaign cockpit
             </span>
+          </div>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-1.5 group-data-[collapsible=icon]:hidden">
+          <div className="rounded-md border border-sidebar-border bg-sidebar-accent/50 px-2 py-1.5">
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-foreground-subtle">
+              Mode
+            </p>
+            <p className="mt-0.5 truncate text-xs text-ink-muted">
+              {ROLE_LABEL[user.role]}
+            </p>
+          </div>
+          <div className="rounded-md border border-sidebar-border bg-sidebar-accent/50 px-2 py-1.5">
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-foreground-subtle">
+              Etat
+            </p>
+            <p className="mt-0.5 text-xs text-primary">En session</p>
           </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+        <SidebarGroup className="p-3">
+          <SidebarGroupLabel className="px-1 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {nav.map((item) => (
                 <SidebarMenuItem key={item.key}>
                   <SidebarMenuButton
                     asChild
                     isActive={active === item.key}
                     tooltip={item.label}
+                    className="h-9 rounded-md border border-transparent data-active:border-primary/30 data-active:bg-primary/12 data-active:text-primary hover:border-sidebar-border"
                   >
                     <Link href={item.href}>
                       <item.icon />
@@ -94,12 +114,16 @@ export function AppSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border/80 p-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton size="lg" tooltip={user.name}>
+                <SidebarMenuButton
+                  size="lg"
+                  tooltip={user.name}
+                  className="h-12 rounded-md border border-sidebar-border bg-sidebar-accent/35 hover:border-hairline-strong"
+                >
                   <Avatar className="h-7 w-7 rounded-md">
                     {user.image && <AvatarImage src={user.image} alt={user.name} />}
                     <AvatarFallback

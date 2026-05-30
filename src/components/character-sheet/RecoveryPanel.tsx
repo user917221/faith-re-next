@@ -49,15 +49,10 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
 
   return (
     <section
-      className="overflow-hidden rounded-xl border border-border"
-      style={{
-        background: "rgba(17,19,24,0.98)",
-        boxShadow:
-          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}
+      className="campaign-panel"
       aria-label="Récupération"
     >
-      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+      <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
         <h2 className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           <Dices size={12} aria-hidden /> Récupération
         </h2>
@@ -153,7 +148,7 @@ function RecoveryButton({
       onClick={onClick}
       className="group flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-overlay/50 disabled:cursor-not-allowed disabled:opacity-50"
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-white/[0.03] text-foreground-subtle transition-colors group-hover:text-foreground-muted">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-background/45 text-foreground-subtle transition-colors group-hover:border-primary/30 group-hover:text-primary">
         <Icon size={14} aria-hidden />
       </span>
       <span className="flex flex-col">
