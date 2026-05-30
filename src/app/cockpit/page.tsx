@@ -523,7 +523,14 @@ function CockpitInner() {
                       <span className="shrink-0 font-mono text-[10px] tabular-nums slashed-zero">
                         <span
                           className={
-                            hpPct < 25 ? "text-hp" : "text-foreground-muted"
+                            c.currentHp < 0
+                              ? ""
+                              : hpPct < 25
+                                ? "text-hp"
+                                : "text-foreground-muted"
+                          }
+                          style={
+                            c.currentHp < 0 ? { color: "var(--mhp)" } : undefined
                           }
                         >
                           {c.currentHp}
