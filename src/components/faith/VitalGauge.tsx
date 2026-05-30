@@ -121,7 +121,15 @@ export function VitalGauge({
             value={displayValue}
             className="font-mono text-2xl font-semibold leading-none tabular-nums slashed-zero"
             style={{
-              color: isLow ? "var(--hp)" : isEmpty ? color : "var(--foreground)",
+              // PV négatifs (système de mort, jusqu'à -21) → bleu, signal distinct.
+              color:
+                displayValue < 0
+                  ? "var(--mhp)"
+                  : isLow
+                    ? "var(--hp)"
+                    : isEmpty
+                      ? color
+                      : "var(--foreground)",
             }}
           />
           <span className="text-foreground-subtle mt-0.5 font-mono text-[10px] tracking-[0.14em] tabular-nums slashed-zero">

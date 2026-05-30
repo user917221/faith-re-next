@@ -10,7 +10,11 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { SlidersHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
-import { updateCharacterFull, type FullCharacterPatch } from "@/lib/actions";
+import {
+  updateCharacterFull,
+  deleteCharacter,
+  type FullCharacterPatch,
+} from "@/lib/actions";
 import { SKILL_GROUPS } from "@/lib/skills";
 import { AvatarUpload } from "@/components/character-sheet/AvatarUpload";
 import type { Character } from "@/components/character-sheet/types";
@@ -157,6 +161,28 @@ function Editor({
       toast.success("Personnage mis à jour");
       router.refresh();
       onClose();
+    });
+  };
+
+  // Suppression du personnage (zone de danger). 1er clic = arme la confirmation,
+  // 2e clic = supprime. Chemin fiable (modale custom, pas le Dialog radix).
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const handleDelete = () => {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true);
+      return;
+    }
+    startTransition(async () => {
+      const res = await deleteCharacter(character.id);
+      if (!res.ok) {
+        toast.error(res.reason);
+        setConfirmingDelete(false);
+        return;
+      }
+      toast.success(`« ${res.name} » supprimé`);
+      onClose();
+      router.push("/mj");
+      router.refresh();
     });
   };
 
@@ -333,6 +359,20 @@ function Editor({
 
         {/* Footer */}
         <footer className="sticky bottom-0 flex items-center justify-end gap-2 rounded-b-xl border-t border-border bg-card px-5 py-3">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isPending}
+            className={`mr-auto rounded-md border px-3 py-1.5 text-sm transition-colors disabled:opacity-50 ${
+              confirmingDelete
+                ? "border-destructive bg-destructive text-white hover:bg-destructive/90"
+                : "border-destructive/40 text-destructive hover:bg-destructive/10"
+            }`}
+          >
+            {confirmingDelete
+              ? "Confirmer la suppression définitive"
+              : "Supprimer le personnage"}
+          </button>
           <button
             type="button"
             onClick={onClose}

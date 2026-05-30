@@ -32,7 +32,12 @@ import type { ShellUser } from "@/components/app-shell/AppSidebar";
 import { SessionTimer } from "./SessionTimer";
 import { QuickRollPanel } from "./QuickRollPanel";
 
-const NAV: { label: string; icon: typeof LayoutDashboard; view?: string }[] = [
+const NAV: {
+  label: string;
+  icon: typeof LayoutDashboard;
+  view?: string;
+  href?: string;
+}[] = [
   { label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
   { label: "Roster", icon: Users },
   { label: "Sessions", icon: CalendarDays },
@@ -42,7 +47,7 @@ const NAV: { label: string; icon: typeof LayoutDashboard; view?: string }[] = [
   { label: "Items", icon: Package },
   { label: "Logs", icon: History, view: "logs" },
   { label: "Règles", icon: Scale, view: "regles" },
-  { label: "Dés", icon: Dices },
+  { label: "Plateau", icon: Dices, href: "/plateau" },
   { label: "Réglages", icon: Settings },
 ];
 
@@ -114,13 +119,21 @@ export function CockpitShell({
           <p className="px-1 pb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
             Navigation
           </p>
-          {NAV.map(({ label, icon: Icon, view }) => {
+          {NAV.map(({ label, icon: Icon, view, href }) => {
             const active = view !== undefined && view === activeView;
             const cls = `flex h-9 items-center gap-2.5 rounded-md border px-2.5 text-sm transition-colors ${
               active
                 ? "border-primary/30 bg-primary/12 text-primary"
                 : "border-transparent text-foreground-muted hover:border-border hover:bg-surface-overlay hover:text-foreground"
             }`;
+            if (href) {
+              return (
+                <Link key={label} href={href} className={cls}>
+                  <Icon size={16} />
+                  <span>{label}</span>
+                </Link>
+              );
+            }
             return view ? (
               <Link key={label} href={`?view=${view}`} className={cls}>
                 <Icon size={16} />

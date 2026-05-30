@@ -184,7 +184,7 @@ export function DeleteCharacterDialog({
         }}
         aria-label={`Supprimer ${characterName}`}
         title="Supprimer"
-        className="flex size-6 shrink-0 items-center justify-center rounded-md text-foreground-subtle opacity-0 transition-[opacity,color,background-color] hover:bg-destructive/15 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
+        className="flex size-6 shrink-0 items-center justify-center rounded-md text-foreground-subtle opacity-60 transition-[opacity,color,background-color] hover:bg-destructive/15 hover:text-destructive focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group-hover:opacity-100"
       >
         <Trash2 className="size-3.5" />
       </button>
