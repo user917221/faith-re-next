@@ -14,7 +14,7 @@ import {
   nextFluxTier,
   nextLevelXp,
 } from "@/lib/faith-system";
-import { AscensionGlyph } from "@/components/glyphs";
+import { TrendingUp } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -73,7 +73,7 @@ function StepperCounter({
       >
         −
       </Button>
-      <span className="tabular flex-1 rounded-md border border-border bg-muted px-2 py-1 text-center text-sm font-semibold text-foreground">
+      <span className="flex-1 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 text-center font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
         {value}
       </span>
       <Button
@@ -171,12 +171,12 @@ export function EvolutionSection({
 
   return (
     <Card className="relative border border-border ring-0">
-      <div className="pointer-events-none absolute right-4 top-4 text-ink-tertiary">
-        <AscensionGlyph size={56} />
-      </div>
-
       <CardHeader>
         <div className="flex items-baseline gap-2">
+          <TrendingUp
+            size={14}
+            className="shrink-0 self-center text-foreground-subtle"
+          />
           <CardTitle className="text-sm">Évolution</CardTitle>
           <span className="text-xs text-muted-foreground">(privé MJ)</span>
         </div>
@@ -187,11 +187,13 @@ export function EvolutionSection({
         <div className="flex flex-col gap-3">
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-xs uppercase tracking-[0.06em] text-muted-foreground">
+              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
                 Niveau
               </span>
               <div className="flex items-baseline gap-2">
-                <span className="big-number text-foreground">{level}</span>
+                <span className="font-mono tabular-nums slashed-zero text-2xl font-medium text-foreground">
+                  {level}
+                </span>
                 <Badge variant="outline" className="tabular">
                   {character.tier}
                 </Badge>
@@ -203,7 +205,7 @@ export function EvolutionSection({
             <div className="flex w-28 flex-col gap-1.5">
               <Label
                 htmlFor="evo-xp"
-                className="text-xs uppercase tracking-[0.06em] text-muted-foreground"
+                className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle"
               >
                 XP total
               </Label>
@@ -246,12 +248,12 @@ export function EvolutionSection({
 
         {/* ─── Entraînements — un bloc par axe ─── */}
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
             Entraînements
           </span>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Physique (= endurance) */}
-            <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card/40 p-3">
+            <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Physique
@@ -292,7 +294,7 @@ export function EvolutionSection({
             </div>
 
             {/* Flux */}
-            <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card/40 p-3">
+            <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Flux
@@ -341,7 +343,7 @@ export function EvolutionSection({
             </div>
 
             {/* Technique */}
-            <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card/40 p-3">
+            <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Technique
@@ -392,12 +394,12 @@ export function EvolutionSection({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Combats réels */}
           <div className="flex flex-col gap-2.5">
-            <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+            <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
               Combats réels
             </span>
             <div className="flex items-end justify-between gap-3">
               <div className="flex flex-col gap-1">
-                <span className="big-number text-foreground">
+                <span className="font-mono tabular-nums slashed-zero text-2xl font-medium text-foreground">
                   {character.combatsReal}
                 </span>
                 <span className="text-xs text-muted-foreground">
@@ -445,9 +447,9 @@ export function EvolutionSection({
           </div>
 
           {/* Palier de Flux — le « level up » que le MJ doit voir */}
-          <div className="flex flex-col gap-2.5 rounded-md border border-hairline-strong bg-muted/40 p-3">
+          <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
+              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
                 Palier de Flux
               </span>
               <Badge variant="outline" className="text-foreground">

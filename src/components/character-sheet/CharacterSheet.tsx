@@ -8,15 +8,11 @@ import {
   type AttributeName,
 } from "@/lib/skills";
 import { SKILL_CAP, calculateLevel } from "@/lib/faith-system";
-import { GrimoireGlyph } from "@/components/glyphs";
+import { Brain, Eye, Shield, Crosshair, Dices } from "lucide-react";
 import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { VitalsHeader } from "./VitalsHeader";
-import { FluxBar } from "./FluxBar";
 import { RuneInventory } from "./RuneInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
@@ -24,33 +20,24 @@ import { SkillRow } from "./SkillRow";
 import { EvolutionSection } from "./EvolutionSection";
 import { ProfileEditor } from "./ProfileEditor";
 import { TrainingRequestButton } from "./TrainingRequestButton";
-import { PresenceBadge } from "./PresenceBadge";
 import { RecoveryPanel } from "./RecoveryPanel";
 import { DDDrawer, type RollContext } from "./DDDrawer";
 import type { CharacterSheetProps } from "./types";
+
+/* Chips d'attributs — 4 attributs FAITH:RE (score = somme des 5 skills). */
+const ATTR_CHIPS = [
+  { name: "INTELLECT", short: "INT", icon: Brain },
+  { name: "PSYCHÉ", short: "PSY", icon: Eye },
+  { name: "CONSTITUTION", short: "CON", icon: Shield },
+  { name: "MANŒUVRE", short: "MAN", icon: Crosshair },
+] as const;
 
 type DrawerCtx = RollContext & {
   attrName: AttributeName;
   skillName: string | null;
 };
 
-/* Eyebrow de section — Linear : uppercase, tracking +, ink-subtle, hairline accolé */
-function SectionLabel({
-  children,
-  trailing,
-}: {
-  children: React.ReactNode;
-  trailing?: React.ReactNode;
-}) {
-  return (
-    <div className="mb-3 flex items-baseline justify-between gap-3">
-      <span className="text-xs font-medium uppercase tracking-[0.08em] text-muted-foreground">
-        {children}
-      </span>
-      {trailing}
-    </div>
-  );
-}
+type TabValue = "vitaux" | "competences" | "evolution" | "profil";
 
 export default function CharacterSheet({
   character,
@@ -78,6 +65,7 @@ export default function CharacterSheet({
   const isCapped = allocated >= SKILL_CAP;
   const derivedLevel = calculateLevel(character.xp);
 
+  const [tab, setTab] = useState<TabValue>("vitaux");
   const [drawerCtx, setDrawerCtx] = useState<DrawerCtx | null>(null);
   const openRollDrawer = onRollSkill
     ? (ctx: DrawerCtx) => setDrawerCtx(ctx)
@@ -87,140 +75,190 @@ export default function CharacterSheet({
 
   return (
     <div className="relative z-[2] flex flex-col gap-6">
-      {/* ─── Identité — bandeau header dense ─── */}
-      <header className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-center gap-4">
-          <Avatar size="lg" className="size-14">
-            <AvatarImage src={character.avatarUrl ?? undefined} alt="" />
-            <AvatarFallback
-              className="text-base font-medium"
-              style={avatarFallbackStyle(character.name)}
-            >
-              {initialsOf(character.name, character.nom)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col gap-1.5">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h1 className="text-2xl font-semibold leading-none tracking-tight text-foreground sm:text-3xl">
+      {/* ─── Identité — carte header (direction v0) ─── */}
+      <header
+        className="rounded-xl border border-border p-5"
+        style={{
+          background:
+            "linear-gradient(145deg, rgba(22,24,32,0.98) 0%, rgba(14,15,20,0.99) 100%)",
+          boxShadow:
+            "0 1px 3px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+        }}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          {/* Avatar */}
+          <div className="relative shrink-0">
+            <Avatar className="size-14 rounded-xl ring-1 ring-[rgba(94,106,210,0.25)]">
+              <AvatarImage
+                src={character.avatarUrl ?? undefined}
+                alt=""
+                className="rounded-xl"
+              />
+              <AvatarFallback
+                className="rounded-xl text-sm font-semibold"
+                style={avatarFallbackStyle(character.name)}
+              >
+                {initialsOf(character.name, character.nom)}
+              </AvatarFallback>
+            </Avatar>
+            <span
+              className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2"
+              style={{
+                background: character.isPresent
+                  ? "var(--endu)"
+                  : "var(--foreground-subtle)",
+                borderColor: "var(--background)",
+              }}
+              aria-hidden
+            />
+          </div>
+
+          {/* Nom + badges + sous-ligne + chips d'attributs */}
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex flex-wrap items-center gap-2">
+              <h1 className="text-xl font-semibold tracking-tight text-foreground">
                 {character.name}
               </h1>
-              <Badge variant="outline" className="font-normal">
-                {isMJ ? "MJ" : "Joueur"}
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="tabular font-normal tracking-tight"
-              >
-                {character.tier}
-              </Badge>
-              <Badge
-                variant="outline"
-                className="font-normal tracking-tight text-ink-muted"
-              >
-                Flux {character.fluxLabel}
-              </Badge>
+              <HeaderBadge accent>{isMJ ? "MJ" : "Joueur"}</HeaderBadge>
+              <HeaderBadge>{character.tier}</HeaderBadge>
+              <HeaderBadge>Flux {character.fluxLabel}</HeaderBadge>
             </div>
-            {character.nom && (
-              <p className="text-sm text-muted-foreground">{character.nom}</p>
-            )}
-            <p className="flex items-center gap-1.5 text-xs uppercase tracking-[0.06em] text-ink-tertiary">
+
+            <p className="mb-3 text-sm text-foreground-muted">
+              {character.nom && <span>{character.nom}</span>}
+              {character.nom && (
+                <span className="mx-2 text-foreground-subtle">·</span>
+              )}
               {isMJ && (
                 <>
                   <span>
                     Niv.{" "}
-                    <span className="tabular text-muted-foreground">
-                      {derivedLevel}
-                    </span>
+                    <span className="tabular-nums">{derivedLevel}</span>
                   </span>
-                  <span aria-hidden>·</span>
+                  <span className="mx-2 text-foreground-subtle">·</span>
                 </>
               )}
-              <span>
-                <span className="tabular text-muted-foreground">
-                  {character.age || "?"}
-                </span>{" "}
-                ans
-              </span>
+              <span className="tabular-nums">{character.age || "?"}</span> ans
             </p>
-          </div>
-        </div>
 
-        {/* Présence — chip aligné à droite */}
-        {onTogglePresence && (
-          <div className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2">
-            <span
-              className={`inline-block h-2 w-2 rounded-full ${
-                character.isPresent ? "presence-led-on" : "presence-led-off"
-              }`}
-              aria-hidden
-            />
-            <span
-              className={`text-xs uppercase tracking-[0.08em] ${
-                character.isPresent ? "text-endu" : "text-ink-tertiary"
-              }`}
+            <div
+              className="flex flex-wrap gap-1.5"
+              role="list"
+              aria-label="Attributs"
             >
-              {character.isPresent ? "À la table" : "Absent"}
-            </span>
-            <PresenceToggle
-              isPresent={character.isPresent}
-              onToggle={onTogglePresence}
-            />
+              {ATTR_CHIPS.map(({ name, short, icon: Icon }) => {
+                const score = calculateAttribute(character.skills, name);
+                return (
+                  <div
+                    key={short}
+                    role="listitem"
+                    title={name}
+                    className="flex items-center gap-1.5 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1"
+                  >
+                    <Icon
+                      size={10}
+                      className="text-foreground-subtle"
+                      aria-hidden
+                    />
+                    <span className="text-[10px] uppercase tracking-widest text-foreground-subtle">
+                      {short}
+                    </span>
+                    <span className="font-mono text-xs font-medium tabular-nums text-foreground-muted">
+                      {score}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
+
+          {/* Présence — chip + toggle (à droite) */}
+          {onTogglePresence && (
+            <div className="flex shrink-0 items-center gap-2.5 self-start rounded-md border border-border bg-surface-overlay px-3 py-2">
+              <span
+                className={`inline-block h-2 w-2 rounded-full ${
+                  character.isPresent ? "presence-led-on" : "presence-led-off"
+                }`}
+                aria-hidden
+              />
+              <span
+                className={`text-xs uppercase tracking-[0.08em] ${
+                  character.isPresent ? "text-endu" : "text-foreground-subtle"
+                }`}
+              >
+                {character.isPresent ? "À la table" : "Absent"}
+              </span>
+              <PresenceToggle
+                isPresent={character.isPresent}
+                onToggle={onTogglePresence}
+              />
+            </div>
+          )}
+        </div>
       </header>
 
-      {/* ─── Onglets de la fiche ─── */}
-      <Tabs defaultValue="vitaux" className="gap-6">
-        <TabsList className="sticky top-0 z-10 w-full justify-start">
-          <TabsTrigger value="vitaux">Vitaux</TabsTrigger>
-          <TabsTrigger value="competences">Compétences</TabsTrigger>
-          {isMJ && <TabsTrigger value="evolution">Évolution</TabsTrigger>}
-          <TabsTrigger value="profil">Profil</TabsTrigger>
-        </TabsList>
+      {/* ─── Onglets de la fiche — segmented-pills mono (geste Omen) ─── */}
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as TabValue)}
+        className="gap-6"
+      >
+        <div
+          role="tablist"
+          aria-label="Sections de la fiche"
+          className="sticky top-0 z-10 flex w-full items-center gap-1 rounded-full border border-border bg-surface-overlay p-1"
+        >
+          {(
+            [
+              ["vitaux", "Vitaux"],
+              ["competences", "Compétences"],
+              ...(isMJ ? [["evolution", "Évolution"]] : []),
+              ["profil", "Profil"],
+            ] as [TabValue, string][]
+          ).map(([value, label]) => {
+            const active = tab === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() => setTab(value)}
+                className={`flex-1 whitespace-nowrap rounded-full px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.12em] transition-colors ${
+                  active
+                    ? "bg-foreground text-background"
+                    : "text-foreground-subtle hover:text-foreground-muted"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
 
-        {/* ─── Vitaux + actions ─── colonnes denses ─── */}
+        {/* ─── Vitaux + actions ─── stack vertical (flux v0) ─── */}
         <TabsContent value="vitaux">
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            {/* Trio vitaux + Flux (4e jauge) */}
-            <div className="flex flex-col gap-4 xl:col-span-7">
-              <VitalsHeader
-                character={character}
-                onVitalChange={onVitalChange}
-              />
-              <FluxBar
-                current={character.currentFlux}
-                max={character.maxFlux}
-                palier={character.fluxPalier}
-                palierLabel={character.fluxLabel}
-                onAdjust={onFluxChange}
-              />
-            </div>
+          <div className="flex flex-col gap-4">
+            {/* 4 jauges circulaires vitales (Santé / Mental / Endurance / Flux) */}
+            <VitalsHeader
+              character={character}
+              onVitalChange={onVitalChange}
+              onFluxChange={onFluxChange}
+            />
 
-            {/* Récup + actions endurance, empilés */}
-            <div className="flex flex-col gap-4 xl:col-span-5">
-              {(onRecoverHp || onRecoverEndurance) && (
-                <RecoveryPanel
-                  onRecoverHp={onRecoverHp}
-                  onRecoverEndurance={onRecoverEndurance}
-                />
-              )}
-              <EnduranceActionPanel onActionCost={onActionCost} />
-            </div>
+            {(onRecoverHp || onRecoverEndurance) && (
+              <RecoveryPanel
+                onRecoverHp={onRecoverHp}
+                onRecoverEndurance={onRecoverEndurance}
+              />
+            )}
+
+            <EnduranceActionPanel onActionCost={onActionCost} />
           </div>
         </TabsContent>
 
-        {/* ─── Attributs & compétences ─── */}
+        {/* ─── Attributs & compétences ─── cartes de section v0 ─── */}
         <TabsContent value="competences">
-          <SectionLabel
-            trailing={
-              <span className="tabular text-xs text-ink-tertiary">
-                {allocated}/{SKILL_CAP} pts
-              </span>
-            }
-          >
-            Attributs &amp; compétences
-          </SectionLabel>
-
           <div className="mb-4">
             <PointAllocatorBar allocated={allocated} />
           </div>
@@ -240,68 +278,60 @@ export default function CharacterSheet({
                 : null;
 
               return (
-                <Card
+                <section
                   key={attr}
-                  className="border border-border ring-0 transition-colors hover:border-hairline-strong"
+                  className="overflow-hidden rounded-xl border border-border"
+                  style={{
+                    background: "rgba(17,19,24,0.98)",
+                    boxShadow:
+                      "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+                  }}
                 >
-                  <CardContent className="flex flex-col gap-4">
-                    <header className="flex items-start justify-between gap-3">
-                      <div className="flex flex-col gap-1">
-                        <span className="text-3xs font-medium uppercase tracking-[0.08em] text-ink-tertiary">
-                          Attribut
+                  <header className="flex items-center border-b border-border px-5 py-3">
+                    <span className="shrink-0 font-mono text-xs font-medium uppercase tracking-[0.12em] text-foreground-muted">
+                      {attr}
+                    </span>
+                    <span
+                      className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/15"
+                      aria-hidden
+                    />
+                    {openAttrRoll ? (
+                      <button
+                        type="button"
+                        onClick={openAttrRoll}
+                        title={`Lancer un jet d'attribut ${attr}`}
+                        aria-label={`Lancer un jet d'attribut ${attr}`}
+                        className="group flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 transition-colors hover:bg-surface-overlay"
+                      >
+                        <span className="font-mono text-lg font-semibold tabular-nums slashed-zero text-foreground">
+                          {score}
                         </span>
-                        <span className="text-lg font-semibold tracking-tight text-foreground">
-                          {attr}
-                        </span>
-                      </div>
-                      {openAttrRoll ? (
-                        <button
-                          type="button"
-                          onClick={openAttrRoll}
-                          title={`Lancer un jet d'attribut ${attr}`}
-                          aria-label={`Lancer un jet d'attribut ${attr}`}
-                          className="focus-grimoire group flex flex-col items-end rounded-md transition-colors"
-                        >
-                          <span
-                            className="big-number text-foreground transition-colors group-hover:text-primary-hover"
-                            style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
-                          >
-                            {score}
-                          </span>
-                          <span className="text-3xs uppercase tracking-[0.08em] text-ink-tertiary transition-colors group-hover:text-muted-foreground">
-                            Jet
-                          </span>
-                        </button>
-                      ) : (
-                        <div className="flex flex-col items-end">
-                          <span
-                            className="big-number text-foreground"
-                            style={{ fontSize: "clamp(1.75rem, 3vw, 2.5rem)" }}
-                          >
-                            {score}
-                          </span>
-                          <span className="text-3xs uppercase tracking-[0.08em] text-ink-tertiary">
-                            Score
-                          </span>
-                        </div>
-                      )}
-                    </header>
-                    <Separator />
-                    <div className="flex flex-col gap-2.5">
-                      {SKILL_GROUPS[attr].map((skill) => (
-                        <SkillRow
-                          key={skill}
-                          name={skill}
-                          value={character.skills[skill] ?? 0}
-                          attrScore={score}
-                          isCapped={isCapped}
-                          onSkillChange={onSkillChange}
-                          onOpenRollDrawer={openRollDrawer}
+                        <Dices
+                          size={13}
+                          className="text-foreground-subtle transition-colors group-hover:text-primary"
+                          aria-hidden
                         />
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
+                      </button>
+                    ) : (
+                      <span className="shrink-0 font-mono text-lg font-semibold tabular-nums slashed-zero text-foreground">
+                        {score}
+                      </span>
+                    )}
+                  </header>
+                  <div className="divide-y divide-border">
+                    {SKILL_GROUPS[attr].map((skill) => (
+                      <SkillRow
+                        key={skill}
+                        name={skill}
+                        value={character.skills[skill] ?? 0}
+                        attrScore={score}
+                        isCapped={isCapped}
+                        onSkillChange={onSkillChange}
+                        onOpenRollDrawer={openRollDrawer}
+                      />
+                    ))}
+                  </div>
+                </section>
               );
             })}
           </div>
@@ -321,43 +351,25 @@ export default function CharacterSheet({
           </TabsContent>
         )}
 
-        {/* ─── Profil — édition perso + présence + entraînement (joueur) ─── */}
+        {/* ─── Profil — édition perso + inventaire + entraînement (joueur) ─── */}
         <TabsContent value="profil">
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-            <div className="flex flex-col gap-4 xl:col-span-7">
-              <ProfileEditor
-                character={character}
-                onProfileChange={onProfileChange}
+          <div className="flex flex-col gap-4">
+            <ProfileEditor
+              character={character}
+              onProfileChange={onProfileChange}
+            />
+
+            <RuneInventory
+              runes={character.runesInventory}
+              onAddRune={onAddRune}
+              onRemoveRune={onRemoveRune}
+            />
+
+            {!isMJ && onRequestTraining && (
+              <TrainingRequestButton
+                pending={pendingTraining ?? null}
+                onRequestTraining={onRequestTraining}
               />
-
-              <RuneInventory
-                runes={character.runesInventory}
-                onAddRune={onAddRune}
-                onRemoveRune={onRemoveRune}
-              />
-
-              {!isMJ && onRequestTraining && (
-                <Card className="relative overflow-hidden border border-border ring-0">
-                  <span className="pointer-events-none absolute right-3 top-3 text-ink-tertiary/40">
-                    <GrimoireGlyph size={64} />
-                  </span>
-                  <CardContent className="relative z-[1]">
-                    <TrainingRequestButton
-                      pending={pendingTraining ?? null}
-                      onRequestTraining={onRequestTraining}
-                    />
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {onTogglePresence && (
-              <div className="xl:col-span-5">
-                <PresenceBadge
-                  isPresent={character.isPresent}
-                  onToggle={onTogglePresence}
-                />
-              </div>
             )}
           </div>
         </TabsContent>
@@ -380,6 +392,36 @@ export default function CharacterSheet({
         />
       )}
     </div>
+  );
+}
+
+/* Badge pilule header — variante accent (MJ) ou neutre (direction v0) */
+function HeaderBadge({
+  children,
+  accent = false,
+}: {
+  children: React.ReactNode;
+  accent?: boolean;
+}) {
+  return (
+    <span
+      className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest"
+      style={
+        accent
+          ? {
+              background: "rgba(94,106,210,0.18)",
+              border: "1px solid rgba(94,106,210,0.35)",
+              color: "#a5abf0",
+            }
+          : {
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "var(--foreground-muted)",
+            }
+      }
+    >
+      {children}
+    </span>
   );
 }
 

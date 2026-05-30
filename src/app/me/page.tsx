@@ -64,7 +64,7 @@ export default async function MePage() {
       <AppShell user={shellUser} active="me" title="Ma fiche">
         <div className="mx-auto flex max-w-2xl flex-col gap-6">
           {availableRows.length === 0 ? (
-            <Empty className="border border-border bg-card">
+            <Empty className="rounded-xl border border-border bg-surface">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <Sparkles className="text-ink-tertiary" />
@@ -76,7 +76,7 @@ export default async function MePage() {
               </EmptyHeader>
             </Empty>
           ) : (
-            <Empty className="border border-border bg-card">
+            <Empty className="rounded-xl border border-border bg-surface">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <Sparkles className="text-ink-tertiary" />
@@ -88,7 +88,7 @@ export default async function MePage() {
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
-                <div className="w-full overflow-hidden rounded-lg border border-border bg-background">
+                <div className="w-full overflow-hidden rounded-xl border border-border bg-surface divide-y divide-border">
                   {availableRows.map((c) => (
                     <form
                       key={c.id}
@@ -100,7 +100,7 @@ export default async function MePage() {
                     >
                       <button
                         type="submit"
-                        className="group flex w-full items-center justify-between gap-3 border-b border-border px-3 py-2.5 text-left transition-colors last:border-b-0 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="group flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition-colors hover:bg-surface-overlay/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <span className="flex min-w-0 items-center gap-3">
                           <Avatar className="h-8 w-8 shrink-0">
@@ -119,7 +119,7 @@ export default async function MePage() {
                             ) : null}
                           </span>
                         </span>
-                        <span className="shrink-0 text-xs text-muted-foreground transition-colors group-hover:text-foreground">
+                        <span className="shrink-0 text-xs text-foreground-muted transition-colors group-hover:text-foreground">
                           Réclamer →
                         </span>
                       </button>

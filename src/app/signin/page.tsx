@@ -24,7 +24,7 @@ export default function SignInPage({
             <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
               FAITH&nbsp;:&nbsp;RE
             </h1>
-            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+            <p className="max-w-xs text-sm leading-relaxed text-foreground-muted">
               Connecte-toi pour rejoindre la table.
             </p>
           </div>
@@ -51,7 +51,7 @@ export default function SignInPage({
           {/* Note MJ */}
           <p className="text-xs leading-relaxed text-ink-tertiary">
             MJ&nbsp;? Ton rôle est promu automatiquement si ton Discord ID correspond à{" "}
-            <code className="tabular rounded-sm border border-border bg-popover px-1 py-0.5 text-muted-foreground">
+            <code className="tabular rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 font-mono text-foreground-muted">
               MJ_DISCORD_ID
             </code>
             .

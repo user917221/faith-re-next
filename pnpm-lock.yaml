@@ -105,6 +105,9 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+      v0-sdk:
+        specifier: ^0.16.4
+        version: 0.16.4
 
 packages:
 
@@ -4519,6 +4522,10 @@ packages:
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+
+  v0-sdk@0.16.4:
+    resolution: {integrity: sha512-ByYyxGbdx1Ab/sTpIK5krf/aK7ATvjWxRiBlqR3f4C4BMh+PzfRzkG/dhOe1lYDYRORQfT4a+SqWcXIGqNsF9w==}
+    engines: {node: '>=22', pnpm: '>=9'}
 
   validate-npm-package-name@7.0.2:
     resolution: {integrity: sha512-hVDIBwsRruT73PbK7uP5ebUt+ezEtCmzZz3F59BSr2F6OVFnJ/6h8liuvdLrQ88Xmnk6/+xGGuq+pG9WwTuy3A==}
@@ -9083,6 +9090,8 @@ snapshots:
       react: 19.2.4
 
   util-deprecate@1.0.2: {}
+
+  v0-sdk@0.16.4: {}
 
   validate-npm-package-name@7.0.2: {}
 

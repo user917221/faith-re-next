@@ -1,43 +1,57 @@
 import { SKILL_CAP } from "@/lib/faith-system";
-import { Progress } from "@/components/ui/progress";
 
 type Props = {
   allocated: number;
 };
 
+/** Barre d'allocation des points de compétence — surface sobre (direction v0). */
 export function PointAllocatorBar({ allocated }: Props) {
   const isCapped = allocated >= SKILL_CAP;
   const pct = Math.min(100, (allocated / SKILL_CAP) * 100);
 
   return (
-    <div className="card-grimoire flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-baseline gap-2.5">
-          <span className="text-2xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
+    <section
+      className="rounded-xl border border-border px-5 py-4"
+      style={{
+        background: "rgba(17,19,24,0.98)",
+        boxShadow:
+          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}
+    >
+      <div className="flex items-baseline justify-between gap-4">
+        <div className="flex items-baseline gap-2">
+          <span className="text-[10px] font-medium uppercase tracking-widest text-foreground-subtle">
             Allocation
           </span>
           <span
-            className={`tabular text-2xl font-semibold leading-none ${
-              isCapped ? "text-hp" : "text-foreground"
-            }`}
+            className="font-mono text-2xl font-semibold leading-none tabular-nums"
+            style={{ color: isCapped ? "var(--hp)" : "var(--foreground)" }}
           >
             {allocated}
           </span>
-          <span className="text-sm text-ink-tertiary">/</span>
-          <span className="tabular text-sm text-muted-foreground">
-            {SKILL_CAP} pts
+          <span className="font-mono text-sm tabular-nums text-foreground-subtle">
+            / {SKILL_CAP}
           </span>
         </div>
         {isCapped && (
-          <span className="text-2xs font-medium uppercase tracking-[0.06em] text-hp">
+          <span
+            className="text-[10px] font-medium uppercase tracking-widest"
+            style={{ color: "var(--hp)" }}
+          >
             Cap atteint
           </span>
         )}
       </div>
-      <Progress
-        value={pct}
-        className={isCapped ? "[&>[data-slot=progress-indicator]]:bg-hp" : undefined}
-      />
-    </div>
+      <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-surface-overlay">
+        <div
+          className="h-full rounded-full"
+          style={{
+            width: `${pct}%`,
+            backgroundColor: isCapped ? "var(--hp)" : "var(--accent)",
+            transition: "width 0.4s cubic-bezier(.4,0,.2,1)",
+          }}
+        />
+      </div>
+    </section>
   );
 }

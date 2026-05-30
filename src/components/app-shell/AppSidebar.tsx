@@ -63,7 +63,7 @@ export function AppSidebar({
             <span className="text-sm font-semibold tracking-tight text-foreground">
               FAITH&nbsp;:&nbsp;RE
             </span>
-            <span className="text-2xs uppercase tracking-[0.14em] text-muted-foreground">
+            <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
               Compagnon
             </span>
           </div>

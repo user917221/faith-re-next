@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CalvaryGlyph, EclipseGlyph } from "@/components/glyphs";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Heart, Wind, Dices } from "lucide-react";
 
 type RecoveryResult =
   | { kind: "hp"; gain: number; d1: number; d2: number; ecaille: number; newHp: number; maxHp: number }
@@ -15,6 +13,10 @@ type Props = {
   onRecoverEndurance?: () => Promise<{ gain: number; roll: number; newEndurance: number; maxEndurance: number }>;
 };
 
+/**
+ * Récupération — régénération naturelle (dés). Surface sobre (direction v0 validée).
+ * Conserve toute la logique : appels server actions + détail du jet.
+ */
 export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
   const [isPending, startTransition] = useTransition();
   const [lastResult, setLastResult] = useState<RecoveryResult | null>(null);
@@ -46,108 +48,122 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
   }
 
   return (
-    <Card className="border border-border ring-0">
-      <CardHeader>
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <div>
-            <CardTitle className="text-sm">Récupération</CardTitle>
-            <CardDescription className="mt-0.5 text-xs">
-              Lance les dés de régénération naturelle.
-            </CardDescription>
-          </div>
-          {lastResult && lastResult.kind !== "error" && (
-            <span className="tabular text-xs tracking-wider text-muted-foreground">
-              {lastResult.kind === "hp"
-                ? `Dernier soin : +${lastResult.gain} HP`
-                : `Dernier souffle : +${lastResult.gain} Endu`}
-            </span>
+    <section
+      className="overflow-hidden rounded-xl border border-border"
+      style={{
+        background: "rgba(17,19,24,0.98)",
+        boxShadow:
+          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}
+      aria-label="Récupération"
+    >
+      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+        <h2 className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+          <Dices size={12} aria-hidden /> Récupération
+        </h2>
+        {lastResult && lastResult.kind !== "error" && (
+          <span className="font-mono text-[10px] tabular-nums text-foreground-subtle">
+            {lastResult.kind === "hp"
+              ? `+${lastResult.gain} Santé`
+              : `+${lastResult.gain} Endurance`}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+        <RecoveryButton
+          icon={Heart}
+          label="Régénérer Santé"
+          formula="(2d6 + Écaillé) / 2"
+          disabled={!onRecoverHp || isPending}
+          onClick={doHp}
+        />
+        <RecoveryButton
+          icon={Wind}
+          label="Reprendre souffle"
+          formula="1d50 / 2"
+          disabled={!onRecoverEndurance || isPending}
+          onClick={doEndu}
+        />
+      </div>
+
+      {lastResult && (
+        <div
+          className="border-t border-border px-5 py-3"
+          style={{ background: "rgba(255,255,255,0.02)" }}
+        >
+          {lastResult.kind === "hp" && (
+            <p className="font-mono text-[11px] leading-relaxed tabular-nums text-foreground-muted">
+              <span className="text-foreground-subtle">2d6</span>{" "}
+              [{lastResult.d1}, {lastResult.d2}]
+              {" + "}
+              <span className="text-foreground-subtle">Écaillé</span>(
+              {lastResult.ecaille}) ={" "}
+              {lastResult.d1 + lastResult.d2 + lastResult.ecaille}
+              {" → ÷2 = "}
+              <span className="font-semibold text-foreground">
+                +{lastResult.gain}
+              </span>
+              <span className="ml-2 text-foreground-subtle">
+                ({lastResult.newHp}/{lastResult.maxHp})
+              </span>
+            </p>
+          )}
+          {lastResult.kind === "endu" && (
+            <p className="font-mono text-[11px] leading-relaxed tabular-nums text-foreground-muted">
+              <span className="text-foreground-subtle">1d50</span>{" "}
+              [{lastResult.roll}]
+              {" → ÷2 = "}
+              <span className="font-semibold text-foreground">
+                +{lastResult.gain}
+              </span>
+              <span className="ml-2 text-foreground-subtle">
+                ({lastResult.newEndurance}/{lastResult.maxEndurance})
+              </span>
+            </p>
+          )}
+          {lastResult.kind === "error" && (
+            <p className="text-[11px] italic text-foreground-muted">
+              Erreur : {lastResult.message}
+            </p>
           )}
         </div>
-      </CardHeader>
+      )}
+    </section>
+  );
+}
 
-      <CardContent>
-        <div className="flex items-center justify-between gap-3">
-          {/* Glyph gauche — HP */}
-          <CalvaryGlyph className="hidden shrink-0 text-ink-tertiary sm:block" size={44} />
-
-          {/* Boutons centraux */}
-          <div className="flex flex-1 flex-col gap-2 sm:flex-row">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!onRecoverHp || isPending}
-              onClick={doHp}
-              className="h-auto flex-1 flex-col gap-1 py-3 text-hp hover:text-hp"
-            >
-              <span className="text-sm font-medium text-foreground">Régénérer HP</span>
-              <span className="tabular text-2xs text-muted-foreground">
-                (2d6 + Écaillé) / 2
-              </span>
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!onRecoverEndurance || isPending}
-              onClick={doEndu}
-              className="h-auto flex-1 flex-col gap-1 py-3 text-endu hover:text-endu"
-            >
-              <span className="text-sm font-medium text-foreground">Reprendre souffle</span>
-              <span className="tabular text-2xs text-muted-foreground">
-                1d50 / 2
-              </span>
-            </Button>
-          </div>
-
-          {/* Glyph droite — Endurance */}
-          <EclipseGlyph className="hidden shrink-0 text-ink-tertiary sm:block" size={44} />
-        </div>
-
-        {lastResult && (
-          <div className="mt-4 rounded-md bg-muted p-3">
-            {lastResult.kind === "hp" && (
-              <p className="tabular text-xs leading-relaxed text-ink-muted">
-                <span className="text-muted-foreground">2d6</span>{" "}
-                <span className="text-foreground">
-                  [{lastResult.d1}, {lastResult.d2}]
-                </span>
-                {" + "}
-                <span className="text-hp">Écaillé</span>(
-                {lastResult.ecaille}){" "}
-                <span className="text-muted-foreground">=</span>{" "}
-                <span className="text-foreground">
-                  {lastResult.d1 + lastResult.d2 + lastResult.ecaille}
-                </span>
-                {" → ÷2 ="}{" "}
-                <span className="tabular text-lg font-semibold text-hp">
-                  +{lastResult.gain} HP
-                </span>
-                <span className="ml-2 text-muted-foreground">
-                  ({lastResult.newHp}/{lastResult.maxHp})
-                </span>
-              </p>
-            )}
-            {lastResult.kind === "endu" && (
-              <p className="tabular text-xs leading-relaxed text-ink-muted">
-                <span className="text-muted-foreground">1d50</span>{" "}
-                <span className="text-foreground">[{lastResult.roll}]</span>
-                {" → ÷2 = "}
-                <span className="tabular text-lg font-semibold text-endu">
-                  +{lastResult.gain} Endu
-                </span>
-                <span className="ml-2 text-muted-foreground">
-                  ({lastResult.newEndurance}/{lastResult.maxEndurance})
-                </span>
-              </p>
-            )}
-            {lastResult.kind === "error" && (
-              <p className="text-xs italic text-hp">
-                Erreur : {lastResult.message}
-              </p>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+function RecoveryButton({
+  icon: Icon,
+  label,
+  formula,
+  disabled,
+  onClick,
+}: {
+  icon: typeof Heart;
+  label: string;
+  formula: string;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="group flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-overlay/50 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-white/[0.03] text-foreground-subtle transition-colors group-hover:text-foreground-muted">
+        <Icon size={14} aria-hidden />
+      </span>
+      <span className="flex flex-col">
+        <span className="text-sm text-foreground-muted transition-colors group-hover:text-foreground">
+          {label}
+        </span>
+        <span className="font-mono text-[10px] tabular-nums tracking-wide text-foreground-subtle">
+          {formula}
+        </span>
+      </span>
+    </button>
   );
 }

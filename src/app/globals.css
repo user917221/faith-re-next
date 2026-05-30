@@ -98,15 +98,31 @@
   --color-warning: var(--warning);
   --color-danger: var(--destructive);
 
-  /* ---- Typography (Inter partout, JetBrains pour les nombres) ---- */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
+  /* ---- Typography (Geist sans + Geist Mono pour les nombres) ---- */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
 
   /* ---- Micro-tailles typo (labels/eyebrows denses, sous text-xs) ---- */
   --text-2xs: 0.6875rem; /* 11px — petits labels */
   --text-3xs: 0.625rem;  /* 10px — eyebrows micro / badges */
+
+  /* ---- Tokens v0 (route /v0 — preview du design généré) ---- */
+  --color-foreground-muted: var(--foreground-muted);
+  --color-foreground-subtle: var(--foreground-subtle);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-overlay: var(--surface-overlay);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border-strong: var(--border-strong);
+  --color-gauge-sante: var(--gauge-sante);
+  --color-gauge-mental: var(--gauge-mental);
+  --color-gauge-endurance: var(--gauge-endurance);
+  --color-gauge-flux: var(--gauge-flux);
+  --color-gauge-track: var(--gauge-track);
 
   /* ---- Radius custom (Linear : cards 12px, inputs/buttons 6-8px) ---- */
   --radius-grim-xs: 4px;
@@ -153,10 +169,10 @@
   --accent: #141516;
   --accent-foreground: #f7f8f8;
 
-  /* ink ladder */
-  --ink-muted: #d0d6e0;
-  --ink-subtle: #8a8f98;
-  --ink-tertiary: #62666d;
+  /* ink ladder — remappé sur la triade texte v0 (foreground-muted/subtle) */
+  --ink-muted: #8b8fa8;
+  --ink-subtle: #8b8fa8;
+  --ink-tertiary: #4a4d60;
 
   /* hairlines */
   --border: #23252a;
@@ -196,6 +212,22 @@
   --sidebar-ring: #5e6ad2;
 
   --radius: 0.75rem;
+
+  /* tokens v0 (preview /v0 — design généré) */
+  --surface: #111318;
+  --surface-raised: #161820;
+  --surface-overlay: #1c1e28;
+  --foreground-muted: #8b8fa8;
+  --foreground-subtle: #4a4d60;
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --accent: #5e6ad2;
+  --accent-dim: rgba(94, 106, 210, 0.18);
+  --accent-foreground: #ffffff;
+  --gauge-sante: #4a6070;
+  --gauge-mental: #4a5570;
+  --gauge-endurance: #4a6055;
+  --gauge-flux: #5e6ad2;
+  --gauge-track: rgba(255, 255, 255, 0.05);
 }
 
 .dark {
@@ -218,9 +250,9 @@
   --muted-foreground: #8a8f98;
   --accent: #141516;
   --accent-foreground: #f7f8f8;
-  --ink-muted: #d0d6e0;
-  --ink-subtle: #8a8f98;
-  --ink-tertiary: #62666d;
+  --ink-muted: #8b8fa8;
+  --ink-subtle: #8b8fa8;
+  --ink-tertiary: #4a4d60;
   --border: #23252a;
   --input: #23252a;
   --hairline-strong: #34343a;
@@ -274,50 +306,79 @@
    Utilitaires — réskinnés Linear (surface ladder + hairlines, plat)
    ============================================================ */
 
-/* Eyebrow / label de section — Linear : ink-subtle, uppercase, +tracking */
+/* Eyebrow / label de section — v0 : foreground-subtle, uppercase, tracking-widest */
 .label-grimoire {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-subtle);
+  color: var(--foreground-subtle);
 }
 
-/* Card Linear — surface-1 + hairline 1px, radius 12px, PLAT (zéro halo) */
-.card-grimoire {
-  background: var(--card);
+/* Eyebrow MONO (geste Omen — labels/eyebrows en Geist Mono) */
+.ui-eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--foreground-subtle);
+}
+
+/* Filet pointillé de ledger (geste Omen — relie label → valeur) */
+.ledger-leader {
+  flex: 1 1 auto;
+  align-self: flex-end;
+  min-width: 1.25rem;
+  margin: 0 0.5rem 0.34rem;
+  border-bottom-width: 1px;
+  border-bottom-style: dotted;
+  border-bottom-color: rgba(255, 255, 255, 0.16);
+}
+
+/* ============================================================
+   Fond — nappe de lumière floutée (donne de la MATIÈRE au verre).
+   Sans ça, le backdrop-blur n'a rien à révéler → plat.
+   Orbes lavande/cyan très subtils, fixes, derrière tout.
+   ============================================================ */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(46rem 46rem at 15% 0%, rgba(94, 106, 210, 0.05), transparent 60%),
+    radial-gradient(40rem 40rem at 88% 100%, rgba(94, 106, 210, 0.03), transparent 58%);
+}
+/* grain fin par-dessus les orbes pour casser le banding */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.4' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* le contenu passe au-dessus de la nappe */
+body > * { position: relative; z-index: 1; }
+
+/* ============================================================
+   Verre — glassmorphism dark (visionOS / macOS)
+   Surface translucide + backdrop-blur + arête lumineuse + ombre.
+   ============================================================ */
+.glass {
+  background: rgba(17, 19, 24, 0.98);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 1.25rem;
-  position: relative;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
-
-/* Card hero — surface-1, hairline, halo lavande TRÈS subtil au sommet */
-.card-hero {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
-}
-.card-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 70% 50% at 50% 0%,
-    rgba(94, 106, 210, 0.06) 0%,
-    transparent 60%
-  );
-  border-radius: inherit;
-}
-.card-hero > * {
-  position: relative;
-  z-index: 1;
-}
+/* .glass-strong / .card-grimoire / .card-hero supprimés (verre lourd grimoire,
+   direction v0 → utiliser .glass aligné v0 ci-dessus ou <Card> shadcn) */
 
 /* Bouton primaire — lavande plein, Inter 500, radius 8px */
 .btn-grimoire {
@@ -434,26 +495,24 @@
 }
 .list-portfolio > * {
   border-bottom: 1px solid var(--border);
-  border-left: 2px solid transparent;
   padding: 0.75rem 1rem;
-  transition: background-color 0.15s ease, border-left-color 0.15s ease;
+  transition: background-color 0.15s ease;
 }
 .list-portfolio > *:last-child {
   border-bottom: none;
 }
 .list-portfolio > *:hover {
-  background: var(--popover);
-  border-left-color: var(--primary);
+  background: var(--surface-overlay);
 }
 
-/* Big number — JetBrains mono tabular, foreground, tracking serré Linear */
+/* Big number — mesuré (premium subtil : hiérarchie par la nuance, pas la taille) */
 .big-number {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   color: var(--foreground);
 }
 

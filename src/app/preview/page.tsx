@@ -132,6 +132,87 @@ export default function PreviewPage() {
     }));
   }, []);
 
+  const onFluxChange = useCallback(async (delta: number) => {
+    // eslint-disable-next-line no-console
+    console.log("[preview] onFluxChange", delta);
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      currentFlux: Math.max(0, Math.min(c.maxFlux, c.currentFlux + delta)),
+    }));
+  }, []);
+
+  const onRecoverHp = useCallback(async () => {
+    const d1 = 1 + Math.floor(Math.random() * 6);
+    const d2 = 1 + Math.floor(Math.random() * 6);
+    const ecaille = 4; // mock — valeur d'Écaillé fixe pour la preview
+    const gain = Math.floor((d1 + d2 + ecaille) / 2);
+    let newHp = 0;
+    setCharacter((c) => {
+      newHp = Math.min(c.maxHp, c.currentHp + gain);
+      return { ...c, currentHp: newHp };
+    });
+    await Promise.resolve();
+    return { gain, d1, d2, ecaille, newHp, maxHp: character.maxHp };
+  }, [character.maxHp]);
+
+  const onRecoverEndurance = useCallback(async () => {
+    const roll = 1 + Math.floor(Math.random() * 50);
+    const gain = Math.floor(roll / 2);
+    let newEndurance = 0;
+    setCharacter((c) => {
+      newEndurance = Math.min(c.maxEndurance, c.currentEndurance + gain);
+      return { ...c, currentEndurance: newEndurance };
+    });
+    await Promise.resolve();
+    return { gain, roll, newEndurance, maxEndurance: character.maxEndurance };
+  }, [character.maxEndurance]);
+
+  const onProfileChange = useCallback(
+    async (patch: { name?: string; nom?: string; age?: number }) => {
+      await Promise.resolve();
+      setCharacter((c) => ({ ...c, ...patch }));
+    },
+    [],
+  );
+
+  const onAddRune = useCallback(
+    async (input: {
+      name: string;
+      type: "utilitaire" | "armement" | "predefinie";
+      description?: string;
+    }) => {
+      await Promise.resolve();
+      setCharacter((c) => ({
+        ...c,
+        runesInventory: [
+          ...c.runesInventory,
+          {
+            id: crypto.randomUUID(),
+            name: input.name,
+            type: input.type,
+            description: input.description ?? null,
+          },
+        ],
+      }));
+    },
+    [],
+  );
+
+  const onRemoveRune = useCallback(async (runeId: string) => {
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      runesInventory: c.runesInventory.filter((r) => r.id !== runeId),
+    }));
+  }, []);
+
+  const onRequestTraining = useCallback(async (note?: string) => {
+    // eslint-disable-next-line no-console
+    console.log("[preview] onRequestTraining", note ?? "(sans note)");
+    await Promise.resolve();
+  }, []);
+
   const allocated = countAllocatedPoints(character.skills);
 
   return (
@@ -181,6 +262,13 @@ export default function PreviewPage() {
           onActionCost={onActionCost}
           onXpChange={onXpChange}
           onTrainingChange={onTrainingChange}
+          onFluxChange={onFluxChange}
+          onRecoverHp={onRecoverHp}
+          onRecoverEndurance={onRecoverEndurance}
+          onProfileChange={onProfileChange}
+          onAddRune={onAddRune}
+          onRemoveRune={onRemoveRune}
+          onRequestTraining={onRequestTraining}
         />
       </div>
     </main>

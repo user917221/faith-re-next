@@ -46,11 +46,11 @@ export function AppShell({
                 new KeyboardEvent("keydown", { key: "k", metaKey: true }),
               );
             }}
-            className="ml-auto flex items-center gap-2 rounded-md border border-border bg-card px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-hairline-strong hover:text-foreground"
+            className="ml-auto flex items-center gap-2 rounded-md border border-white/[0.07] bg-white/[0.04] px-2.5 py-1 text-xs text-foreground-muted transition-colors hover:bg-white/[0.06] hover:text-foreground"
           >
             <Search className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Rechercher</span>
-            <kbd className="tabular hidden rounded border border-border bg-muted px-1 text-2xs sm:inline">
+            <kbd className="tabular hidden rounded border border-white/[0.07] bg-white/[0.04] px-1 font-mono text-[10px] sm:inline">
               ⌘K
             </kbd>
           </button>

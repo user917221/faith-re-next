@@ -1,14 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CrestGlyph } from "@/components/glyphs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +11,7 @@ type Props = {
   onProfileChange?: (patch: ProfilePatch) => Promise<void>;
 };
 
+/** Édition d'identité du personnage — surface sobre (direction v0). */
 export function ProfileEditor({ character, onProfileChange }: Props) {
   const [name, setName] = useState(character.name);
   const [nom, setNom] = useState(character.nom);
@@ -41,24 +34,29 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   }
 
   return (
-    <Card className="border border-border ring-0">
-      <CardHeader className="grid-cols-[auto_1fr_auto] items-center gap-3">
-        <span className="shrink-0 text-ink-tertiary">
-          <CrestGlyph size={36} />
-        </span>
-        <div className="flex flex-col gap-0.5">
-          <CardTitle>Profil</CardTitle>
-          <CardDescription>Identité du personnage</CardDescription>
-        </div>
+    <section
+      className="overflow-hidden rounded-xl border border-border"
+      style={{
+        background: "rgba(17,19,24,0.98)",
+        boxShadow:
+          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}
+    >
+      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+        <h2 className="text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+          Profil — identité
+        </h2>
         {feedback && (
-          <span className="self-start text-xs text-muted-foreground">{feedback}</span>
+          <span className="font-mono text-[10px] text-foreground-subtle">
+            {feedback}
+          </span>
         )}
-      </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      </div>
+
+      <div className="flex flex-col gap-3 p-5">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-name">
-            Prénom
-            <span className="text-hp">*</span>
+          <Label htmlFor="profile-name" className="text-foreground-muted">
+            Prénom <span className="text-foreground-subtle">*</span>
           </Label>
           <Input
             id="profile-name"
@@ -69,7 +67,9 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-nom">Nom de famille</Label>
+          <Label htmlFor="profile-nom" className="text-foreground-muted">
+            Nom de famille
+          </Label>
           <Input
             id="profile-nom"
             type="text"
@@ -79,7 +79,9 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
           />
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-age">Âge</Label>
+          <Label htmlFor="profile-age" className="text-foreground-muted">
+            Âge
+          </Label>
           <Input
             id="profile-age"
             type="number"
@@ -88,19 +90,18 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
             value={age}
             onChange={(e) => setAge(parseInt(e.target.value, 10) || 0)}
             disabled={!onProfileChange}
-            className="tabular"
+            className="tabular-nums"
           />
         </div>
         <Button
           type="button"
-          size="lg"
           className="w-full"
           disabled={!onProfileChange || !dirty || isPending}
           onClick={save}
         >
           {isPending ? "…" : "Enregistrer"}
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

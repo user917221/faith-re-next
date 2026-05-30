@@ -38,7 +38,7 @@ export default async function HomePage() {
               <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
                 FAITH&nbsp;:&nbsp;RE
               </h1>
-              <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
+              <p className="max-w-md text-sm leading-relaxed text-foreground-muted">
                 Compagnon de jeu &amp; fiches de personnage.
               </p>
             </div>
@@ -71,7 +71,7 @@ export default async function HomePage() {
                     </p>
                     <Badge
                       variant="outline"
-                      className="w-fit uppercase tracking-[0.12em]"
+                      className="w-fit uppercase tracking-wider"
                     >
                       {ROLE_LABEL[user.role]}
                     </Badge>
@@ -115,7 +115,7 @@ export default async function HomePage() {
                 <p className="text-2xl font-medium leading-tight tracking-tight text-foreground">
                   Rejoins la table.
                 </p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
+                <p className="text-sm leading-relaxed text-foreground-muted">
                   Identifie-toi avec ton compte Discord pour réclamer ta fiche
                   et participer aux jets de session.
                 </p>
@@ -142,7 +142,7 @@ export default async function HomePage() {
                 Les invitations sont accordées par le MJ. Demande l&apos;accès
                 à la table avant de tenter ta première convocation. Ton rôle
                 est promu MJ si ton Discord ID correspond à{" "}
-                <code className="tabular rounded-sm border border-border bg-popover px-1 py-0.5 text-muted-foreground">
+                <code className="tabular rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 font-mono text-foreground-muted">
                   MJ_DISCORD_ID
                 </code>
                 .

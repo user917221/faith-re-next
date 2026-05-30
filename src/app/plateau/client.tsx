@@ -40,7 +40,8 @@ import {
   SKILL_GROUPS,
   type AttributeName,
 } from "@/lib/skills";
-import { RoundTableGlyph } from "@/components/glyphs";
+import { Users, Dices, BarChart3, ListPlus } from "lucide-react";
+import { CountUp } from "@/components/faith/CountUp";
 import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -142,10 +143,9 @@ function buildBreakdown(item: FeedItem): string[] {
 
 /** Classe couleur du total — accent SCARCE (lavande crit succ / réussite, hp crit fail). */
 function totalColorClass(item: FeedItem): string {
+  // Discipline d'accent (Omen) : lavande UNIQUEMENT sur la réussite critique
+  // (signal rare). Tout le reste reste neutre — l'état est porté par les badges.
   if (item.isCritSucc) return "text-primary";
-  if (item.isCritFail) return "text-hp";
-  if (item.success === true) return "text-endu";
-  if (item.success === false) return "text-muted-foreground";
   return "text-foreground";
 }
 
@@ -277,7 +277,7 @@ function Roster({
 
       {sorted.length === 0 ? (
         <div className="flex flex-col items-center gap-3 px-4 py-10 text-center">
-          <RoundTableGlyph size={88} className="text-ink-tertiary" />
+          <Users className="size-8 text-foreground-subtle" />
           <p className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
             La table est encore vide
           </p>
@@ -291,7 +291,7 @@ function Roster({
             {sorted.map((c, idx) => (
               <div
                 key={c.id}
-                className={`px-4 py-3 transition-colors hover:bg-popover ${
+                className={`px-4 py-3 transition-colors hover:bg-surface-overlay/50 ${
                   idx > 0 ? "border-t border-border" : ""
                 }`}
               >
@@ -317,7 +317,7 @@ function LastActHero({ item }: { item: FeedItem | null }) {
       <Empty className="h-full min-h-[260px] border-0">
         <EmptyHeader>
           <EmptyMedia>
-            <RoundTableGlyph size={120} className="text-ink-tertiary" />
+            <Dices className="size-8 text-foreground-subtle" />
           </EmptyMedia>
           <EmptyTitle>Dernier acte</EmptyTitle>
           <EmptyDescription>Aucun jet inscrit — lance le premier.</EmptyDescription>
@@ -363,13 +363,10 @@ function LastActHero({ item }: { item: FeedItem | null }) {
         <p className="tabular text-sm text-muted-foreground">{item.formula}</p>
 
         <div className="flex items-end justify-center gap-3">
-          <span
-            key={item.id}
-            className={`big-number ${totalClass} ${item.isCritFail ? "italic" : ""}`}
-            style={{ animation: "vital-flash 0.35s ease-out" }}
-          >
-            {item.total}
-          </span>
+          <CountUp
+            value={item.total}
+            className={`font-mono text-6xl font-semibold leading-none tabular-nums slashed-zero ${totalClass}`}
+          />
           {item.dd !== null && (
             <span className="tabular mb-2 text-base uppercase tracking-[0.06em] text-ink-tertiary sm:text-lg">
               / DD {item.dd}
@@ -442,7 +439,7 @@ function StatsChart({ items }: { items: FeedItem[] }) {
       <Empty className="h-full min-h-[260px] border-0">
         <EmptyHeader>
           <EmptyMedia>
-            <RoundTableGlyph size={120} className="text-ink-tertiary" />
+            <BarChart3 className="size-8 text-foreground-subtle" />
           </EmptyMedia>
           <EmptyTitle>Distribution des totaux</EmptyTitle>
           <EmptyDescription>
@@ -959,7 +956,7 @@ function CarnetRow({ item }: { item: FeedItem }) {
 function Carnet({ items }: { items: FeedItem[] }) {
   return (
     <Card className="min-w-0 gap-0 py-0">
-      <CardHeader className="sticky top-0 z-10 flex flex-row items-baseline justify-between gap-2 rounded-t-lg border-b bg-card px-4 py-3">
+      <CardHeader className="sticky top-0 z-10 flex flex-row items-baseline justify-between gap-2 rounded-t-lg border-b bg-[rgba(17,19,24,0.98)] px-4 py-3">
         <CardTitle className="text-xs font-medium uppercase tracking-[0.06em] text-muted-foreground">
           Carnet des jets
         </CardTitle>
@@ -970,7 +967,7 @@ function Carnet({ items }: { items: FeedItem[] }) {
 
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 px-4 py-12 text-center">
-          <RoundTableGlyph size={88} className="text-ink-tertiary" />
+          <ListPlus className="size-8 text-foreground-subtle" />
           <p className="text-sm text-ink-tertiary">
             Aucun jet n&apos;a été inscrit. Lance le premier.
           </p>
@@ -981,7 +978,7 @@ function Carnet({ items }: { items: FeedItem[] }) {
             {items.map((it, idx) => (
               <div
                 key={it.id}
-                className={`px-4 py-3 transition-colors hover:bg-popover ${
+                className={`px-4 py-3 transition-colors hover:bg-surface-overlay/50 ${
                   idx > 0 ? "border-t border-border" : ""
                 }`}
               >

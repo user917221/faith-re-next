@@ -4,12 +4,6 @@ import { useState, useTransition } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { RUNE_TYPES, RUNE_TYPE_LABEL, type RuneType } from "@/lib/faith-system";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Empty,
   EmptyDescription,
   EmptyHeader,
@@ -193,16 +187,32 @@ export function RuneInventory({ runes, onAddRune, onRemoveRune }: Props) {
   const hasRunes = runes.length > 0;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Inventaire de runes</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <section
+      className="overflow-hidden rounded-xl border border-border"
+      style={{
+        background: "rgba(17,19,24,0.98)",
+        boxShadow:
+          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}
+    >
+      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+        <h2 className="text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+          Inventaire de runes
+        </h2>
+        {hasRunes && (
+          <span className="font-mono text-[10px] tabular-nums text-foreground-subtle">
+            {runes.length}
+          </span>
+        )}
+      </div>
+      <div className="p-5">
         {hasRunes ? (
           <div className="flex flex-col gap-4">
             {groups.map((group) => (
               <div key={group.type}>
-                <p className="label-grimoire mb-1">{group.label}</p>
+                <p className="mb-1.5 text-[10px] font-medium uppercase tracking-widest text-foreground-subtle">
+                  {group.label}
+                </p>
                 <div className="divide-y divide-border">
                   {group.items.map((rune) => (
                     <RuneRow
@@ -232,7 +242,7 @@ export function RuneInventory({ runes, onAddRune, onRemoveRune }: Props) {
         )}
 
         {onAddRune ? <AddRuneForm onAddRune={onAddRune} /> : null}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

@@ -24,7 +24,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { ScrollText } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 import {
   updateSkill,
@@ -70,7 +70,7 @@ export function RosterNav({
   const presentCount = characters.filter((c) => c.isPresent).length;
 
   return (
-    <div className="sticky top-[4.5rem] overflow-hidden rounded-lg border border-border bg-card">
+    <div className="sticky top-[4.5rem] overflow-hidden rounded-xl border border-border bg-[rgba(17,19,24,0.98)] shadow-[0_1px_3px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)]">
       <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
         <p className="label-grimoire">Roster</p>
         <span className="tabular text-xs text-ink-tertiary">
@@ -111,7 +111,7 @@ export function RosterNav({
                           </Avatar>
                           <span
                             aria-hidden
-                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-card ${
+                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full ring-2 ring-[rgba(17,19,24,0.98)] ${
                               c.isPresent ? "presence-led-on" : "presence-led-off"
                             }`}
                           />
@@ -128,7 +128,7 @@ export function RosterNav({
                       </span>
                       <Badge
                         variant="outline"
-                        className="shrink-0 tabular tracking-wide text-muted-foreground"
+                        className="shrink-0 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 font-mono tabular-nums text-[11px] text-foreground-muted"
                       >
                         Niv. {c.level}
                       </Badge>
@@ -475,7 +475,7 @@ export function PendingTrainingPanel({
           <Empty className="border-0 py-10">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <ScrollText />
+                <Inbox />
               </EmptyMedia>
               <EmptyTitle>File vide</EmptyTitle>
               <EmptyDescription>

@@ -60,15 +60,9 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
         style={{ animation: "crit-overlay-fade 2.5s ease-in-out forwards" }}
         aria-hidden
       >
-        <div className="relative flex flex-col items-center gap-6 px-4 text-center">
-          <span
-            className="text-6xl text-primary-hover opacity-0 sm:text-7xl"
-            style={{ animation: "crit-sigil-spin 1.4s ease-out forwards" }}
-          >
-            ✦
-          </span>
+        <div className="relative flex flex-col items-center px-4 text-center">
           <h1
-            className="text-5xl font-semibold uppercase tracking-tight text-primary-hover sm:text-7xl"
+            className="text-5xl font-semibold uppercase tracking-tight text-primary opacity-0 sm:text-7xl"
             style={{ animation: "crit-text-rise 2.4s ease-out forwards" }}
           >
             Réussite critique
@@ -84,9 +78,9 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
       style={{ animation: "crit-overlay-fade 2.5s ease-in-out forwards" }}
       aria-hidden
     >
-      <div className="relative flex flex-col items-center gap-6 px-4 text-center">
+      <div className="relative flex flex-col items-center gap-4 px-4 text-center">
         <h1
-          className="text-4xl font-semibold uppercase tracking-tight text-hp italic sm:text-6xl"
+          className="text-4xl font-semibold uppercase tracking-tight text-foreground sm:text-6xl"
           style={{
             animation:
               "crit-text-rise 2.4s ease-out forwards, crit-shake 0.5s ease-in-out 2",
@@ -95,20 +89,11 @@ export function CritOverlay({ latestRoll }: { latestRoll: RollPing | null }) {
           Échec catastrophique
         </h1>
         <p
-          className="text-xs uppercase tracking-[0.18em] text-muted-foreground italic opacity-0"
+          className="text-[11px] uppercase tracking-widest text-foreground-subtle opacity-0"
           style={{ animation: "crit-text-rise 2.4s ease-out 0.25s forwards" }}
         >
           L&apos;Impôt Divin réclame son dû.
         </p>
-        <span
-          className="text-6xl text-hp opacity-0"
-          style={{
-            animation: "crit-sigil-spin 1.4s ease-out forwards",
-            transform: "rotate(180deg)",
-          }}
-        >
-          ⚜
-        </span>
       </div>
     </div>
   );
