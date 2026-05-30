@@ -3,13 +3,18 @@
 /**
  * ConditionsPanel — états actifs d'un perso en chips colorés (Phase 2).
  * buff (vert) / debuff (rouge) / blessure (orange) / focus (cyan) / marqueur (gris).
- * Add via formulaire inline (label + nature), remove via × sur le chip.
- * Lecture seule si aucun handler fourni.
+ *
+ * Ajout via formulaire inline : on choisit d'abord une condition prédéfinie
+ * (Fatigue, Blessure grave, Saignement, Sommeil, Faim, Debuff, Buff, Focus…)
+ * qui pré-remplit le libellé, la nature (couleur) et un modificateur de dé.
+ * Le libellé et le modificateur restent ajustables (condition libre). Le
+ * modificateur signé s'applique aux jets côté serveur (ex. Fatigue −4).
+ * Remove via × sur le chip. Lecture seule si aucun handler fourni.
  */
 
 import { useState, useTransition } from "react";
 import { Plus, X } from "lucide-react";
-import type { ConditionItem, ConditionKind } from "./types";
+import type { ConditionItem, ConditionKind, ConditionPreset } from "./types";
 
 const KIND_META: Record<
   ConditionKind,
@@ -22,12 +27,16 @@ const KIND_META: Record<
   neutral: { label: "Marqueur", rgb: "150,150,168" }, // gris
 };
 
-const KIND_ORDER: ConditionKind[] = [
-  "buff",
-  "debuff",
-  "wound",
-  "focus",
-  "neutral",
+// Conditions prédéfinies — sélectionnables d'un clic. Couleur portée par `kind`.
+const CONDITION_PRESETS: ConditionPreset[] = [
+  { label: "Fatigue", kind: "debuff", diceModifier: -4 },
+  { label: "Blessure grave", kind: "wound", diceModifier: -2 },
+  { label: "Saignement", kind: "wound", diceModifier: -1 },
+  { label: "Sommeil", kind: "debuff", diceModifier: -2 },
+  { label: "Faim", kind: "debuff", diceModifier: -1 },
+  { label: "Concentration", kind: "focus", diceModifier: 0 },
+  { label: "Buff", kind: "buff", diceModifier: 2 },
+  { label: "Marqueur", kind: "neutral", diceModifier: 0 },
 ];
 
 export function ConditionsPanel({
@@ -39,6 +48,7 @@ export function ConditionsPanel({
   onAddCondition?: (input: {
     label: string;
     kind: ConditionKind;
+    diceModifier?: number;
   }) => Promise<void>;
   onRemoveCondition?: (conditionId: string) => Promise<void>;
 }) {
@@ -46,16 +56,28 @@ export function ConditionsPanel({
   const [adding, setAdding] = useState(false);
   const [label, setLabel] = useState("");
   const [kind, setKind] = useState<ConditionKind>("neutral");
+  const [diceModifier, setDiceModifier] = useState<number>(0);
   const [isPending, startTransition] = useTransition();
+
+  const selectPreset = (p: ConditionPreset) => {
+    setLabel(p.label);
+    setKind(p.kind);
+    setDiceModifier(p.diceModifier);
+  };
+
+  const resetForm = () => {
+    setLabel("");
+    setKind("neutral");
+    setDiceModifier(0);
+    setAdding(false);
+  };
 
   const submit = () => {
     const trimmed = label.trim();
     if (!trimmed || !onAddCondition) return;
     startTransition(async () => {
-      await onAddCondition({ label: trimmed, kind });
-      setLabel("");
-      setKind("neutral");
-      setAdding(false);
+      await onAddCondition({ label: trimmed, kind, diceModifier });
+      resetForm();
     });
   };
 
@@ -86,6 +108,7 @@ export function ConditionsPanel({
           <div className="flex flex-wrap gap-2">
             {conditions.map((c) => {
               const meta = KIND_META[c.kind];
+              const mod = c.diceModifier ?? 0;
               return (
                 <span
                   key={c.id}
@@ -103,6 +126,11 @@ export function ConditionsPanel({
                     aria-hidden
                   />
                   <span>{c.label}</span>
+                  {mod !== 0 && (
+                    <span className="font-mono text-[10px] tabular-nums opacity-80">
+                      {mod > 0 ? `+${mod}` : mod}
+                    </span>
+                  )}
                   {onRemoveCondition && (
                     <button
                       type="button"
@@ -124,27 +152,16 @@ export function ConditionsPanel({
 
         {editable && adding && (
           <div className="flex flex-col gap-2.5 rounded-md border border-border bg-background/30 p-2.5">
-            <input
-              autoFocus
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") submit();
-                if (e.key === "Escape") setAdding(false);
-              }}
-              maxLength={40}
-              placeholder="État (ex. Concentré, Saignement…)"
-              className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
-            />
+            {/* Conditions prédéfinies — pré-remplissent label + nature + modif dé */}
             <div className="flex flex-wrap gap-1.5">
-              {KIND_ORDER.map((k) => {
-                const meta = KIND_META[k];
-                const active = kind === k;
+              {CONDITION_PRESETS.map((p) => {
+                const meta = KIND_META[p.kind];
+                const active = label === p.label && kind === p.kind;
                 return (
                   <button
-                    key={k}
+                    key={p.label}
                     type="button"
-                    onClick={() => setKind(k)}
+                    onClick={() => selectPreset(p)}
                     className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors"
                     style={{
                       background: active
@@ -154,27 +171,64 @@ export function ConditionsPanel({
                       color: active ? `rgb(${meta.rgb})` : "var(--foreground-subtle)",
                     }}
                   >
-                    {meta.label}
+                    {p.label}
                   </button>
                 );
               })}
             </div>
-            <div className="flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setAdding(false)}
-                className="rounded-md px-2.5 py-1 text-xs text-foreground-subtle transition-colors hover:text-foreground"
-              >
-                Annuler
-              </button>
-              <button
-                type="button"
-                onClick={submit}
-                disabled={isPending || !label.trim()}
-                className="rounded-md bg-foreground px-3 py-1 text-xs font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
-              >
-                Ajouter
-              </button>
+
+            <input
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submit();
+                if (e.key === "Escape") resetForm();
+              }}
+              maxLength={40}
+              placeholder="État (ex. Concentré, Saignement…)"
+              className="w-full rounded-md border border-border bg-background px-2.5 py-1.5 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
+            />
+
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <label className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground-subtle">
+                  Modif dé
+                </label>
+                <input
+                  type="number"
+                  min={-20}
+                  max={20}
+                  value={diceModifier}
+                  onChange={(e) =>
+                    setDiceModifier(
+                      Math.max(
+                        -20,
+                        Math.min(20, parseInt(e.target.value || "0", 10) || 0),
+                      ),
+                    )
+                  }
+                  onFocus={(e) => e.currentTarget.select()}
+                  aria-label="Modificateur de dé"
+                  className="h-7 w-14 rounded-md border border-border bg-background px-2 text-center font-mono text-sm tabular-nums text-foreground focus:border-primary/40 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="rounded-md px-2.5 py-1 text-xs text-foreground-subtle transition-colors hover:text-foreground"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  onClick={submit}
+                  disabled={isPending || !label.trim()}
+                  className="rounded-md bg-foreground px-3 py-1 text-xs font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-40"
+                >
+                  Ajouter
+                </button>
+              </div>
             </div>
           </div>
         )}

@@ -105,10 +105,10 @@ const ATTRIBUTES: AttributeName[] = [
 ];
 
 const DD_PRESETS = [
-  { label: "Facile", value: 6 },
-  { label: "Normal", value: 8 },
-  { label: "Difficile", value: 11 },
-  { label: "Héroïque", value: 14 },
+  { label: "Facile", value: 10 },
+  { label: "Normal", value: 12 },
+  { label: "Difficile", value: 14 },
+  { label: "Héroïque", value: 16 },
   { label: "Impossible", value: 18 },
 ] as const;
 
@@ -665,7 +665,7 @@ function Launcher({
   const [charA, setCharA] = useState(defaultCharacterId);
   const [attr, setAttr] = useState<AttributeName>("INTELLECT");
   const [skill, setSkill] = useState<string>("");
-  const [ddMode, setDdMode] = useState<number | "free" | "libre">(8);
+  const [ddMode, setDdMode] = useState<number | "free" | "libre">(12);
   const [customDD, setCustomDD] = useState<number>(10);
   const [errorA, setErrorA] = useState<string | null>(null);
 

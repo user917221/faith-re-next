@@ -62,6 +62,9 @@ export type Character = {
   runesInventory: RuneItem[];
   // --- Inventaire d'objets (Phase 6) ---
   items: ItemEntry[];
+  // --- Onglet Objets : Cristaux de Lumière + Compétences de l'Aléa ---
+  lightCrystals: number;
+  competencesAlea: CompetenceAleaItem[];
 };
 
 export type ItemKind = "arme" | "armure" | "objet" | "consommable";
@@ -81,6 +84,19 @@ export type ConditionItem = {
   id: string;
   label: string;
   kind: ConditionKind;
+  /** Modificateur de dé signé appliqué aux jets (ex. Fatigue = -4). */
+  diceModifier: number;
+};
+
+/**
+ * Condition prédéfinie sélectionnable dans le formulaire d'ajout : libellé,
+ * couleur (via kind) et malus/bonus de dé par défaut. Le MJ peut quand même
+ * créer une condition libre.
+ */
+export type ConditionPreset = {
+  label: string;
+  kind: ConditionKind;
+  diceModifier: number;
 };
 
 export type CombatStatKey = "initiative" | "armor" | "movement" | "proficiency";
@@ -95,6 +111,16 @@ export type RuneItem = {
   level: number;
   rarity: RuneRarity;
   damage: string | null;
+  /** Réduction de dégâts fixe apportée par la rune. */
+  armor: number;
+  /** Quantité en possession. */
+  qty: number;
+};
+
+export type CompetenceAleaItem = {
+  id: string;
+  name: string;
+  description: string | null;
 };
 
 export type ActionType = keyof typeof ENDURANCE_COSTS;
@@ -144,13 +170,27 @@ export type CharacterSheetProps = {
   onRemoveRune?: (runeId: string) => Promise<void>;
   onUpdateRune?: (
     runeId: string,
-    patch: { level?: number; rarity?: RuneRarity; damage?: string },
+    patch: {
+      level?: number;
+      rarity?: RuneRarity;
+      damage?: string;
+      armor?: number;
+      qty?: number;
+    },
   ) => Promise<void>;
+  // --- Objets : Cristaux de Lumière + Compétences de l'Aléa ---
+  onUpdateLightCrystals?: (newCount: number) => Promise<void>;
+  onAddCompetenceAlea?: (input: {
+    name: string;
+    description?: string;
+  }) => Promise<void>;
+  onRemoveCompetenceAlea?: (competenceId: string) => Promise<void>;
   // --- Combat & conditions (Phase 2) ---
   onCombatStatChange?: (key: CombatStatKey, delta: number) => Promise<void>;
   onAddCondition?: (input: {
     label: string;
     kind: ConditionKind;
+    diceModifier?: number;
   }) => Promise<void>;
   onRemoveCondition?: (conditionId: string) => Promise<void>;
   // --- Inventaire d'objets (Phase 6) ---

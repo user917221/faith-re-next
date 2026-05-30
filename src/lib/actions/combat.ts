@@ -91,8 +91,15 @@ export async function updateCombatStats(
 
 export async function addCondition(
   characterId: string,
-  input: { label: string; kind?: ConditionKind },
-): Promise<ActionResult<{ id: string; label: string; kind: ConditionKind }>> {
+  input: { label: string; kind?: ConditionKind; diceModifier?: number },
+): Promise<
+  ActionResult<{
+    id: string;
+    label: string;
+    kind: ConditionKind;
+    diceModifier: number;
+  }>
+> {
   await assertCanEdit(characterId);
 
   const label = input.label.trim();
@@ -102,11 +109,15 @@ export async function addCondition(
   }
   const kind: ConditionKind =
     input.kind && CONDITION_KINDS.includes(input.kind) ? input.kind : "neutral";
+  // Modificateur de dé signé, borné [-20, +20] pour rester jouable.
+  const diceModifier = Number.isFinite(input.diceModifier)
+    ? Math.max(-20, Math.min(20, Math.trunc(input.diceModifier as number)))
+    : 0;
 
   const [row] = await db
     .insert(conditions)
-    .values({ characterId, label, kind })
-    .returning({ id: conditions.id });
+    .values({ characterId, label, kind, diceModifier })
+    .returning({ id: conditions.id, diceModifier: conditions.diceModifier });
 
   await db
     .update(characters)
@@ -114,7 +125,7 @@ export async function addCondition(
     .where(eq(characters.id, characterId));
 
   revalidateAll();
-  return { ok: true, id: row.id, label, kind };
+  return { ok: true, id: row.id, label, kind, diceModifier: row.diceModifier };
 }
 
 // ---------------- removeCondition ----------------

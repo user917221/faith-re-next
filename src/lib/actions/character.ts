@@ -12,10 +12,10 @@
 
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { characters, characterSkills } from "@/db/schema";
+import { characters, characterSkills, conditions } from "@/db/schema";
 import {
   ENDURANCE_COSTS,
   calculateLevel,
@@ -33,9 +33,47 @@ const FATE_MAX = 5;
 const VITAL_HP_MAX = 200; // garde-fou — le max réel est dérivé runtime côté caller
 const VITAL_MENTAL_MAX = 200;
 
+// Condition Fatigue automatique : déclenchée si l'endurance courante tombe à ou
+// sous (maxEndurance − 40), retirée dès qu'elle remonte au-dessus. Malus −4 au dé.
+const FATIGUE_LABEL = "Fatigue";
+const FATIGUE_THRESHOLD_MARGIN = 40;
+const FATIGUE_DICE_MODIFIER = -4;
+
 function revalidateAll() {
   revalidatePath("/me");
   revalidatePath("/mj");
+}
+
+/**
+ * Gère la condition « Fatigue » selon le seuil d'endurance.
+ * Ajoute la condition (debuff, −4 au dé) si endurance ≤ maxEndurance − 40 et
+ * absente ; la retire si endurance repasse au-dessus et présente. Idempotent.
+ */
+async function manageFatigueCondition(
+  characterId: string,
+  newEndurance: number,
+  maxEndurance: number,
+): Promise<void> {
+  const threshold = maxEndurance - FATIGUE_THRESHOLD_MARGIN;
+  const shouldHaveFatigue = newEndurance <= threshold;
+
+  const existing = await db.query.conditions.findFirst({
+    where: and(
+      eq(conditions.characterId, characterId),
+      eq(conditions.label, FATIGUE_LABEL),
+    ),
+  });
+
+  if (shouldHaveFatigue && !existing) {
+    await db.insert(conditions).values({
+      characterId,
+      label: FATIGUE_LABEL,
+      kind: "debuff",
+      diceModifier: FATIGUE_DICE_MODIFIER,
+    });
+  } else if (!shouldHaveFatigue && existing) {
+    await db.delete(conditions).where(eq(conditions.id, existing.id));
+  }
 }
 
 // ---------------- updateSkill ----------------
@@ -138,6 +176,12 @@ export async function updateVital(
       .update(characters)
       .set({ currentEndurance: newValue, updatedAt: now })
       .where(eq(characters.id, characterId));
+  }
+
+  // Fatigue automatique : seuil d'endurance (max − 40). Seul updateVital pilote
+  // l'endurance via l'UI, donc c'est le bon point d'ancrage.
+  if (type === "endu") {
+    await manageFatigueCondition(characterId, newValue, max);
   }
 
   revalidateAll();

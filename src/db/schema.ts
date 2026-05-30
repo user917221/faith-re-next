@@ -149,6 +149,8 @@ export const characters = pgTable("character", {
   // narration
   fatePoints: integer("fate_points").default(2).notNull(),
   runes: jsonb("runes").$type<string[]>().default([]).notNull(),
+  // Cristaux de Lumière (onglet Objets) — compteur ; chaque cristal = 1 XP.
+  lightCrystals: integer("light_crystals").default(0).notNull(),
   // intégrations
   discordMessageId: text("discord_message_id"),
   // portrait du personnage (URL ; fallback initiales si null)
@@ -186,6 +188,9 @@ export const characterRunes = pgTable("character_rune", {
   level: integer("level").default(1).notNull(),
   rarity: runeRarityEnum("rarity").default("commune").notNull(),
   damage: text("damage"), // ex. "1d8", "2d6+1", "5" — libre
+  // runes armement : réduction de dégâts fixe + quantité en possession
+  armor: integer("armor").default(0).notNull(), // 0-99 : réduction dégâts fixe
+  qty: integer("qty").default(1).notNull(), // 1-999 : quantité en possession
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -198,6 +203,19 @@ export const conditions = pgTable("condition", {
     .references(() => characters.id, { onDelete: "cascade" }),
   label: text("label").notNull(),
   kind: conditionKindEnum("kind").default("neutral").notNull(),
+  // Modificateur de dé appliqué aux jets (signé). Ex. Fatigue = -4.
+  diceModifier: integer("dice_modifier").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Compétences de l'Aléa (onglet Objets) — récompenses spéciales liées au hasard.
+export const competencesAlea = pgTable("competences_alea", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  characterId: uuid("character_id")
+    .notNull()
+    .references(() => characters.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -343,6 +361,14 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
   conditions: many(conditions),
   statusNotes: many(statusNotes),
   items: many(items),
+  competencesAlea: many(competencesAlea),
+}));
+
+export const competencesAleaRelations = relations(competencesAlea, ({ one }) => ({
+  character: one(characters, {
+    fields: [competencesAlea.characterId],
+    references: [characters.id],
+  }),
 }));
 
 export const itemsRelations = relations(items, ({ one }) => ({
@@ -458,6 +484,8 @@ export type GameSession = typeof gameSessions.$inferSelect;
 export type StatusNote = typeof statusNotes.$inferSelect;
 export type Item = typeof items.$inferSelect;
 export type NewItem = typeof items.$inferInsert;
+export type CompetenceAlea = typeof competencesAlea.$inferSelect;
+export type NewCompetenceAlea = typeof competencesAlea.$inferInsert;
 export type JournalEntry = typeof journalEntries.$inferSelect;
 export type Npc = typeof npcs.$inferSelect;
 export type NpcDisposition = (typeof npcDispositionEnum.enumValues)[number];

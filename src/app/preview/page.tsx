@@ -60,8 +60,8 @@ function buildMockBrad(): Character {
     bio: "Forgeron de village devenu mage du feu après l'incendie du Bastion.",
     notes: "",
     conditions: [
-      { id: "c1", label: "Échauffé", kind: "buff" },
-      { id: "c2", label: "Concentré", kind: "focus" },
+      { id: "c1", label: "Échauffé", kind: "buff", diceModifier: 1 },
+      { id: "c2", label: "Concentré", kind: "focus", diceModifier: 0 },
     ],
     items: [
       { id: "it1", name: "Bâton de braise", type: "arme", qty: 1, equipped: true, description: "1d8 feu." },
@@ -69,9 +69,13 @@ function buildMockBrad(): Character {
       { id: "it3", name: "Potion de soin", type: "consommable", qty: 2, equipped: false, description: "Rend 2d6 PV." },
     ],
     runesInventory: [
-      { id: "r1", name: "Brasier mineur", type: "armement", description: "Inflige 1d6 feu.", level: 3, rarity: "rare", damage: "1d6" },
-      { id: "r2", name: "Pas-léger", type: "utilitaire", description: null, level: 1, rarity: "commune", damage: null },
-      { id: "r3", name: "Sceau de garde", type: "predefinie", description: null, level: 2, rarity: "epique", damage: null },
+      { id: "r1", name: "Brasier mineur", type: "armement", description: "Inflige 1d6 feu.", level: 3, rarity: "rare", damage: "1d6", armor: 1, qty: 1 },
+      { id: "r2", name: "Pas-léger", type: "utilitaire", description: null, level: 1, rarity: "commune", damage: null, armor: 0, qty: 1 },
+      { id: "r3", name: "Sceau de garde", type: "predefinie", description: null, level: 2, rarity: "epique", damage: null, armor: 0, qty: 1 },
+    ],
+    lightCrystals: 3,
+    competencesAlea: [
+      { id: "ca1", name: "Souffle du Phénix", description: "Une fois par session, relance un jet de feu." },
     ],
   };
 }
@@ -282,13 +286,18 @@ export default function PreviewPage() {
   );
 
   const onAddCondition = useCallback(
-    async (input: { label: string; kind: ConditionKind }) => {
+    async (input: { label: string; kind: ConditionKind; diceModifier?: number }) => {
       await Promise.resolve();
       setCharacter((c) => ({
         ...c,
         conditions: [
           ...c.conditions,
-          { id: crypto.randomUUID(), label: input.label, kind: input.kind },
+          {
+            id: crypto.randomUUID(),
+            label: input.label,
+            kind: input.kind,
+            diceModifier: input.diceModifier ?? 0,
+          },
         ],
       }));
     },
@@ -322,6 +331,8 @@ export default function PreviewPage() {
             level: 1,
             rarity: "commune",
             damage: null,
+            armor: 0,
+            qty: 1,
           },
         ],
       }));
@@ -340,7 +351,13 @@ export default function PreviewPage() {
   const onUpdateRune = useCallback(
     async (
       runeId: string,
-      patch: { level?: number; rarity?: RuneRarity; damage?: string },
+      patch: {
+        level?: number;
+        rarity?: RuneRarity;
+        damage?: string;
+        armor?: number;
+        qty?: number;
+      },
     ) => {
       await Promise.resolve();
       setCharacter((c) => ({
@@ -352,6 +369,8 @@ export default function PreviewPage() {
                 level: patch.level ?? r.level,
                 rarity: patch.rarity ?? r.rarity,
                 damage: patch.damage !== undefined ? patch.damage || null : r.damage,
+                armor: patch.armor ?? r.armor,
+                qty: patch.qty ?? r.qty,
               }
             : r,
         ),
@@ -359,6 +378,40 @@ export default function PreviewPage() {
     },
     [],
   );
+
+  const onUpdateLightCrystals = useCallback(async (newCount: number) => {
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      lightCrystals: Math.max(0, Math.min(999, newCount)),
+    }));
+  }, []);
+
+  const onAddCompetenceAlea = useCallback(
+    async (input: { name: string; description?: string }) => {
+      await Promise.resolve();
+      setCharacter((c) => ({
+        ...c,
+        competencesAlea: [
+          ...c.competencesAlea,
+          {
+            id: crypto.randomUUID(),
+            name: input.name,
+            description: input.description ?? null,
+          },
+        ],
+      }));
+    },
+    [],
+  );
+
+  const onRemoveCompetenceAlea = useCallback(async (competenceId: string) => {
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      competencesAlea: c.competencesAlea.filter((x) => x.id !== competenceId),
+    }));
+  }, []);
 
   const onRequestTraining = useCallback(async (note?: string) => {
     console.log("[preview] onRequestTraining", note ?? "(sans note)");
@@ -421,6 +474,9 @@ export default function PreviewPage() {
           onAddRune={onAddRune}
           onRemoveRune={onRemoveRune}
           onUpdateRune={onUpdateRune}
+          onUpdateLightCrystals={onUpdateLightCrystals}
+          onAddCompetenceAlea={onAddCompetenceAlea}
+          onRemoveCompetenceAlea={onRemoveCompetenceAlea}
           onRequestTraining={onRequestTraining}
           onCombatStatChange={onCombatStatChange}
           onAddCondition={onAddCondition}

@@ -33,7 +33,14 @@ export {
   updateFlux,
 } from "./flux";
 
-export { addRune, removeRune, updateRune } from "./runes";
+export {
+  addRune,
+  removeRune,
+  updateRune,
+  updateLightCrystals,
+  addCompetenceAlea,
+  removeCompetenceAlea,
+} from "./runes";
 
 export { addItem, removeItem, toggleEquip, updateItemQty } from "./items";
 

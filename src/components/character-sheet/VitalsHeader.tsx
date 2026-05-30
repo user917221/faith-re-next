@@ -43,6 +43,7 @@ export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) 
           max={character.maxHp}
           color="var(--gauge-sante)"
           step={5}
+          armorReduction={character.armor}
           onAdjust={
             onVitalChange ? (d) => onVitalChange("hp", d) : undefined
           }

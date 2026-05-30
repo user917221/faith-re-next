@@ -23,6 +23,8 @@ interface VitalGaugeProps {
   step?: number;
   /** Badge optionnel sous le label (ex palier de Flux "P2"). */
   badge?: string;
+  /** Montant fixe d'armure soustrait des dégâts (réduit un delta négatif). */
+  armorReduction?: number;
   /** Câblage serveur. delta négatif = dégât, positif = soin. */
   onAdjust?: (delta: number) => Promise<void>;
 }
@@ -37,6 +39,7 @@ export function VitalGauge({
   strokeWidth = 5,
   step = 5,
   badge,
+  armorReduction = 0,
   onAdjust,
 }: VitalGaugeProps) {
   const [amount, setAmount] = useState(step);
@@ -66,9 +69,12 @@ export function VitalGauge({
 
   const adjust = (delta: number) => {
     if (!onAdjust) return;
+    // Si dégât (delta < 0), l'armure réduit l'amplitude (sans jamais devenir un soin).
+    const actualDelta =
+      delta < 0 ? Math.min(0, delta + (armorReduction ?? 0)) : delta;
     // Snap optimiste immédiat (la valeur bouge avant le retour serveur).
     startTransition(async () => {
-      await onAdjust(delta);
+      await onAdjust(actualDelta);
     });
   };
 

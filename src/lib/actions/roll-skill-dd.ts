@@ -2,7 +2,7 @@
 
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { characters, publicRolls } from "@/db/schema";
+import { characters, publicRolls, conditions } from "@/db/schema";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import {
@@ -70,12 +70,18 @@ export async function rollSkillWithDD(input: {
     skillScore = skillsMap[input.skillName] ?? 0;
   }
 
+  // Modificateurs de dé issus des conditions actives (ex. Fatigue −4).
+  const conds = await db.query.conditions.findMany({
+    where: eq(conditions.characterId, input.characterId),
+  });
+  const totalDiceMod = conds.reduce((sum, c) => sum + (c.diceModifier ?? 0), 0);
+
   const d1 = Math.floor(Math.random() * 6) + 1;
   const d2 = Math.floor(Math.random() * 6) + 1;
   // Règle FAITH:RE — jet de COMPÉTENCE = 2d6 + compétence (sans l'attribut).
   // Jet d'attribut seul (sans compétence) = 2d6 + attribut.
   const bonus = resolvedSkill ? skillScore : attrScore;
-  const total = d1 + d2 + bonus;
+  const total = d1 + d2 + bonus + totalDiceMod;
   const isCritSucc = d1 === 6 && d2 === 6;
   const isCritFail = d1 === 1 && d2 === 1;
 

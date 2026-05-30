@@ -17,7 +17,7 @@ import { VitalsHeader } from "./VitalsHeader";
 import { PaliersRewards } from "./PaliersRewards";
 import { XpBar } from "./XpBar";
 import { ConditionsPanel } from "./ConditionsPanel";
-import { RuneInventory } from "./RuneInventory";
+import { ObjectsTab } from "./ObjectsTab";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
 import { SkillTierLegend } from "./SkillTierLegend";
@@ -42,7 +42,7 @@ type DrawerCtx = RollContext & {
   skillName: string | null;
 };
 
-type TabValue = "vitaux" | "competences" | "runes" | "evolution" | "profil";
+type TabValue = "vitaux" | "competences" | "objets" | "evolution" | "profil";
 
 export default function CharacterSheet({
   character,
@@ -66,6 +66,9 @@ export default function CharacterSheet({
   onAddRune,
   onRemoveRune,
   onUpdateRune,
+  onUpdateLightCrystals,
+  onAddCompetenceAlea,
+  onRemoveCompetenceAlea,
   onAddCondition,
   onRemoveCondition,
 }: CharacterSheetProps) {
@@ -238,7 +241,7 @@ export default function CharacterSheet({
             [
               ["vitaux", "Vitaux"],
               ["competences", "Stats"],
-              ["runes", "Runes"],
+              ["objets", "Objets"],
               ...(isMJ ? [["evolution", "Évolution"]] : []),
               ["profil", "Profil"],
             ] as [TabValue, string][]
@@ -371,13 +374,16 @@ export default function CharacterSheet({
           </div>
         </TabsContent>
 
-        {/* ─── Runes — inventaire de runes (niveau / rareté / dégâts) ─── */}
-        <TabsContent value="runes">
-          <RuneInventory
-            runes={character.runesInventory}
+        {/* ─── Objets — Cristaux de Lumière + Runes + Compétences de l'Aléa ─── */}
+        <TabsContent value="objets">
+          <ObjectsTab
+            character={character}
             onAddRune={onAddRune}
             onRemoveRune={onRemoveRune}
             onUpdateRune={onUpdateRune}
+            onUpdateLightCrystals={onUpdateLightCrystals}
+            onAddCompetenceAlea={onAddCompetenceAlea}
+            onRemoveCompetenceAlea={onRemoveCompetenceAlea}
           />
         </TabsContent>
 

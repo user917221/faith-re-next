@@ -42,7 +42,13 @@ const RARITY_META: Record<RuneRarity, { label: string; rgb: string }> = {
 
 type UpdateFn = (
   runeId: string,
-  patch: { level?: number; rarity?: RuneRarity; damage?: string },
+  patch: {
+    level?: number;
+    rarity?: RuneRarity;
+    damage?: string;
+    armor?: number;
+    qty?: number;
+  },
 ) => Promise<void>;
 
 type Props = {
@@ -77,6 +83,36 @@ function DamageField({
       placeholder="—"
       aria-label="Dégâts"
       className="h-6 w-20 rounded border border-border bg-background px-1.5 text-center font-mono text-xs tabular-nums text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
+    />
+  );
+}
+
+/** Champ d'armure éditable inline (commit sur blur / Entrée), 0-99. */
+function ArmorField({
+  value,
+  onCommit,
+}: {
+  value: number;
+  onCommit: (v: number) => void;
+}) {
+  const [v, setV] = useState(String(value ?? 0));
+  return (
+    <input
+      type="number"
+      min={0}
+      max={99}
+      value={v}
+      onChange={(e) => setV(e.target.value)}
+      onBlur={() => {
+        const n = Math.max(0, Math.min(99, parseInt(v || "0", 10) || 0));
+        if (n !== value) onCommit(n);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+      }}
+      placeholder="0"
+      aria-label="Armure"
+      className="h-6 w-12 rounded border border-border bg-background px-1.5 text-center font-mono text-xs tabular-nums text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
     />
   );
 }
@@ -192,6 +228,55 @@ function RuneRow({
             <span className="font-mono text-xs tabular-nums text-foreground">
               {rune.damage ?? "—"}
             </span>
+          )}
+        </span>
+
+        {/* Armure */}
+        <span className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground-subtle">
+            Armure
+          </span>
+          {onUpdateRune ? (
+            <ArmorField
+              value={rune.armor}
+              onCommit={(a) => run(() => onUpdateRune(rune.id, { armor: a }))}
+            />
+          ) : (
+            <span className="font-mono text-xs tabular-nums text-foreground">
+              {rune.armor}
+            </span>
+          )}
+        </span>
+
+        {/* Quantité */}
+        <span className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-foreground-subtle">
+            Qté
+          </span>
+          {onUpdateRune && (
+            <button
+              type="button"
+              aria-label="Quantité −1"
+              disabled={isPending || rune.qty <= 1}
+              onClick={() => run(() => onUpdateRune(rune.id, { qty: rune.qty - 1 }))}
+              className="flex size-5 items-center justify-center rounded border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+            >
+              <Minus size={10} />
+            </button>
+          )}
+          <span className="w-5 text-center font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
+            {rune.qty}
+          </span>
+          {onUpdateRune && (
+            <button
+              type="button"
+              aria-label="Quantité +1"
+              disabled={isPending}
+              onClick={() => run(() => onUpdateRune(rune.id, { qty: rune.qty + 1 }))}
+              className="flex size-5 items-center justify-center rounded border border-border text-foreground-subtle transition-colors hover:text-foreground disabled:opacity-30"
+            >
+              <Plus size={10} />
+            </button>
           )}
         </span>
       </div>

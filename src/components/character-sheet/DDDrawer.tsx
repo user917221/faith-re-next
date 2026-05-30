@@ -22,10 +22,10 @@ import { Input } from "@/components/ui/input";
  */
 
 const DD_PRESETS = [
-  { label: "Facile", value: 6, desc: "Le bon sens suffit" },
-  { label: "Normal", value: 8, desc: "Une stat entraînée" },
-  { label: "Difficile", value: 11, desc: "Demande de l'effort" },
-  { label: "Héroïque", value: 14, desc: "Au-delà du normal" },
+  { label: "Facile", value: 10, desc: "Le bon sens suffit" },
+  { label: "Normal", value: 12, desc: "Une stat entraînée" },
+  { label: "Difficile", value: 14, desc: "Demande de l'effort" },
+  { label: "Héroïque", value: 16, desc: "Au-delà du normal" },
   { label: "Impossible", value: 18, desc: "Seul un miracle…" },
 ] as const;
 
@@ -45,7 +45,7 @@ type Props = {
 };
 
 export function DDDrawer({ context, onClose, onRoll }: Props) {
-  const [dd, setDd] = useState<number | null>(8);
+  const [dd, setDd] = useState<number | null>(12);
   const [custom, setCustom] = useState<number>(10);
   const [mode, setMode] = useState<"preset" | "free" | "libre">("preset");
   const [isPending, startTransition] = useTransition();
@@ -53,7 +53,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
   // Reset state à chaque ouverture
   function resetDifficulty() {
     setMode("preset");
-    setDd(8);
+    setDd(12);
     setCustom(10);
   }
 

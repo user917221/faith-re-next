@@ -116,6 +116,8 @@ function mk(id: string, name: string, hp: number, maxHp: number): Character {
     conditions: [],
     items: [],
     runesInventory: [],
+    lightCrystals: 0,
+    competencesAlea: [],
   };
 }
 
@@ -129,8 +131,8 @@ const INITIAL: Character[] = [
     initiative: 5,
     armor: 1,
     conditions: [
-      { id: "x1", label: "Concentrée", kind: "focus" },
-      { id: "x2", label: "Bénédiction", kind: "buff" },
+      { id: "x1", label: "Concentrée", kind: "focus", diceModifier: 0 },
+      { id: "x2", label: "Bénédiction", kind: "buff", diceModifier: 2 },
     ],
     items: [
       { id: "i1", name: "Lame de brume", type: "arme", qty: 1, equipped: true, description: "1d8 tranchant, ignore 1 d'armure." },
@@ -139,9 +141,13 @@ const INITIAL: Character[] = [
       { id: "i4", name: "Corde de soie", type: "objet", qty: 1, equipped: false, description: null },
     ],
     runesInventory: [
-      { id: "r1", name: "Lame de brume", type: "armement", description: "Tranchant spectral.", level: 4, rarity: "legendaire", damage: "1d8+2" },
-      { id: "r2", name: "Voile de Flux", type: "utilitaire", description: "Dissimule la porteuse.", level: 2, rarity: "rare", damage: null },
-      { id: "r3", name: "Sceau d'ancrage", type: "predefinie", description: null, level: 1, rarity: "commune", damage: null },
+      { id: "r1", name: "Lame de brume", type: "armement", description: "Tranchant spectral.", level: 4, rarity: "legendaire", damage: "1d8+2", armor: 2, qty: 1 },
+      { id: "r2", name: "Voile de Flux", type: "utilitaire", description: "Dissimule la porteuse.", level: 2, rarity: "rare", damage: null, armor: 0, qty: 1 },
+      { id: "r3", name: "Sceau d'ancrage", type: "predefinie", description: null, level: 1, rarity: "commune", damage: null, armor: 0, qty: 1 },
+    ],
+    lightCrystals: 4,
+    competencesAlea: [
+      { id: "ca1", name: "Danse du Sort", description: "Bonus +2 en contrôle de Flux." },
     ],
   },
   {
@@ -150,12 +156,12 @@ const INITIAL: Character[] = [
     charClass: "Garde du Serment",
     armor: 6,
     initiative: 1,
-    conditions: [{ id: "x3", label: "Saignement", kind: "wound" }],
+    conditions: [{ id: "x3", label: "Saignement", kind: "wound", diceModifier: -1 }],
   },
   mk("c3", "Mira", 38, 38),
   {
     ...mk("c4", "Joric", 29, 36),
-    conditions: [{ id: "x4", label: "Étourdi", kind: "debuff" }],
+    conditions: [{ id: "x4", label: "Étourdi", kind: "debuff", diceModifier: -2 }],
   },
   mk("c5", "Elowen", 31, 31),
   mk("c6", "Calder", 27, 27),
@@ -230,11 +236,12 @@ function CockpitInner() {
   );
 
   const onAddCondition = useCallback(
-    async (input: { label: string; kind: ConditionKind }) => {
+    async (input: { label: string; kind: ConditionKind; diceModifier?: number }) => {
       const next: ConditionItem = {
         id: `cond-${Math.round(performance.now())}`,
         label: input.label,
         kind: input.kind,
+        diceModifier: input.diceModifier ?? 0,
       };
       patch(selId, (c) => ({ ...c, conditions: [...c.conditions, next] }));
     },
@@ -315,6 +322,8 @@ function CockpitInner() {
         level: 1,
         rarity: "commune",
         damage: null,
+        armor: 0,
+        qty: 1,
       };
       patch(selId, (c) => ({ ...c, runesInventory: [...c.runesInventory, next] }));
     },
@@ -334,7 +343,13 @@ function CockpitInner() {
   const onUpdateRune = useCallback(
     async (
       runeId: string,
-      rp: { level?: number; rarity?: RuneRarity; damage?: string },
+      rp: {
+        level?: number;
+        rarity?: RuneRarity;
+        damage?: string;
+        armor?: number;
+        qty?: number;
+      },
     ) => {
       patch(selId, (c) => ({
         ...c,
@@ -345,9 +360,48 @@ function CockpitInner() {
                 level: rp.level ?? r.level,
                 rarity: rp.rarity ?? r.rarity,
                 damage: rp.damage !== undefined ? rp.damage || null : r.damage,
+                armor: rp.armor ?? r.armor,
+                qty: rp.qty ?? r.qty,
               }
             : r,
         ),
+      }));
+    },
+    [patch, selId],
+  );
+
+  const onUpdateLightCrystals = useCallback(
+    async (newCount: number) => {
+      patch(selId, (c) => ({
+        ...c,
+        lightCrystals: Math.max(0, Math.min(999, newCount)),
+      }));
+    },
+    [patch, selId],
+  );
+
+  const onAddCompetenceAlea = useCallback(
+    async (input: { name: string; description?: string }) => {
+      patch(selId, (c) => ({
+        ...c,
+        competencesAlea: [
+          ...c.competencesAlea,
+          {
+            id: `ca-${Math.round(performance.now())}`,
+            name: input.name,
+            description: input.description ?? null,
+          },
+        ],
+      }));
+    },
+    [patch, selId],
+  );
+
+  const onRemoveCompetenceAlea = useCallback(
+    async (competenceId: string) => {
+      patch(selId, (c) => ({
+        ...c,
+        competencesAlea: c.competencesAlea.filter((x) => x.id !== competenceId),
       }));
     },
     [patch, selId],
@@ -382,6 +436,9 @@ function CockpitInner() {
         onAddRune={onAddRune}
         onRemoveRune={onRemoveRune}
         onUpdateRune={onUpdateRune}
+        onUpdateLightCrystals={onUpdateLightCrystals}
+        onAddCompetenceAlea={onAddCompetenceAlea}
+        onRemoveCompetenceAlea={onRemoveCompetenceAlea}
         />
       </div>
     );

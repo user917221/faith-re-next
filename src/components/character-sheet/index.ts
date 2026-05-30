@@ -8,6 +8,8 @@ export type {
   CombatStatKey,
   ConditionItem,
   ConditionKind,
+  ConditionPreset,
+  CompetenceAleaItem,
   ItemEntry,
   ItemKind,
   RuneItem,

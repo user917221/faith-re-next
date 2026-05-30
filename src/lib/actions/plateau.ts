@@ -17,7 +17,7 @@
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { publicRolls, characters } from "@/db/schema";
+import { publicRolls, characters, conditions } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import {
   ATTR_SHORTHAND,
@@ -49,6 +49,14 @@ async function loadCharacterWithSkills(characterId: string) {
   const skillsMap: Record<string, number> = {};
   for (const s of char.skills) skillsMap[s.skillName] = s.points;
   return { char, skillsMap };
+}
+
+/** Somme des modificateurs de dé des conditions actives (ex. Fatigue −4). */
+async function conditionsDiceMod(characterId: string): Promise<number> {
+  const conds = await db.query.conditions.findMany({
+    where: eq(conditions.characterId, characterId),
+  });
+  return conds.reduce((sum, c) => sum + (c.diceModifier ?? 0), 0);
 }
 
 // ---------------- rollPublicSkill ----------------
@@ -104,9 +112,10 @@ export async function rollPublicSkill(input: {
   const d2 = rollD6();
   const diceSum = d1 + d2;
   const attrScore = calculateAttribute(skillsMap, input.attrName);
+  const totalDiceMod = await conditionsDiceMod(input.characterId);
   // Jet de COMPÉTENCE = 2d6 + compétence ; jet d'attribut seul = 2d6 + attribut.
   const bonus = resolvedSkill ? skillScore : attrScore;
-  const total = diceSum + bonus;
+  const total = diceSum + bonus + totalDiceMod;
   const isCritSucc = d1 === 6 && d2 === 6;
   const isCritFail = d1 === 1 && d2 === 1;
 
@@ -208,7 +217,8 @@ export async function rollPublicFormula(input: {
     }
   }
 
-  const total = diceSum + modValue;
+  const totalDiceMod = await conditionsDiceMod(input.characterId);
+  const total = diceSum + modValue + totalDiceMod;
 
   // Crits 2d6 standards uniquement (par défaut, lit double-6/double-1).
   const isCritSucc = count === 2 && sides === 6 && rolls[0] === 6 && rolls[1] === 6;
@@ -320,7 +330,8 @@ export async function rollPublicPool(input: {
     kept = rolls.reduce((acc, r) => acc + r, 0);
   }
 
-  const total = kept + modifier;
+  const totalDiceMod = await conditionsDiceMod(input.characterId);
+  const total = kept + modifier + totalDiceMod;
 
   // Crits naturels : sur un dé unique décisif (avantage/désavantage ou 1 seul dé)
   // → face max / face 1. Sur une somme de pool, on les laisse à false.

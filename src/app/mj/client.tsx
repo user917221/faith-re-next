@@ -51,6 +51,9 @@ import {
   addRune,
   removeRune,
   updateRune,
+  updateLightCrystals,
+  addCompetenceAlea,
+  removeCompetenceAlea,
   updateCombatStats,
   addCondition,
   removeCondition,
@@ -438,6 +441,23 @@ export function MJCharacterClient({
       }}
       onUpdateRune={async (runeId, patch) => {
         await updateRune(character.id, runeId, patch);
+        refresh();
+      }}
+      onUpdateLightCrystals={async (newCount) => {
+        await updateLightCrystals(character.id, newCount);
+        refresh();
+      }}
+      onAddCompetenceAlea={async (input) => {
+        const res = await addCompetenceAlea(character.id, input);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast.success(`Compétence « ${input.name} »`);
+        refresh();
+      }}
+      onRemoveCompetenceAlea={async (competenceId) => {
+        await removeCompetenceAlea(character.id, competenceId);
         refresh();
       }}
       onCombatStatChange={async (key, delta) => {

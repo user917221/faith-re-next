@@ -23,7 +23,13 @@ export type HydratedCharacter = Character;
 export async function loadCharacter(characterId: string): Promise<HydratedCharacter | null> {
   const row = await db.query.characters.findFirst({
     where: eq(characters.id, characterId),
-    with: { skills: true, runesInventory: true, conditions: true, items: true },
+    with: {
+      skills: true,
+      runesInventory: true,
+      conditions: true,
+      items: true,
+      competencesAlea: true,
+    },
   });
   if (!row) return null;
   return hydrate(row);
@@ -31,7 +37,13 @@ export async function loadCharacter(characterId: string): Promise<HydratedCharac
 
 export async function loadAllCharacters(): Promise<HydratedCharacter[]> {
   const rows = await db.query.characters.findMany({
-    with: { skills: true, runesInventory: true, conditions: true, items: true },
+    with: {
+      skills: true,
+      runesInventory: true,
+      conditions: true,
+      items: true,
+      competencesAlea: true,
+    },
   });
   return rows.map(hydrate).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -39,7 +51,13 @@ export async function loadAllCharacters(): Promise<HydratedCharacter[]> {
 export async function loadCharacterForUser(userId: string): Promise<HydratedCharacter | null> {
   const row = await db.query.characters.findFirst({
     where: eq(characters.ownerUserId, userId),
-    with: { skills: true, runesInventory: true, conditions: true, items: true },
+    with: {
+      skills: true,
+      runesInventory: true,
+      conditions: true,
+      items: true,
+      competencesAlea: true,
+    },
   });
   if (!row) return null;
   return hydrate(row);
@@ -55,11 +73,14 @@ type CharacterRow = typeof characters.$inferSelect & {
     level: number;
     rarity: "commune" | "rare" | "epique" | "legendaire";
     damage: string | null;
+    armor: number;
+    qty: number;
   }[];
   conditions?: {
     id: string;
     label: string;
     kind: "buff" | "debuff" | "wound" | "focus" | "neutral";
+    diceModifier: number;
   }[];
   items?: {
     id: string;
@@ -67,6 +88,11 @@ type CharacterRow = typeof characters.$inferSelect & {
     type: "arme" | "armure" | "objet" | "consommable";
     qty: number;
     equipped: number;
+    description: string | null;
+  }[];
+  competencesAlea?: {
+    id: string;
+    name: string;
     description: string | null;
   }[];
 };
@@ -133,6 +159,14 @@ function hydrate(row: CharacterRow): HydratedCharacter {
       id: c.id,
       label: c.label,
       kind: c.kind,
+      diceModifier: c.diceModifier ?? 0,
+    })),
+    // --- Onglet Objets : cristaux + compétences de l'Aléa ---
+    lightCrystals: row.lightCrystals ?? 0,
+    competencesAlea: (row.competencesAlea ?? []).map((ca) => ({
+      id: ca.id,
+      name: ca.name,
+      description: ca.description,
     })),
     // --- Inventaire d'objets ---
     items: (row.items ?? []).map((it) => ({
@@ -152,6 +186,8 @@ function hydrate(row: CharacterRow): HydratedCharacter {
       level: r.level,
       rarity: r.rarity,
       damage: r.damage,
+      armor: r.armor,
+      qty: r.qty,
     })),
   };
 }
