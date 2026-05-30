@@ -11,10 +11,16 @@
 
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, desc, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { campaigns, gameSessions, statusNotes } from "@/db/schema";
+import {
+  campaigns,
+  gameSessions,
+  statusNotes,
+  publicRolls,
+  sessionLogs,
+} from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { assertCanEdit } from "./guards";
 
@@ -223,4 +229,170 @@ export async function removeStatusNote(
   revalidatePath("/mj");
   revalidatePath("/me");
   return { ok: true };
+}
+
+// ---------------- renameSession (#85) ----------------
+
+/**
+ * renameSession — renomme une session existante (MJ). Nom libre, optionnel :
+ * vide → repasse à NULL (l'UI affiche le fallback « Session N »).
+ * Max 80 chars (cohérent avec createCampaign).
+ */
+export async function renameSession(
+  sessionId: string,
+  name: string,
+): Promise<ActionResult<Record<never, never>>> {
+  await requireMJ();
+  const s = await db.query.gameSessions.findFirst({
+    where: eq(gameSessions.id, sessionId),
+  });
+  if (!s) return { ok: false, reason: "Session introuvable" };
+
+  const clean = (name ?? "").trim();
+  if (clean.length > 80) return { ok: false, reason: "Nom trop long (80 max)" };
+
+  await db
+    .update(gameSessions)
+    .set({ name: clean.length ? clean : null })
+    .where(eq(gameSessions.id, sessionId));
+
+  revalidatePath("/mj");
+  return { ok: true };
+}
+
+// ---------------- endSession (#87) ----------------
+
+/**
+ * endSession — « Fin de session » (MJ). Archive TOUS les jets actuellement en
+ * table (`public_roll`) dans `session_log` (1 ligne par jet), puis VIDE la
+ * table des dés. Idempotent : table vide → { archived: 0, deletedRolls: 0 }.
+ *
+ * Neon HTTP ne supporte pas les transactions multi-statements : on lit les
+ * jets, on insère les logs, puis on supprime les jets archivés (par leurs ids).
+ * En pratique le risque de course est négligeable (action MJ unique).
+ *
+ * Heure : `endedAt` = instant ISO (timestamptz, UTC). Formatage Europe/Paris
+ * fr-FR à l'affichage (cf. getSessionLogs / SessionLogsView).
+ */
+export async function endSession(sessionId: string): Promise<
+  ActionResult<{ archived: number; deletedRolls: number; archivedAt: string }>
+> {
+  const session = await requireMJ();
+
+  const gs = await db.query.gameSessions.findFirst({
+    where: eq(gameSessions.id, sessionId),
+  });
+  if (!gs) return { ok: false, reason: "Session introuvable" };
+
+  const rolls = await db
+    .select()
+    .from(publicRolls)
+    .orderBy(desc(publicRolls.createdAt));
+
+  const endedAt = new Date();
+
+  if (rolls.length === 0) {
+    return {
+      ok: true,
+      archived: 0,
+      deletedRolls: 0,
+      archivedAt: endedAt.toISOString(),
+    };
+  }
+
+  // Copie intégrale de chaque jet (replay/audit) dans session_log.
+  await db.insert(sessionLogs).values(
+    rolls.map((r) => ({
+      campaignId: gs.campaignId,
+      gameSessionId: gs.id,
+      sessionNumber: gs.number,
+      casterUserId: r.casterUserId,
+      characterId: r.characterId,
+      casterName: r.casterName,
+      characterName: r.characterName,
+      diceFormula: r.formula,
+      diceRolls: r.rolls,
+      diceTotal: r.total,
+      damageValue: null,
+      dd: r.dd,
+      success: r.success,
+      isCritSucc: r.isCritSucc,
+      isCritFail: r.isCritFail,
+      rolledAt: r.createdAt,
+      endedAt,
+      createdByUserId: session.user.id,
+    })),
+  );
+
+  // Vide la table des dés (jets archivés). On supprime toutes les lignes lues.
+  const ids = rolls.map((r) => r.id);
+  await db.delete(publicRolls).where(inArray(publicRolls.id, ids));
+
+  revalidatePath("/plateau");
+  revalidatePath("/mj");
+
+  return {
+    ok: true,
+    archived: rolls.length,
+    deletedRolls: ids.length,
+    archivedAt: endedAt.toISOString(),
+  };
+}
+
+// ---------------- getSessionLogs (#88) ----------------
+
+export type SessionLogDisplay = {
+  id: string;
+  gameSessionId: string | null;
+  sessionNumber: number;
+  casterName: string;
+  characterName: string;
+  characterId: string | null;
+  diceFormula: string;
+  diceRolls: number[];
+  diceTotal: number;
+  damageValue: number | null;
+  dd: number | null;
+  success: boolean | null;
+  isCritSucc: boolean;
+  isCritFail: boolean;
+  rolledAt: Date;
+  endedAt: Date;
+};
+
+/**
+ * getSessionLogs — lit les logs archivés (MJ), filtrés par campagne si fournie,
+ * triés du plus récent au plus ancien (endedAt DESC, puis rolledAt DESC).
+ * Lecture pour l'onglet « Logs de session » (#88).
+ */
+export async function getSessionLogs(
+  campaignId?: string,
+): Promise<SessionLogDisplay[]> {
+  await requireMJ();
+
+  const rows = await db
+    .select()
+    .from(sessionLogs)
+    .where(campaignId ? eq(sessionLogs.campaignId, campaignId) : undefined)
+    .orderBy(desc(sessionLogs.endedAt), desc(sessionLogs.rolledAt))
+    .limit(1000);
+
+  return rows.map((r) => ({
+    id: r.id,
+    gameSessionId: r.gameSessionId,
+    sessionNumber: r.sessionNumber,
+    casterName: r.casterName,
+    characterName: r.characterName,
+    characterId: r.characterId,
+    diceFormula: r.diceFormula,
+    diceRolls: r.diceRolls,
+    diceTotal: r.diceTotal,
+    damageValue: r.damageValue,
+    dd: r.dd,
+    success: r.success === null ? null : r.success === 1,
+    isCritSucc: r.isCritSucc === 1,
+    isCritFail: r.isCritFail === 1,
+    rolledAt: r.rolledAt,
+    endedAt: r.endedAt,
+  }));
 }

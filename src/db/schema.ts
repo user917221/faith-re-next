@@ -299,10 +299,60 @@ export const gameSessions = pgTable("game_session", {
     .notNull()
     .references(() => campaigns.id, { onDelete: "cascade" }),
   number: integer("number").default(1).notNull(),
+  // Nom libre de la session (#85) — null = fallback « Session N » à l'affichage.
+  name: text("name"),
   date: timestamp("date").defaultNow().notNull(),
   elapsedSeconds: integer("elapsed_seconds").default(0).notNull(),
   timerStartedAt: timestamp("timer_started_at"), // null = en pause
   isActive: integer("is_active").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Logs de session archivés (#87 / #88) : à la « Fin de session », chaque jet de
+// `public_roll` est copié ici (1 ligne par jet), puis supprimé de la table des
+// dés. Lecture seule dans l'onglet « Logs de session » du cockpit MJ.
+//
+// `endedAt` est partagé par toutes les lignes d'un même archivage (instant de
+// clôture). Stocké en UTC ; formaté à l'affichage en Europe/Paris (fr-FR).
+export const sessionLogs = pgTable("session_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  // FK vers la séance archivée. SET NULL pour garder le log si la séance part.
+  gameSessionId: uuid("game_session_id").references(() => gameSessions.id, {
+    onDelete: "set null",
+  }),
+  // Snapshot du numéro de séance (résilient si gameSessionId devient null).
+  sessionNumber: integer("session_number").default(1).notNull(),
+  // Auteur du jet (caster). SET NULL si le user est supprimé.
+  casterUserId: text("caster_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
+  // Perso ciblé par le jet. SET NULL si le perso est supprimé.
+  characterId: uuid("character_id").references(() => characters.id, {
+    onDelete: "set null",
+  }),
+  casterName: text("caster_name").notNull(),
+  characterName: text("character_name").notNull(),
+  diceFormula: text("dice_formula").notNull(),
+  diceRolls: jsonb("dice_rolls").$type<number[]>().default([]).notNull(),
+  diceTotal: integer("dice_total").notNull(),
+  // Dégâts associés au jet (null/0 = aucun). Réservé pour traçabilité future.
+  damageValue: integer("damage_value"),
+  // Difficulté + réussite snapshotées (pour replay/audit complet).
+  dd: integer("dd"),
+  success: integer("success"),
+  isCritSucc: integer("is_crit_succ").default(0).notNull(),
+  isCritFail: integer("is_crit_fail").default(0).notNull(),
+  // Instant du jet d'origine (copié depuis public_roll.createdAt).
+  rolledAt: timestamp("rolled_at", { withTimezone: true }).defaultNow().notNull(),
+  // Instant de clôture de la session (partagé par le lot archivé).
+  endedAt: timestamp("ended_at", { withTimezone: true }).defaultNow().notNull(),
+  // MJ qui a fermé la session. SET NULL si le user est supprimé.
+  createdByUserId: text("created_by_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -405,10 +455,34 @@ export const npcsRelations = relations(npcs, ({ one }) => ({
   }),
 }));
 
-export const gameSessionsRelations = relations(gameSessions, ({ one }) => ({
+export const gameSessionsRelations = relations(gameSessions, ({ one, many }) => ({
   campaign: one(campaigns, {
     fields: [gameSessions.campaignId],
     references: [campaigns.id],
+  }),
+  sessionLogs: many(sessionLogs),
+}));
+
+export const sessionLogsRelations = relations(sessionLogs, ({ one }) => ({
+  campaign: one(campaigns, {
+    fields: [sessionLogs.campaignId],
+    references: [campaigns.id],
+  }),
+  session: one(gameSessions, {
+    fields: [sessionLogs.gameSessionId],
+    references: [gameSessions.id],
+  }),
+  caster: one(users, {
+    fields: [sessionLogs.casterUserId],
+    references: [users.id],
+  }),
+  character: one(characters, {
+    fields: [sessionLogs.characterId],
+    references: [characters.id],
+  }),
+  createdBy: one(users, {
+    fields: [sessionLogs.createdByUserId],
+    references: [users.id],
   }),
 }));
 
@@ -481,6 +555,8 @@ export type NewCondition = typeof conditions.$inferInsert;
 export type ConditionKind = (typeof conditionKindEnum.enumValues)[number];
 export type Campaign = typeof campaigns.$inferSelect;
 export type GameSession = typeof gameSessions.$inferSelect;
+export type SessionLog = typeof sessionLogs.$inferSelect;
+export type NewSessionLog = typeof sessionLogs.$inferInsert;
 export type StatusNote = typeof statusNotes.$inferSelect;
 export type Item = typeof items.$inferSelect;
 export type NewItem = typeof items.$inferInsert;

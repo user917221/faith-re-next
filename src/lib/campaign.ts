@@ -13,6 +13,7 @@ import {
   statusNotes,
   journalEntries,
   npcs,
+  sessionLogs,
 } from "@/db/schema";
 
 export type CampaignSummary = { id: string; name: string };
@@ -29,6 +30,7 @@ export type CampaignContext = {
   session: {
     id: string;
     number: number;
+    name: string | null;
     date: Date;
     elapsedSeconds: number; // valeur live (incl. course en cours)
     running: boolean;
@@ -104,6 +106,7 @@ export async function getCampaignContext(): Promise<CampaignContext> {
     session: {
       id: session.id,
       number: session.number,
+      name: session.name ?? null,
       date: session.date,
       elapsedSeconds: liveElapsed,
       running,
@@ -142,6 +145,60 @@ export async function loadNpcs(campaignId: string) {
     role: r.role,
     disposition: r.disposition,
     description: r.description,
+  }));
+}
+
+export type SessionLogEntry = {
+  id: string;
+  gameSessionId: string | null;
+  sessionNumber: number;
+  casterName: string;
+  characterName: string;
+  characterId: string | null;
+  diceFormula: string;
+  diceRolls: number[];
+  diceTotal: number;
+  damageValue: number | null;
+  dd: number | null;
+  success: boolean | null;
+  isCritSucc: boolean;
+  isCritFail: boolean;
+  rolledAt: Date;
+  endedAt: Date;
+};
+
+/**
+ * Charge les logs de session archivés d'une campagne (#88), du plus récent au
+ * plus ancien (endedAt DESC, rolledAt DESC). Lecture seule pour l'onglet
+ * « Logs de session ». La page /mj re-vérifie le rôle MJ avant d'appeler.
+ */
+export async function loadSessionLogs(
+  campaignId: string,
+): Promise<SessionLogEntry[]> {
+  const rows = await db
+    .select()
+    .from(sessionLogs)
+    .where(eq(sessionLogs.campaignId, campaignId))
+    .orderBy(desc(sessionLogs.endedAt), desc(sessionLogs.rolledAt))
+    .limit(1000);
+
+  return rows.map((r) => ({
+    id: r.id,
+    gameSessionId: r.gameSessionId,
+    sessionNumber: r.sessionNumber,
+    casterName: r.casterName,
+    characterName: r.characterName,
+    characterId: r.characterId,
+    diceFormula: r.diceFormula,
+    diceRolls: r.diceRolls,
+    diceTotal: r.diceTotal,
+    damageValue: r.damageValue,
+    dd: r.dd,
+    success: r.success === null ? null : r.success === 1,
+    isCritSucc: r.isCritSucc === 1,
+    isCritFail: r.isCritFail === 1,
+    rolledAt: r.rolledAt,
+    endedAt: r.endedAt,
   }));
 }
 

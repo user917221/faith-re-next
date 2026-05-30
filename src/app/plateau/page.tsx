@@ -17,6 +17,7 @@ import { db } from "@/db";
 import { characters as charactersTable } from "@/db/schema";
 import { loadAllCharacters } from "@/lib/load-character";
 import { listRecentPublicRolls } from "@/lib/actions/plateau";
+import { getCampaignContext } from "@/lib/campaign";
 import { AppShell } from "@/components/app-shell/AppShell";
 import { PlateauClient } from "./client";
 
@@ -28,13 +29,15 @@ export default async function PlateauPage() {
 
   const isMJ = session.user.role === "mj";
 
-  const [allCharacters, recentRolls, ownedRow] = await Promise.all([
+  const [allCharacters, recentRolls, ownedRow, ctx] = await Promise.all([
     loadAllCharacters(),
     listRecentPublicRolls(),
     db.query.characters.findFirst({
       where: eq(charactersTable.ownerUserId, session.user.id),
       columns: { id: true },
     }),
+    // Contexte campagne/session : utile uniquement aux contrôles MJ (Fin de session).
+    isMJ ? getCampaignContext() : Promise.resolve(null),
   ]);
 
   // MJ voit tout, joueur voit seulement les présents
@@ -62,6 +65,9 @@ export default async function PlateauPage() {
         currentUserId={session.user.id ?? ""}
         ownedCharacterId={ownedRow?.id ?? null}
         isMJ={isMJ}
+        sessionId={ctx?.session.id ?? null}
+        sessionNumber={ctx?.session.number ?? null}
+        sessionName={ctx?.session.name ?? null}
       />
     </AppShell>
   );

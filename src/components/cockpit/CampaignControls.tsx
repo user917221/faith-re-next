@@ -7,9 +7,9 @@
  * - SessionTimerLive : start/pause persistés.
  */
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Plus, SkipForward } from "lucide-react";
+import { Check, ChevronDown, Pencil, Plus, SkipForward, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   setActiveCampaign,
@@ -19,6 +19,7 @@ import {
   startSessionTimer,
   pauseSessionTimer,
   resetSessionTimer,
+  renameSession,
 } from "@/lib/actions";
 import { CampaignStatus } from "./CampaignStatus";
 import { SessionTimer } from "./SessionTimer";
@@ -210,27 +211,167 @@ export function CampaignStatusLive({
 
 export function SessionTimerLive({
   sessionId,
+  sessionNumber,
+  sessionName,
   elapsedSeconds,
   running,
 }: {
   sessionId: string;
+  sessionNumber?: number;
+  sessionName?: string | null;
   elapsedSeconds: number;
   running: boolean;
 }) {
   const router = useRouter();
   return (
-    <SessionTimer
-      startSeconds={elapsedSeconds}
-      running={running}
-      onToggle={async (next) => {
-        if (next) await startSessionTimer(sessionId);
-        else await pauseSessionTimer(sessionId);
-        router.refresh();
-      }}
-      onReset={async () => {
-        await resetSessionTimer(sessionId);
-        router.refresh();
-      }}
-    />
+    <div className="flex flex-col gap-2">
+      {sessionNumber !== undefined && (
+        <SessionNameEditor
+          sessionId={sessionId}
+          sessionNumber={sessionNumber}
+          sessionName={sessionName ?? null}
+        />
+      )}
+      <SessionTimer
+        startSeconds={elapsedSeconds}
+        running={running}
+        onToggle={async (next) => {
+          if (next) await startSessionTimer(sessionId);
+          else await pauseSessionTimer(sessionId);
+          router.refresh();
+        }}
+        onReset={async () => {
+          await resetSessionTimer(sessionId);
+          router.refresh();
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * SessionNameEditor — titre de session renommable (#85). Affiche le nom (ou
+ * fallback « Session N »), avec un crayon → input inline + Valider/Annuler.
+ * Persiste via renameSession (MJ-only côté serveur).
+ */
+function SessionNameEditor({
+  sessionId,
+  sessionNumber,
+  sessionName,
+}: {
+  sessionId: string;
+  sessionNumber: number;
+  sessionName: string | null;
+}) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(sessionName ?? "");
+  const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const fallback = `Session ${sessionNumber}`;
+  const display = sessionName?.trim() ? sessionName : fallback;
+
+  // Resynchronise le brouillon quand la session change (navigation / refresh).
+  useEffect(() => {
+    setValue(sessionName ?? "");
+  }, [sessionName, sessionId]);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  const open = () => {
+    setValue(sessionName ?? "");
+    setEditing(true);
+  };
+  const cancel = () => {
+    setValue(sessionName ?? "");
+    setEditing(false);
+  };
+  const save = () => {
+    const next = value.trim();
+    // No-op si inchangé (le nom courant peut être null → "").
+    if (next === (sessionName ?? "")) {
+      setEditing(false);
+      return;
+    }
+    startTransition(async () => {
+      const res = await renameSession(sessionId, next);
+      if (!res.ok) {
+        toast.error(res.reason);
+        return;
+      }
+      setEditing(false);
+      toast.success(
+        next ? `Session renommée en « ${next} »` : "Nom de session retiré",
+      );
+      router.refresh();
+    });
+  };
+
+  if (editing) {
+    return (
+      <div className="campaign-subpanel flex items-center gap-1.5 p-2">
+        <input
+          ref={inputRef}
+          value={value}
+          maxLength={80}
+          placeholder={fallback}
+          disabled={isPending}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              save();
+            } else if (e.key === "Escape") {
+              e.preventDefault();
+              cancel();
+            }
+          }}
+          className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={save}
+          disabled={isPending}
+          aria-label="Valider le nom de session"
+          title="Valider"
+          className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-primary transition-colors hover:bg-surface-overlay disabled:opacity-40"
+        >
+          <Check size={13} />
+        </button>
+        <button
+          type="button"
+          onClick={cancel}
+          disabled={isPending}
+          aria-label="Annuler"
+          title="Annuler"
+          className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay disabled:opacity-40"
+        >
+          <X size={13} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="campaign-subpanel flex items-center justify-between gap-2 p-2">
+      <div className="flex min-w-0 flex-col">
+        <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground-subtle">
+          Session {sessionNumber}
+        </p>
+        <p className="truncate text-sm font-medium text-foreground">{display}</p>
+      </div>
+      <button
+        type="button"
+        onClick={open}
+        aria-label="Renommer la session"
+        title="Renommer la session"
+        className="flex size-7 shrink-0 items-center justify-center rounded-md border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
+      >
+        <Pencil size={12} />
+      </button>
+    </div>
   );
 }

@@ -52,7 +52,12 @@ export {
   updateNpc,
 } from "./world";
 
-export { updateCharacterFull, type FullCharacterPatch } from "./admin";
+export {
+  updateCharacterFull,
+  createCharacter,
+  deleteCharacter,
+  type FullCharacterPatch,
+} from "./admin";
 
 export {
   updateCombatStats,
@@ -69,9 +74,13 @@ export {
   startSessionTimer,
   pauseSessionTimer,
   resetSessionTimer,
+  renameSession,
+  endSession,
+  getSessionLogs,
   addStatusNote,
   removeStatusNote,
   type CampaignStatusPatch,
+  type SessionLogDisplay,
 } from "./campaign";
 
 export {

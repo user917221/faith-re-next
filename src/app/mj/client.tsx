@@ -25,6 +25,10 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuickRollPanel } from "@/components/cockpit/QuickRollPanel";
 import { ModificationsPanel } from "@/components/cockpit/ModificationsPanel";
+import {
+  CreateCharacterDialog,
+  DeleteCharacterDialog,
+} from "@/components/cockpit/RosterActionsDialog";
 import { toast } from "sonner";
 import { Inbox } from "lucide-react";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
@@ -77,19 +81,24 @@ function pct(current: number, max: number): number {
 export function RosterNav({
   characters,
   selectedId,
+  isMJ = true,
 }: {
   characters: Character[];
   selectedId?: string;
+  isMJ?: boolean;
 }) {
   const presentCount = characters.filter((c) => c.isPresent).length;
 
   return (
     <div className="campaign-panel sticky top-[5rem]">
       <header className="campaign-header-line flex items-center justify-between gap-2 px-4 py-3">
-        <p className="label-grimoire">Roster</p>
-        <span className="tabular text-xs text-ink-tertiary">
-          <span className="text-foreground">{characters.length}</span> / 4
-        </span>
+        <div className="flex items-center gap-2">
+          <p className="label-grimoire">Roster</p>
+          <span className="tabular text-xs text-ink-tertiary">
+            <span className="text-foreground">{characters.length}</span> / 4
+          </span>
+        </div>
+        {isMJ && <CreateCharacterDialog />}
       </header>
 
       <ScrollArea className="max-h-[calc(100vh-13rem)]">
@@ -103,15 +112,30 @@ export function RosterNav({
             return (
               <HoverCard key={c.id} openDelay={120} closeDelay={60}>
                 <HoverCardTrigger asChild>
+                  <div className="group relative">
+                  {isMJ && (
+                    <div className="absolute right-3 top-3 z-10">
+                      <DeleteCharacterDialog
+                        characterId={c.id}
+                        characterName={c.name}
+                        isSelected={isActive}
+                      />
+                    </div>
+                  )}
                   <Link
                     href={`/mj?id=${c.id}`}
-                    className={`group block !py-3 !px-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                    className={`block !py-3 !px-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       isActive ? "!border-l-primary bg-primary/10" : ""
                     }`}
                     aria-current={isActive ? "page" : undefined}
                   >
-                    {/* Row 1 — Avatar + LED + name + Niv badge */}
-                    <div className="flex items-center justify-between gap-2">
+                    {/* Row 1 — Avatar + LED + name + Niv badge.
+                        pr-7 (MJ) réserve l'emplacement du bouton supprimer. */}
+                    <div
+                      className={`flex items-center justify-between gap-2 ${
+                        isMJ ? "pr-7" : ""
+                      }`}
+                    >
                       <span className="flex min-w-0 items-center gap-2.5">
                         <span className="relative shrink-0">
                           <Avatar size="sm" className="rounded-md">
@@ -166,6 +190,7 @@ export function RosterNav({
                       </span>
                     </div>
                   </Link>
+                  </div>
                 </HoverCardTrigger>
 
                 {/* Preview synthétique au survol */}

@@ -36,11 +36,12 @@ import {
   rollPublicFormula,
 } from "@/lib/actions/plateau";
 import { rollSkillWithDD } from "@/lib/actions/roll-skill-dd";
+import { endSession } from "@/lib/actions";
 import {
   SKILL_GROUPS,
   type AttributeName,
 } from "@/lib/skills";
-import { Users, Dices, BarChart3, ListPlus } from "lucide-react";
+import { Users, Dices, BarChart3, ListPlus, Crown, Flag, Loader2 } from "lucide-react";
 import { CountUp } from "@/components/faith/CountUp";
 import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,6 +78,15 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { CritOverlay } from "./CritOverlay";
 
 type FeedItem = {
@@ -992,6 +1002,122 @@ function Carnet({ items }: { items: FeedItem[] }) {
   );
 }
 
+/* -------------------------- Contrôles MJ (#86 / #87) -------------------------- */
+
+/**
+ * MJControls — bloc réservé au MJ, en haut du plateau. Héberge « Fin de
+ * session » : archive tous les jets en table dans session_log puis vide la
+ * table des dés (#87). Confirmation via Dialog ; verrou isPending anti
+ * double-clic ; bouton désactivé si aucun jet à archiver.
+ */
+function MJControls({
+  sessionId,
+  sessionNumber,
+  sessionName,
+  rollCount,
+}: {
+  sessionId: string | null;
+  sessionNumber: number | null;
+  sessionName: string | null;
+  rollCount: number;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const sessionLabel = sessionName?.trim()
+    ? sessionName
+    : sessionNumber !== null
+      ? `Session ${sessionNumber}`
+      : "Session";
+
+  const confirmEnd = () => {
+    if (!sessionId) {
+      toast.error("Session introuvable");
+      return;
+    }
+    startTransition(async () => {
+      const res = await endSession(sessionId);
+      if (!res.ok) {
+        toast.error(res.reason);
+        return;
+      }
+      setOpen(false);
+      toast.success(
+        sessionNumber !== null
+          ? `Session ${sessionNumber} archivée`
+          : "Session archivée",
+        {
+          description:
+            res.archived > 0
+              ? `${res.archived} jet${res.archived > 1 ? "s" : ""} conservé${
+                  res.archived > 1 ? "s" : ""
+                } dans les logs.`
+              : "Aucun jet à archiver — table déjà vide.",
+        },
+      );
+      router.refresh();
+    });
+  };
+
+  return (
+    <div className="campaign-panel">
+      <header className="campaign-header-line flex items-center justify-between gap-2 px-4 py-2.5">
+        <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+          <Crown size={12} /> Contrôles MJ
+        </span>
+        <span className="tabular text-3xs uppercase tracking-[0.1em] text-ink-tertiary">
+          {sessionLabel}
+        </span>
+      </header>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+        <p className="text-2xs text-muted-foreground">
+          Clôt la session : archive les jets dans les logs, puis vide la table
+          des dés.
+        </p>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => setOpen(true)}
+            disabled={rollCount === 0 || !sessionId}
+            className="gap-1.5"
+          >
+            <Flag className="size-3.5" />
+            Fin de session
+          </Button>
+
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Flag className="size-4 text-primary" />
+                Terminer la session ?
+              </DialogTitle>
+              <DialogDescription>
+                Les {rollCount} jet{rollCount > 1 ? "s" : ""} actuellement en
+                table seront archivés dans les logs de session, puis retirés du
+                plateau. Cette action est définitive.
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" disabled={isPending}>
+                  Annuler
+                </Button>
+              </DialogClose>
+              <Button type="button" onClick={confirmEnd} disabled={isPending}>
+                {isPending && <Loader2 className="size-3.5 animate-spin" />}
+                Archiver et clôturer
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </div>
+  );
+}
+
 /* -------------------------- Container -------------------------- */
 
 export function PlateauClient({
@@ -1000,6 +1126,9 @@ export function PlateauClient({
   defaultCharacterId,
   ownedCharacterId,
   isMJ,
+  sessionId,
+  sessionNumber,
+  sessionName,
 }: {
   characters: Character[];
   initialRolls: FeedItem[];
@@ -1008,6 +1137,9 @@ export function PlateauClient({
   currentUserId: string;
   ownedCharacterId: string | null;
   isMJ: boolean;
+  sessionId?: string | null;
+  sessionNumber?: number | null;
+  sessionName?: string | null;
 }) {
   const router = useRouter();
 
@@ -1090,6 +1222,16 @@ export function PlateauClient({
           </span>
         </p>
       </div>
+
+      {/* Contrôles MJ — orthogonaux, visibles du MJ seul (#86). */}
+      {isMJ && (
+        <MJControls
+          sessionId={sessionId ?? null}
+          sessionNumber={sessionNumber ?? null}
+          sessionName={sessionName ?? null}
+          rollCount={initialRolls.length}
+        />
+      )}
 
       {/* === lg+ : 3 panneaux resizable (orientation horizontale par défaut) === */}
       <ResizablePanelGroup className="hidden min-h-[560px] lg:flex">
