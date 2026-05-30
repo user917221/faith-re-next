@@ -13,6 +13,8 @@ import type {
   CombatStatKey,
   ConditionItem,
   ConditionKind,
+  ItemEntry,
+  ItemKind,
   VitalType,
 } from "@/components/character-sheet/types";
 import { ALL_SKILLS } from "@/lib/skills";
@@ -75,7 +77,10 @@ function mk(id: string, name: string, hp: number, maxHp: number): Character {
     race: null,
     pronouns: null,
     charClass: null,
+    bio: null,
+    notes: null,
     conditions: [],
+    items: [],
     runesInventory: [],
   };
 }
@@ -86,11 +91,18 @@ const INITIAL: Character[] = [
     race: "Sylvenne",
     pronouns: "elle/elle",
     charClass: "Tisseuse de Flux",
+    bio: "Ancienne archiviste du Bastion, partie sur les routes après la chute.",
     initiative: 5,
     armor: 1,
     conditions: [
       { id: "x1", label: "Concentrée", kind: "focus" },
       { id: "x2", label: "Bénédiction", kind: "buff" },
+    ],
+    items: [
+      { id: "i1", name: "Lame de brume", type: "arme", qty: 1, equipped: true, description: "1d8 tranchant, ignore 1 d'armure." },
+      { id: "i2", name: "Cotte tissée", type: "armure", qty: 1, equipped: true, description: null },
+      { id: "i3", name: "Fiole de Flux", type: "consommable", qty: 3, equipped: false, description: "Restaure 20 de Flux." },
+      { id: "i4", name: "Corde de soie", type: "objet", qty: 1, equipped: false, description: null },
     ],
   },
   {
@@ -189,6 +201,60 @@ export default function CockpitPreview() {
     [patch, selId],
   );
 
+  const onAddItem = useCallback(
+    async (input: {
+      name: string;
+      type: ItemKind;
+      qty?: number;
+      description?: string;
+    }) => {
+      const next: ItemEntry = {
+        id: `item-${Math.round(performance.now())}`,
+        name: input.name,
+        type: input.type,
+        qty: input.qty ?? 1,
+        equipped: false,
+        description: input.description ?? null,
+      };
+      patch(selId, (c) => ({ ...c, items: [...c.items, next] }));
+    },
+    [patch, selId],
+  );
+
+  const onRemoveItem = useCallback(
+    async (itemId: string) => {
+      patch(selId, (c) => ({
+        ...c,
+        items: c.items.filter((x) => x.id !== itemId),
+      }));
+    },
+    [patch, selId],
+  );
+
+  const onToggleEquip = useCallback(
+    async (itemId: string) => {
+      patch(selId, (c) => ({
+        ...c,
+        items: c.items.map((x) =>
+          x.id === itemId ? { ...x, equipped: !x.equipped } : x,
+        ),
+      }));
+    },
+    [patch, selId],
+  );
+
+  const onUpdateItemQty = useCallback(
+    async (itemId: string, delta: number) => {
+      patch(selId, (c) => ({
+        ...c,
+        items: c.items
+          .map((x) => (x.id === itemId ? { ...x, qty: x.qty + delta } : x))
+          .filter((x) => x.qty > 0),
+      }));
+    },
+    [patch, selId],
+  );
+
   return (
     <CockpitShell
       user={{ name: "Game Master", role: "mj", image: null }}
@@ -256,6 +322,10 @@ export default function CockpitPreview() {
         onCombatStatChange={onCombatStatChange}
         onAddCondition={onAddCondition}
         onRemoveCondition={onRemoveCondition}
+        onAddItem={onAddItem}
+        onRemoveItem={onRemoveItem}
+        onToggleEquip={onToggleEquip}
+        onUpdateItemQty={onUpdateItemQty}
       />
     </CockpitShell>
   );

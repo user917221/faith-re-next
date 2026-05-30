@@ -8,4 +8,6 @@ export type {
   CombatStatKey,
   ConditionItem,
   ConditionKind,
+  ItemEntry,
+  ItemKind,
 } from "./types";

@@ -17,6 +17,7 @@ import { VitalsHeader } from "./VitalsHeader";
 import { CombatStatsBanner } from "./CombatStatsBanner";
 import { ConditionsPanel } from "./ConditionsPanel";
 import { RuneInventory } from "./RuneInventory";
+import { ItemInventory } from "./ItemInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
 import { SkillTierLegend } from "./SkillTierLegend";
@@ -41,7 +42,7 @@ type DrawerCtx = RollContext & {
   skillName: string | null;
 };
 
-type TabValue = "vitaux" | "competences" | "evolution" | "profil";
+type TabValue = "vitaux" | "competences" | "equipement" | "evolution" | "profil";
 
 export default function CharacterSheet({
   character,
@@ -67,6 +68,10 @@ export default function CharacterSheet({
   onCombatStatChange,
   onAddCondition,
   onRemoveCondition,
+  onAddItem,
+  onRemoveItem,
+  onToggleEquip,
+  onUpdateItemQty,
 }: CharacterSheetProps) {
   const allocated = countAllocatedPoints(character.skills);
   const isCapped = allocated >= SKILL_CAP;
@@ -234,6 +239,7 @@ export default function CharacterSheet({
             [
               ["vitaux", "Vitaux"],
               ["competences", "Compétences"],
+              ["equipement", "Équipement"],
               ...(isMJ ? [["evolution", "Évolution"]] : []),
               ["profil", "Profil"],
             ] as [TabValue, string][]
@@ -362,6 +368,17 @@ export default function CharacterSheet({
               );
             })}
           </div>
+        </TabsContent>
+
+        {/* ─── Équipement — inventaire d'objets (Phase 6) ─── */}
+        <TabsContent value="equipement">
+          <ItemInventory
+            items={character.items}
+            onAddItem={onAddItem}
+            onRemoveItem={onRemoveItem}
+            onToggleEquip={onToggleEquip}
+            onUpdateItemQty={onUpdateItemQty}
+          />
         </TabsContent>
 
         {/* ─── Évolution (MJ seulement) ─── */}

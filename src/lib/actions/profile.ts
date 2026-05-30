@@ -13,6 +13,8 @@ type ProfilePatch = {
   race?: string;
   pronouns?: string;
   charClass?: string;
+  bio?: string;
+  notes?: string;
 };
 
 // Normalise un tag d'identité optionnel : trim, cap 40, vide → null (effacement).
@@ -34,6 +36,8 @@ export async function updateProfile(
     race: string | null;
     pronouns: string | null;
     charClass: string | null;
+    bio: string | null;
+    notes: string | null;
     updatedAt: Date;
   }> = {
     updatedAt: new Date(),
@@ -57,6 +61,14 @@ export async function updateProfile(
   if (typeof patch.race === "string") update.race = tag(patch.race);
   if (typeof patch.pronouns === "string") update.pronouns = tag(patch.pronouns);
   if (typeof patch.charClass === "string") update.charClass = tag(patch.charClass);
+  if (typeof patch.bio === "string") {
+    const v = patch.bio.trim();
+    update.bio = v.length ? v.slice(0, 1000) : null;
+  }
+  if (typeof patch.notes === "string") {
+    const v = patch.notes.trim();
+    update.notes = v.length ? v.slice(0, 1000) : null;
+  }
 
   const [row] = await db
     .update(characters)

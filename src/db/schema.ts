@@ -26,6 +26,12 @@ import type { AdapterAccountType } from "next-auth/adapters";
 export const userRoleEnum = pgEnum("user_role", ["mj", "player", "spectator"]);
 export const requestStatusEnum = pgEnum("request_status", ["pending", "approved", "rejected"]);
 export const runeTypeEnum = pgEnum("rune_type", ["utilitaire", "armement", "predefinie"]);
+export const itemTypeEnum = pgEnum("item_type", [
+  "arme",
+  "armure",
+  "objet",
+  "consommable",
+]);
 // Nature d'une condition active (pilote la couleur du chip côté UI).
 export const conditionKindEnum = pgEnum("condition_kind", [
   "buff", // bénéfique (vert)
@@ -116,6 +122,9 @@ export const characters = pgTable("character", {
   race: text("race"),
   pronouns: text("pronouns"),
   charClass: text("char_class"),
+  // bio libre + notes perso du joueur (Phase 6 ; distinct des status_note MJ)
+  bio: text("bio"),
+  notes: text("notes"),
   // vitals runtime (les max sont dérivés)
   currentHp: integer("current_hp").default(45).notNull(),
   currentMental: integer("current_mental").default(45).notNull(),
@@ -169,6 +178,21 @@ export const conditions = pgTable("condition", {
     .references(() => characters.id, { onDelete: "cascade" }),
   label: text("label").notNull(),
   kind: conditionKindEnum("kind").default("neutral").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Inventaire d'objets (arme / armure / objet / consommable) — Phase 6.
+// Distinct des runes (characters.runes équipées + characterRunes inventaire).
+export const items = pgTable("item", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  characterId: uuid("character_id")
+    .notNull()
+    .references(() => characters.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  type: itemTypeEnum("type").default("objet").notNull(),
+  qty: integer("qty").default(1).notNull(),
+  equipped: integer("equipped").default(0).notNull(),
+  description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -273,6 +297,14 @@ export const charactersRelations = relations(characters, ({ one, many }) => ({
   runesInventory: many(characterRunes),
   conditions: many(conditions),
   statusNotes: many(statusNotes),
+  items: many(items),
+}));
+
+export const itemsRelations = relations(items, ({ one }) => ({
+  character: one(characters, {
+    fields: [items.characterId],
+    references: [characters.id],
+  }),
 }));
 
 export const conditionsRelations = relations(conditions, ({ one }) => ({
@@ -362,3 +394,5 @@ export type ConditionKind = (typeof conditionKindEnum.enumValues)[number];
 export type Campaign = typeof campaigns.$inferSelect;
 export type GameSession = typeof gameSessions.$inferSelect;
 export type StatusNote = typeof statusNotes.$inferSelect;
+export type Item = typeof items.$inferSelect;
+export type NewItem = typeof items.$inferInsert;

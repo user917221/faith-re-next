@@ -19,6 +19,8 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   const [race, setRace] = useState(character.race ?? "");
   const [pronouns, setPronouns] = useState(character.pronouns ?? "");
   const [charClass, setCharClass] = useState(character.charClass ?? "");
+  const [bio, setBio] = useState(character.bio ?? "");
+  const [notes, setNotes] = useState(character.notes ?? "");
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -28,7 +30,9 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
     age !== character.age ||
     race.trim() !== (character.race ?? "") ||
     pronouns.trim() !== (character.pronouns ?? "") ||
-    charClass.trim() !== (character.charClass ?? "");
+    charClass.trim() !== (character.charClass ?? "") ||
+    bio.trim() !== (character.bio ?? "") ||
+    notes.trim() !== (character.notes ?? "");
 
   function save() {
     if (!onProfileChange || !dirty) return;
@@ -40,11 +44,16 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
         race: race.trim(),
         pronouns: pronouns.trim(),
         charClass: charClass.trim(),
+        bio: bio.trim(),
+        notes: notes.trim(),
       });
       setFeedback("Profil sauvegardé.");
       setTimeout(() => setFeedback(null), 2000);
     });
   }
+
+  const textareaCls =
+    "w-full resize-none rounded-md border border-border bg-background px-2.5 py-2 text-sm text-foreground placeholder:text-foreground-subtle focus:border-primary/40 focus:outline-none disabled:opacity-60";
 
   return (
     <section
@@ -131,6 +140,36 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               disabled={!onProfileChange}
             />
           </div>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="profile-bio" className="text-foreground-muted">
+            Bio / historique
+          </Label>
+          <textarea
+            id="profile-bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            disabled={!onProfileChange}
+            rows={3}
+            maxLength={1000}
+            placeholder="Quelques lignes sur le passé du personnage…"
+            className={textareaCls}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="profile-notes" className="text-foreground-muted">
+            Notes personnelles
+          </Label>
+          <textarea
+            id="profile-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            disabled={!onProfileChange}
+            rows={2}
+            maxLength={1000}
+            placeholder="Notes privées du joueur…"
+            className={textareaCls}
+          />
         </div>
         <div className="flex items-end justify-between gap-3">
           <div className="flex flex-col gap-1.5">

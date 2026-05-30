@@ -7,6 +7,8 @@ import type {
   Character,
   CombatStatKey,
   ConditionKind,
+  ItemEntry,
+  ItemKind,
   VitalType,
 } from "@/components/character-sheet";
 import { ENDURANCE_COSTS, calculateLevel } from "@/lib/faith-system";
@@ -50,9 +52,16 @@ function buildMockBrad(): Character {
     race: "Humain",
     pronouns: "il/lui",
     charClass: "Pyromancien",
+    bio: "Forgeron de village devenu mage du feu après l'incendie du Bastion.",
+    notes: "",
     conditions: [
       { id: "c1", label: "Échauffé", kind: "buff" },
       { id: "c2", label: "Concentré", kind: "focus" },
+    ],
+    items: [
+      { id: "it1", name: "Bâton de braise", type: "arme", qty: 1, equipped: true, description: "1d8 feu." },
+      { id: "it2", name: "Robe ignifugée", type: "armure", qty: 1, equipped: true, description: null },
+      { id: "it3", name: "Potion de soin", type: "consommable", qty: 2, equipped: false, description: "Rend 2d6 PV." },
     ],
     runesInventory: [
       { id: "r1", name: "Brasier mineur", type: "armement", description: "Inflige 1d6 feu." },
@@ -183,6 +192,8 @@ export default function PreviewPage() {
       race?: string;
       pronouns?: string;
       charClass?: string;
+      bio?: string;
+      notes?: string;
     }) => {
       await Promise.resolve();
       setCharacter((c) => ({
@@ -193,10 +204,66 @@ export default function PreviewPage() {
           patch.pronouns !== undefined ? patch.pronouns || null : c.pronouns,
         charClass:
           patch.charClass !== undefined ? patch.charClass || null : c.charClass,
+        bio: patch.bio !== undefined ? patch.bio || null : c.bio,
+        notes: patch.notes !== undefined ? patch.notes || null : c.notes,
       }));
     },
     [],
   );
+
+  const onAddItem = useCallback(
+    async (input: {
+      name: string;
+      type: ItemKind;
+      qty?: number;
+      description?: string;
+    }) => {
+      await Promise.resolve();
+      setCharacter((c) => ({
+        ...c,
+        items: [
+          ...c.items,
+          {
+            id: crypto.randomUUID(),
+            name: input.name,
+            type: input.type,
+            qty: input.qty ?? 1,
+            equipped: false,
+            description: input.description ?? null,
+          } satisfies ItemEntry,
+        ],
+      }));
+    },
+    [],
+  );
+
+  const onRemoveItem = useCallback(async (itemId: string) => {
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      items: c.items.filter((x) => x.id !== itemId),
+    }));
+  }, []);
+
+  const onToggleEquip = useCallback(async (itemId: string) => {
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      items: c.items.map((x) =>
+        x.id === itemId ? { ...x, equipped: !x.equipped } : x,
+      ),
+    }));
+  }, []);
+
+  const onUpdateItemQty = useCallback(async (itemId: string, delta: number) => {
+    await Promise.resolve();
+    setCharacter((c) => ({
+      ...c,
+      items: c.items
+        .map((x) => (x.id === itemId ? { ...x, qty: x.qty + delta } : x))
+        .filter((x) => x.qty > 0),
+    }));
+  }, []);
 
   const onCombatStatChange = useCallback(
     async (key: CombatStatKey, delta: number) => {
@@ -323,6 +390,10 @@ export default function PreviewPage() {
           onCombatStatChange={onCombatStatChange}
           onAddCondition={onAddCondition}
           onRemoveCondition={onRemoveCondition}
+          onAddItem={onAddItem}
+          onRemoveItem={onRemoveItem}
+          onToggleEquip={onToggleEquip}
+          onUpdateItemQty={onUpdateItemQty}
         />
       </div>
     </main>

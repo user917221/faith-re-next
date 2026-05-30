@@ -35,6 +35,8 @@ export {
 
 export { addRune, removeRune } from "./runes";
 
+export { addItem, removeItem, toggleEquip, updateItemQty } from "./items";
+
 export {
   updateCombatStats,
   addCondition,

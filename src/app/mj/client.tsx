@@ -52,6 +52,10 @@ import {
   updateCombatStats,
   addCondition,
   removeCondition,
+  addItem,
+  removeItem,
+  toggleEquip,
+  updateItemQty,
   type TrainingRequestWithChar,
 } from "@/lib/actions";
 
@@ -443,6 +447,27 @@ export function MJCharacterClient({ character }: { character: Character }) {
           toast.error(res.reason);
           throw new Error(res.reason);
         }
+        refresh();
+      }}
+      onAddItem={async (input) => {
+        const res = await addItem(character.id, input);
+        if (!res.ok) {
+          toast.error(res.reason);
+          throw new Error(res.reason);
+        }
+        toast.success(`Objet « ${input.name} »`);
+        refresh();
+      }}
+      onRemoveItem={async (itemId) => {
+        await removeItem(character.id, itemId);
+        refresh();
+      }}
+      onToggleEquip={async (itemId) => {
+        await toggleEquip(character.id, itemId);
+        refresh();
+      }}
+      onUpdateItemQty={async (itemId, delta) => {
+        await updateItemQty(character.id, itemId, delta);
         refresh();
       }}
     />

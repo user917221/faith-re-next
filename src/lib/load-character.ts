@@ -23,7 +23,7 @@ export type HydratedCharacter = Character;
 export async function loadCharacter(characterId: string): Promise<HydratedCharacter | null> {
   const row = await db.query.characters.findFirst({
     where: eq(characters.id, characterId),
-    with: { skills: true, runesInventory: true, conditions: true },
+    with: { skills: true, runesInventory: true, conditions: true, items: true },
   });
   if (!row) return null;
   return hydrate(row);
@@ -31,7 +31,7 @@ export async function loadCharacter(characterId: string): Promise<HydratedCharac
 
 export async function loadAllCharacters(): Promise<HydratedCharacter[]> {
   const rows = await db.query.characters.findMany({
-    with: { skills: true, runesInventory: true, conditions: true },
+    with: { skills: true, runesInventory: true, conditions: true, items: true },
   });
   return rows.map(hydrate).sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -39,7 +39,7 @@ export async function loadAllCharacters(): Promise<HydratedCharacter[]> {
 export async function loadCharacterForUser(userId: string): Promise<HydratedCharacter | null> {
   const row = await db.query.characters.findFirst({
     where: eq(characters.ownerUserId, userId),
-    with: { skills: true, runesInventory: true, conditions: true },
+    with: { skills: true, runesInventory: true, conditions: true, items: true },
   });
   if (!row) return null;
   return hydrate(row);
@@ -57,6 +57,14 @@ type CharacterRow = typeof characters.$inferSelect & {
     id: string;
     label: string;
     kind: "buff" | "debuff" | "wound" | "focus" | "neutral";
+  }[];
+  items?: {
+    id: string;
+    name: string;
+    type: "arme" | "armure" | "objet" | "consommable";
+    qty: number;
+    equipped: number;
+    description: string | null;
   }[];
 };
 
@@ -109,11 +117,23 @@ function hydrate(row: CharacterRow): HydratedCharacter {
     race: row.race ?? null,
     pronouns: row.pronouns ?? null,
     charClass: row.charClass ?? null,
+    // --- Bio + notes ---
+    bio: row.bio ?? null,
+    notes: row.notes ?? null,
     // --- Conditions actives ---
     conditions: (row.conditions ?? []).map((c) => ({
       id: c.id,
       label: c.label,
       kind: c.kind,
+    })),
+    // --- Inventaire d'objets ---
+    items: (row.items ?? []).map((it) => ({
+      id: it.id,
+      name: it.name,
+      type: it.type,
+      qty: it.qty,
+      equipped: it.equipped === 1,
+      description: it.description,
     })),
     // --- Inventaire ---
     runesInventory: (row.runesInventory ?? []).map((r) => ({

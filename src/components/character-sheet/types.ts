@@ -48,10 +48,26 @@ export type Character = {
   race: string | null;
   pronouns: string | null;
   charClass: string | null;
+  // --- Bio libre + notes joueur (Phase 6) ---
+  bio: string | null;
+  notes: string | null;
   // --- Conditions actives (Phase 2) ---
   conditions: ConditionItem[];
   // --- Inventaire de runes ---
   runesInventory: RuneItem[];
+  // --- Inventaire d'objets (Phase 6) ---
+  items: ItemEntry[];
+};
+
+export type ItemKind = "arme" | "armure" | "objet" | "consommable";
+
+export type ItemEntry = {
+  id: string;
+  name: string;
+  type: ItemKind;
+  qty: number;
+  equipped: boolean;
+  description: string | null;
 };
 
 export type ConditionKind = "buff" | "debuff" | "wound" | "focus" | "neutral";
@@ -81,6 +97,8 @@ export type ProfilePatch = {
   race?: string;
   pronouns?: string;
   charClass?: string;
+  bio?: string;
+  notes?: string;
 };
 
 export type PendingTrainingRequest = {
@@ -120,6 +138,16 @@ export type CharacterSheetProps = {
     kind: ConditionKind;
   }) => Promise<void>;
   onRemoveCondition?: (conditionId: string) => Promise<void>;
+  // --- Inventaire d'objets (Phase 6) ---
+  onAddItem?: (input: {
+    name: string;
+    type: ItemKind;
+    qty?: number;
+    description?: string;
+  }) => Promise<void>;
+  onRemoveItem?: (itemId: string) => Promise<void>;
+  onToggleEquip?: (itemId: string) => Promise<void>;
+  onUpdateItemQty?: (itemId: string, delta: number) => Promise<void>;
   onRecoverHp?: () => Promise<{ gain: number; d1: number; d2: number; ecaille: number; newHp: number; maxHp: number }>;
   onRecoverEndurance?: () => Promise<{ gain: number; roll: number; newEndurance: number; maxEndurance: number }>;
   onTogglePresence?: () => Promise<void>;
