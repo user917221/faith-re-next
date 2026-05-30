@@ -1,5 +1,7 @@
 "use client";
 
+import { HeartCrack } from "lucide-react";
+import { getVitalityState } from "@/lib/faith-system";
 import type { Character, VitalType } from "./types";
 import { VitalGauge } from "@/components/faith/VitalGauge";
 
@@ -16,6 +18,7 @@ type Props = {
  * via `onVitalChange` / `onFluxChange`.
  */
 export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) {
+  const vitality = getVitalityState(character.currentHp);
   return (
     <section
       className="campaign-panel p-5"
@@ -35,6 +38,33 @@ export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) 
           {character.isPresent ? "Actif" : "Hors table"}
         </span>
       </div>
+
+      {vitality.key !== "vivant" && (
+        <div
+          className="mb-4 flex flex-col gap-0.5 rounded-md border px-3 py-2"
+          style={{
+            borderColor: "color-mix(in oklab, var(--hp) 45%, transparent)",
+            background: "color-mix(in oklab, var(--hp) 12%, transparent)",
+          }}
+          role="status"
+        >
+          <span
+            className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: "var(--hp)" }}
+          >
+            <HeartCrack size={13} aria-hidden />
+            {vitality.label}
+            <span className="ml-auto font-mono text-[10px] tabular-nums opacity-80">
+              {character.currentHp} PV
+            </span>
+          </span>
+          {vitality.effect && (
+            <span className="text-[11px] leading-snug text-foreground-muted">
+              {vitality.effect}
+            </span>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 items-start justify-items-center gap-6 sm:grid-cols-4 sm:gap-5">
         <VitalGauge

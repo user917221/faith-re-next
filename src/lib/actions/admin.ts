@@ -105,7 +105,7 @@ export async function updateCharacterFull(
     u.fatePoints = clampInt(patch.fatePoints, 0, 99);
 
   if (typeof patch.currentHp === "number")
-    u.currentHp = clampInt(patch.currentHp, 0, 100000);
+    u.currentHp = clampInt(patch.currentHp, -21, 100000); // PV ≥ -21 (HP_FLOOR, système de mort)
   if (typeof patch.currentMental === "number")
     u.currentMental = clampInt(patch.currentMental, 0, 100000);
   if (typeof patch.currentEndurance === "number")

@@ -27,6 +27,7 @@ import {
   ENDURANCE_COSTS,
   calculateLevel,
   getEnduranceTier,
+  HP_FLOOR,
   type ActionType,
 } from "@/lib/faith-system";
 import { countAllocatedPoints } from "@/lib/skills";
@@ -217,7 +218,10 @@ export async function updateVital(
     max = getEnduranceTier(character.enduranceTrainings).max;
   }
 
-  const newValue = Math.max(0, Math.min(max, current + delta));
+  // Les PV peuvent descendre en négatif jusqu'à HP_FLOOR (-21, système de mort) ;
+  // Mental et Endurance restent plancher 0.
+  const floor = type === "hp" ? HP_FLOOR : 0;
+  const newValue = Math.max(floor, Math.min(max, current + delta));
   const now = new Date();
 
   // Set TS-safe par variant : Drizzle attend les noms de propriété du schema,

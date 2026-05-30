@@ -9,6 +9,61 @@ export const BASE_MHP = 40;
 export const SKILL_CAP = 80;
 export const ENDURANCE_DEFAULT_MAX = 250;
 
+// --- Vitalité / seuils de mort (système FAITH:RE) ---
+// Les PV peuvent descendre en négatif jusqu'à HP_FLOOR ; Mort totale en dessous.
+export const HP_FLOOR = -21;
+
+export type VitalityKey =
+  | "vivant"
+  | "dernier_souffle"
+  | "ko_total"
+  | "mort_imminente"
+  | "mort_totale";
+
+export type VitalityState = {
+  key: VitalityKey;
+  label: string;
+  /** Mécanique associée affichée à la table (null si aucune). */
+  effect: string | null;
+  /** État critique (≤ 15 PV) → affichage d'alerte rouge. */
+  critical: boolean;
+};
+
+/**
+ * État de vitalité dérivé des PV courants :
+ *   16+      → Vivant (aucun état)
+ *   1..15    → Dernier Souffle (malus +2 sur les dés physiques)
+ *   0        → KO Total (1d100 sur la blessure ; impossible sur attaques ultimes)
+ *   -1..-20  → Expérience de Mort Imminente (soignable par soins de haute performance)
+ *   ≤ -21    → Mort totale
+ */
+export function getVitalityState(hp: number): VitalityState {
+  if (hp <= -21)
+    return { key: "mort_totale", label: "Mort totale", effect: null, critical: true };
+  if (hp < 0)
+    return {
+      key: "mort_imminente",
+      label: "Expérience de Mort Imminente",
+      effect: "Soignable uniquement par soins de haute performance.",
+      critical: true,
+    };
+  if (hp === 0)
+    return {
+      key: "ko_total",
+      label: "KO Total",
+      effect: "1d100 sur la blessure (impossible sur les attaques ultimes).",
+      critical: true,
+    };
+  if (hp <= 15)
+    return {
+      key: "dernier_souffle",
+      label: "Dernier Souffle",
+      effect: "Malus +2 sur tous les dés physiques.",
+      critical: true,
+    };
+  return { key: "vivant", label: "Vivant", effect: null, critical: false };
+}
+
 // --- XP / Niveau ---
 export const XP_THRESHOLDS = [0, 500, 1000, 2000, 3000, 4000] as const;
 export const LEVEL_BONUS = [0, 20, 40, 80, 160, 320] as const;

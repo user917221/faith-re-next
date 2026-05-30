@@ -193,7 +193,7 @@ function CockpitInner() {
     async (type: VitalType, delta: number) => {
       patch(selId, (c) => {
         if (type === "hp")
-          return { ...c, currentHp: Math.max(0, Math.min(c.maxHp, c.currentHp + delta)) };
+          return { ...c, currentHp: Math.max(-21, Math.min(c.maxHp, c.currentHp + delta)) };
         if (type === "mental")
           return {
             ...c,
