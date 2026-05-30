@@ -31,10 +31,10 @@ import type { CharacterSheetProps } from "./types";
 
 /* Chips d'attributs — 4 attributs FAITH:RE (score = somme des 5 skills). */
 const ATTR_CHIPS = [
-  { name: "INTELLECT", short: "INT", icon: Brain },
-  { name: "PSYCHÉ", short: "PSY", icon: Eye },
-  { name: "CONSTITUTION", short: "CON", icon: Shield },
-  { name: "MANŒUVRE", short: "MAN", icon: Crosshair },
+  { name: "INTELLECT", short: "INT", icon: Brain, accent: "var(--mhp)" },
+  { name: "PSYCHÉ", short: "PSY", icon: Eye, accent: "#a78bfa" },
+  { name: "CONSTITUTION", short: "CON", icon: Shield, accent: "var(--endu)" },
+  { name: "MANŒUVRE", short: "MAN", icon: Crosshair, accent: "var(--primary)" },
 ] as const;
 
 type DrawerCtx = RollContext & {
@@ -98,14 +98,14 @@ export default function CharacterSheet({
         {/* Ligne identité */}
         <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-5">
           <div className="relative shrink-0">
-            <Avatar className="size-14 rounded-lg ring-1 ring-border">
+            <Avatar className="size-16 rounded-xl ring-1 ring-primary/30 ring-offset-2 ring-offset-card">
               <AvatarImage
                 src={character.avatarUrl ?? undefined}
                 alt=""
-                className="rounded-lg"
+                className="rounded-xl"
               />
               <AvatarFallback
-                className="rounded-lg text-sm font-semibold"
+                className="rounded-xl text-base font-semibold"
                 style={avatarFallbackStyle(character.name)}
               >
                 {initialsOf(character.name, character.nom)}
@@ -201,20 +201,31 @@ export default function CharacterSheet({
           role="list"
           aria-label="Attributs"
         >
-          {ATTR_CHIPS.map(({ name, short, icon: Icon }) => {
+          {ATTR_CHIPS.map(({ name, short, icon: Icon, accent }) => {
             const score = calculateAttribute(character.skills, name);
             return (
               <div
                 key={short}
                 role="listitem"
                 title={name}
-                className="flex items-center justify-center gap-2 px-3 py-3"
+                className="group/attr relative flex flex-col items-center justify-center gap-1 px-3 py-3.5"
               >
-                <Icon size={11} className="text-foreground-subtle" aria-hidden />
-                <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-                  {short}
+                {/* liseré d'accent par attribut */}
+                <span
+                  aria-hidden
+                  className="absolute inset-x-3 top-0 h-px"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+                    opacity: 0.6,
+                  }}
+                />
+                <span className="flex items-center gap-1.5">
+                  <Icon size={12} style={{ color: accent }} aria-hidden />
+                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+                    {short}
+                  </span>
                 </span>
-                <span className="font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
+                <span className="font-mono text-lg font-semibold tabular-nums slashed-zero text-foreground">
                   {score}
                 </span>
               </div>
