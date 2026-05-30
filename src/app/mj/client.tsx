@@ -90,7 +90,7 @@ export function RosterNav({
   const presentCount = characters.filter((c) => c.isPresent).length;
 
   return (
-    <div className="campaign-panel sticky top-[5rem]">
+    <div className="campaign-panel sticky top-0">
       <header className="campaign-header-line flex items-center justify-between gap-2 px-4 py-3">
         <div className="flex items-center gap-2">
           <p className="label-grimoire">Roster</p>
@@ -101,7 +101,7 @@ export function RosterNav({
         {isMJ && <CreateCharacterDialog />}
       </header>
 
-      <ScrollArea className="max-h-[calc(100vh-13rem)]">
+      <ScrollArea className="max-h-[calc(100vh-7rem)]">
         <nav className="list-portfolio" aria-label="Liste des personnages">
           {characters.map((c) => {
             const isActive = c.id === selectedId;
@@ -634,6 +634,9 @@ export function PendingTrainingPanel({
       toast("Demande refusée");
       refresh();
     });
+
+  // « File vide » = inutile : on n'affiche le panneau que s'il y a des demandes.
+  if (requests.length === 0) return null;
 
   return (
     <Card className="h-full gap-0 py-0">
