@@ -19,6 +19,7 @@ import { ALL_SKILLS } from "@/lib/skills";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 import { CockpitShell } from "@/components/cockpit/CockpitShell";
+import { QuickRollPanel } from "@/components/cockpit/QuickRollPanel";
 
 const SKILLS = Object.fromEntries(ALL_SKILLS.map((s) => [s, 1]));
 
@@ -176,6 +177,7 @@ export default function CockpitPreview() {
   return (
     <CockpitShell
       user={{ name: "Game Master", role: "mj", image: null }}
+      rollPanel={<QuickRollPanel characterName={selected.name} />}
       roster={
         <div className="campaign-panel">
           <div className="campaign-header-line flex items-center justify-between px-4 py-3">

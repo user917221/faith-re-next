@@ -1,42 +1,108 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Dices, X } from "lucide-react";
 
 /**
  * Quick-Roll panel (cockpit MJ) — sélecteur de dé + display + modificateurs + pool.
- * Phase 1 : jets locaux (Math.random) pour valider l'UI. Phase 3 : brancher le
- * moteur serveur (rollPublicFormula) + le carnet du plateau.
+ *
+ * Contrôlé : si `onRoll` est fourni (cockpit /mj réel → `rollPublicPool`), le jet
+ * est persisté côté serveur et apparaît sur /plateau. Sinon, fallback local
+ * (Math.random) pour l'aperçu public /cockpit sans BDD.
  */
 const DICE = [4, 6, 8, 10, 12, 20, 100];
+
 type PoolDie = { sides: number; count: number };
+type Keep = "all" | "highest" | "lowest";
+type RollInput = { dice: PoolDie[]; modifier: number; keep: Keep };
+type RollResult = { total: number; isCritSucc: boolean; isCritFail: boolean };
+type Display = { total: number; crit: "succ" | "fail" | null; label: string };
 
 const d = (sides: number) => 1 + Math.floor(Math.random() * sides);
 
-export function QuickRollPanel() {
+function localRoll({ dice, modifier, keep }: RollInput): RollResult {
+  const flat = dice.flatMap((g) => Array<number>(g.count).fill(g.sides));
+  const rolls = flat.map((s) => d(s));
+  let kept: number;
+  let isCritSucc = false;
+  let isCritFail = false;
+  if (keep === "highest" || keep === "lowest") {
+    const pick = keep === "highest" ? (a: number, b: number) => a > b : (a: number, b: number) => a < b;
+    const idx = rolls.reduce((best, r, i) => (pick(r, rolls[best]) ? i : best), 0);
+    kept = rolls[idx];
+    isCritSucc = kept === flat[idx];
+    isCritFail = kept === 1;
+  } else {
+    kept = rolls.reduce((a, b) => a + b, 0);
+    if (flat.length === 1) {
+      isCritSucc = rolls[0] === flat[0];
+      isCritFail = rolls[0] === 1;
+    }
+  }
+  return { total: kept + modifier, isCritSucc, isCritFail };
+}
+
+export function QuickRollPanel({
+  characterName,
+  onRoll,
+}: {
+  characterName?: string;
+  onRoll?: (input: RollInput) => Promise<RollResult | null>;
+} = {}) {
   const [die, setDie] = useState(20);
   const [mods, setMods] = useState(0);
   const [pool, setPool] = useState<PoolDie[]>([
     { sides: 6, count: 2 },
     { sides: 8, count: 1 },
   ]);
-  const [result, setResult] = useState<number | null>(null);
+  const [display, setDisplay] = useState<Display | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  const rollSingle = () => setResult(d(die) + mods);
-  const rollAdvantage = () => setResult(Math.max(d(die), d(die)) + mods);
-  const rollPool = () => {
-    let t = mods;
-    for (const p of pool) for (let i = 0; i < p.count; i++) t += d(p.sides);
-    setResult(t);
+  const doRoll = (input: RollInput, label: string) => {
+    startTransition(async () => {
+      const res = onRoll ? await onRoll(input) : localRoll(input);
+      if (!res) return;
+      setDisplay({
+        total: res.total,
+        crit: res.isCritSucc ? "succ" : res.isCritFail ? "fail" : null,
+        label,
+      });
+    });
   };
+
+  const modLabel = mods ? ` ${mods > 0 ? "+" : "−"}${Math.abs(mods)}` : "";
+  const rollSingle = () =>
+    doRoll({ dice: [{ sides: die, count: 1 }], modifier: mods, keep: "all" }, `d${die}${modLabel}`);
+  const rollAdvantage = () =>
+    doRoll(
+      { dice: [{ sides: die, count: 2 }], modifier: mods, keep: "highest" },
+      `d${die} av.${modLabel}`,
+    );
+  const rollPool = () => {
+    const label =
+      pool.map((p) => `${p.count}d${p.sides}`).join(" + ") + modLabel;
+    doRoll({ dice: pool, modifier: mods, keep: "all" }, label);
+  };
+
+  const critColor =
+    display?.crit === "succ"
+      ? "var(--endu)"
+      : display?.crit === "fail"
+        ? "var(--hp)"
+        : "var(--foreground)";
 
   return (
     <div className="flex flex-col gap-3">
       {/* Jet rapide */}
       <section className="campaign-panel">
         <div className="campaign-header-line flex items-center justify-between px-4 py-3">
-          <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <h2 className="min-w-0 truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
             Jet rapide
+            {characterName && (
+              <span className="ml-1.5 normal-case tracking-normal text-foreground-muted">
+                · {characterName}
+              </span>
+            )}
           </h2>
           <select
             value={die}
@@ -52,26 +118,36 @@ export function QuickRollPanel() {
           </select>
         </div>
         <div className="flex flex-col items-center gap-1 px-4 py-5">
-          <span className="font-mono text-5xl font-semibold leading-none tabular-nums slashed-zero text-foreground">
-            {result ?? "—"}
+          <span
+            className="font-mono text-5xl font-semibold leading-none tabular-nums slashed-zero transition-colors"
+            style={{ color: critColor }}
+          >
+            {display?.total ?? "—"}
           </span>
-          <span className="mt-1 font-mono text-[10px] uppercase tracking-widest text-foreground-subtle">
-            Jet d{die}
-            {mods ? ` ${mods > 0 ? "+" : "−"}${Math.abs(mods)}` : ""}
+          <span className="mt-1 min-h-3.5 font-mono text-[10px] uppercase tracking-widest text-foreground-subtle">
+            {display
+              ? display.crit === "succ"
+                ? `Crit ! · ${display.label}`
+                : display.crit === "fail"
+                  ? `Échec critique · ${display.label}`
+                  : `Jet ${display.label}`
+              : `Jet d${die}${modLabel}`}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2 px-4 pb-4">
           <button
             type="button"
             onClick={rollSingle}
-            className="flex h-9 items-center justify-center gap-2 rounded-md bg-foreground text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+            disabled={isPending}
+            className="flex h-9 items-center justify-center gap-2 rounded-md bg-foreground text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
           >
             <Dices size={14} /> Lancer
           </button>
           <button
             type="button"
             onClick={rollAdvantage}
-            className="flex h-9 items-center justify-center gap-2 rounded-md border border-border text-sm text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground"
+            disabled={isPending}
+            className="flex h-9 items-center justify-center gap-2 rounded-md border border-border text-sm text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground disabled:opacity-50"
           >
             Avantage
           </button>
@@ -164,7 +240,8 @@ export function QuickRollPanel() {
         <button
           type="button"
           onClick={rollPool}
-          className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-md bg-foreground text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+          disabled={isPending || pool.length === 0}
+          className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-md bg-foreground text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-50"
         >
           <Dices size={14} /> Lancer le pool
         </button>

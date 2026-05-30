@@ -3,7 +3,12 @@ import { redirect } from "next/navigation";
 import { loadAllCharacters, loadCharacter } from "@/lib/load-character";
 import { listTrainingRequestsForMJ } from "@/lib/actions";
 import { CockpitShell } from "@/components/cockpit/CockpitShell";
-import { MJCharacterClient, PendingTrainingPanel, RosterNav } from "./client";
+import {
+  MJCharacterClient,
+  MJQuickRoll,
+  PendingTrainingPanel,
+  RosterNav,
+} from "./client";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +41,11 @@ export default async function MjDashboardPage({
           <RosterNav characters={allChars} selectedId={selectedId} />
           <PendingTrainingPanel requests={pendingRequests} />
         </>
+      }
+      rollPanel={
+        selected ? (
+          <MJQuickRoll characterId={selected.id} characterName={selected.name} />
+        ) : undefined
       }
     >
       {selected ? (

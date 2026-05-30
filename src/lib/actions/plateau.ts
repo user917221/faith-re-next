@@ -239,6 +239,133 @@ export async function rollPublicFormula(input: {
   return { ok: true, rollId: inserted.id, total };
 }
 
+// ---------------- rollPublicPool ----------------
+
+/**
+ * Jet « pool » générique du cockpit (Jet Rapide) : une ou plusieurs séries de
+ * dés `NdS`, un modificateur plat, et un mode de conservation :
+ *  - "all"      : somme de tous les dés (+ mod) — jet simple ou pool.
+ *  - "highest"  : garde le meilleur dé (+ mod) — avantage.
+ *  - "lowest"   : garde le pire dé (+ mod) — désavantage.
+ * Persiste un seul `public_roll` (visible sur /plateau).
+ */
+export async function rollPublicPool(input: {
+  characterId: string;
+  dice: { sides: number; count: number }[];
+  modifier?: number;
+  keep?: "all" | "highest" | "lowest";
+}): Promise<
+  | {
+      ok: true;
+      rollId: string;
+      total: number;
+      rolls: number[];
+      isCritSucc: boolean;
+      isCritFail: boolean;
+    }
+  | { ok: false; reason: string }
+> {
+  const session = await requireSession();
+
+  const keep = input.keep ?? "all";
+  const modifier = Number.isFinite(input.modifier)
+    ? Math.max(-99, Math.min(99, Math.trunc(input.modifier as number)))
+    : 0;
+
+  const groups = (input.dice ?? []).filter((g) => g && g.count > 0);
+  if (groups.length === 0) return { ok: false, reason: "Aucun dé" };
+
+  // Aplatit en une liste de faces (une entrée par dé lancé) pour valider + roller.
+  const flatSides: number[] = [];
+  for (const g of groups) {
+    const sides = Math.trunc(g.sides);
+    const count = Math.trunc(g.count);
+    if (sides < 2 || sides > 1000) {
+      return { ok: false, reason: "Taille de dé invalide (2-1000)" };
+    }
+    if (count < 1 || count > 50) {
+      return { ok: false, reason: "Nombre de dés invalide (1-50)" };
+    }
+    for (let i = 0; i < count; i++) flatSides.push(sides);
+  }
+  if (flatSides.length > 50) {
+    return { ok: false, reason: "Pool trop grand (50 dés max)" };
+  }
+  if ((keep === "highest" || keep === "lowest") && flatSides.length < 2) {
+    return { ok: false, reason: "Avantage : il faut au moins 2 dés" };
+  }
+
+  let char;
+  try {
+    char = (await loadCharacterWithSkills(input.characterId)).char;
+  } catch {
+    return { ok: false, reason: "Personnage introuvable" };
+  }
+
+  const rolls = flatSides.map((s) => rollDie(s));
+
+  // Détermine la valeur conservée + l'index décisif (pour les crits naturels).
+  let kept: number;
+  let keptIdx: number;
+  if (keep === "highest") {
+    keptIdx = rolls.reduce((best, r, i) => (r > rolls[best] ? i : best), 0);
+    kept = rolls[keptIdx];
+  } else if (keep === "lowest") {
+    keptIdx = rolls.reduce((worst, r, i) => (r < rolls[worst] ? i : worst), 0);
+    kept = rolls[keptIdx];
+  } else {
+    keptIdx = -1;
+    kept = rolls.reduce((acc, r) => acc + r, 0);
+  }
+
+  const total = kept + modifier;
+
+  // Crits naturels : sur un dé unique décisif (avantage/désavantage ou 1 seul dé)
+  // → face max / face 1. Sur une somme de pool, on les laisse à false.
+  let isCritSucc = false;
+  let isCritFail = false;
+  if (keep === "highest" || keep === "lowest") {
+    isCritSucc = kept === flatSides[keptIdx];
+    isCritFail = kept === 1;
+  } else if (flatSides.length === 1) {
+    isCritSucc = rolls[0] === flatSides[0];
+    isCritFail = rolls[0] === 1;
+  }
+
+  // Formule canonique lisible : "2d6 + 1d8 (av.) +3"
+  const dicePart = groups
+    .map((g) => `${Math.trunc(g.count)}d${Math.trunc(g.sides)}`)
+    .join(" + ");
+  const keepSuffix =
+    keep === "highest" ? " (av.)" : keep === "lowest" ? " (dés.)" : "";
+  const modPart =
+    modifier !== 0 ? ` ${modifier > 0 ? "+" : "−"}${Math.abs(modifier)}` : "";
+  const formula = `${dicePart}${keepSuffix}${modPart}`;
+
+  const [inserted] = await db
+    .insert(publicRolls)
+    .values({
+      characterId: char.id,
+      characterName: char.name,
+      casterUserId: session.user.id,
+      casterName: session.user.name ?? "Inconnu",
+      formula,
+      rolls,
+      attrName: null,
+      attrScore: null,
+      skillName: null,
+      skillScore: null,
+      total,
+      isCritSucc: isCritSucc ? 1 : 0,
+      isCritFail: isCritFail ? 1 : 0,
+    })
+    .returning({ id: publicRolls.id });
+
+  revalidatePath("/plateau");
+
+  return { ok: true, rollId: inserted.id, total, rolls, isCritSucc, isCritFail };
+}
+
 // ---------------- listRecentPublicRolls ----------------
 
 export async function listRecentPublicRolls(): Promise<

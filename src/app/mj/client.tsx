@@ -23,9 +23,11 @@ import {
 } from "@/components/ui/hover-card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { QuickRollPanel } from "@/components/cockpit/QuickRollPanel";
 import { toast } from "sonner";
 import { Inbox } from "lucide-react";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
+import { rollPublicPool } from "@/lib/actions/plateau";
 import {
   updateSkill,
   updateVital,
@@ -442,6 +444,47 @@ export function MJCharacterClient({ character }: { character: Character }) {
           throw new Error(res.reason);
         }
         refresh();
+      }}
+    />
+  );
+}
+
+/* ============================================================
+ * MJQuickRoll — pane droit du cockpit : Jet Rapide branché sur le moteur
+ * réel (rollPublicPool → persiste dans public_roll, visible sur /plateau).
+ * ============================================================ */
+export function MJQuickRoll({
+  characterId,
+  characterName,
+}: {
+  characterId: string;
+  characterName: string;
+}) {
+  const router = useRouter();
+  const [, startTransition] = useTransition();
+
+  return (
+    <QuickRollPanel
+      characterName={characterName}
+      onRoll={async (input) => {
+        const res = await rollPublicPool({ characterId, ...input });
+        if (!res.ok) {
+          toast.error(res.reason);
+          return null;
+        }
+        toast.success(`Jet : ${res.total}`, {
+          description: res.isCritSucc
+            ? "Réussite critique !"
+            : res.isCritFail
+              ? "Échec critique"
+              : undefined,
+        });
+        startTransition(() => router.refresh());
+        return {
+          total: res.total,
+          isCritSucc: res.isCritSucc,
+          isCritFail: res.isCritFail,
+        };
       }}
     />
   );
