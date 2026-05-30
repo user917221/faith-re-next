@@ -64,13 +64,11 @@ export function AppSidebar({
             <span className="truncate text-sm font-semibold text-foreground">
               FAITH&nbsp;:&nbsp;RE
             </span>
-            <span className="mt-0.5 text-[10px] font-mono uppercase tracking-[0.16em] text-foreground-subtle">
-              Campaign cockpit
-            </span>
+            <span className="eyebrow mt-0.5">Campaign cockpit</span>
           </div>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-1.5 group-data-[collapsible=icon]:hidden">
-          <div className="rounded-md border border-sidebar-border bg-sidebar-accent/50 px-2 py-1.5">
+          <div className="chrome-tile px-2 py-1.5">
             <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-foreground-subtle">
               Mode
             </p>
@@ -78,9 +76,9 @@ export function AppSidebar({
               {ROLE_LABEL[user.role]}
             </p>
           </div>
-          <div className="rounded-md border border-sidebar-border bg-sidebar-accent/50 px-2 py-1.5">
+          <div className="chrome-tile px-2 py-1.5">
             <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-foreground-subtle">
-              Etat
+              État
             </p>
             <p className="mt-0.5 text-xs text-primary">En session</p>
           </div>
@@ -89,7 +87,7 @@ export function AppSidebar({
 
       <SidebarContent>
         <SidebarGroup className="p-3">
-          <SidebarGroupLabel className="px-1 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
+          <SidebarGroupLabel className="eyebrow px-1">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>

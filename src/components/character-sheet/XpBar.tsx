@@ -23,20 +23,14 @@ export function XpBar({ character }: { character: Character }) {
 
   return (
     <section className="campaign-panel flex items-center gap-3 px-5 py-3">
-      <span className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-        XP
-      </span>
+      <span className="eyebrow shrink-0">XP</span>
       <span className="shrink-0 font-mono text-xs tabular-nums slashed-zero text-foreground-muted">
         Niv. <span className="text-foreground">{level}</span> · {character.tier}
       </span>
-      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/[0.07]">
+      <div className="vital-track flex-1">
         <div
-          className="h-full rounded-full"
-          style={{
-            width: `${pct}%`,
-            backgroundColor: "var(--primary)",
-            transition: "width 0.4s cubic-bezier(.4,0,.2,1)",
-          }}
+          className="vital-track-fill"
+          style={{ width: `${pct}%`, background: "var(--primary)" }}
         />
       </div>
       <span className="shrink-0 font-mono text-xs tabular-nums slashed-zero text-foreground-muted">

@@ -105,9 +105,7 @@ export function CampaignStatus({
 }: Props) {
   return (
     <div className="campaign-subpanel flex flex-col gap-2.5 p-3">
-      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground-subtle">
-        Statut de campagne
-      </p>
+      <p className="eyebrow">Statut de campagne</p>
       <div className="flex flex-col gap-1">
         <div className="flex items-center justify-between text-[11px]">
           <span className="text-foreground-muted">Menace</span>

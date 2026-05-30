@@ -18,9 +18,7 @@ export function PointAllocatorBar({ allocated, cap = SKILL_CAP }: Props) {
     <section
       className="campaign-panel flex items-center gap-4 px-5 py-3"
     >
-      <span className="shrink-0 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-        Allocation
-      </span>
+      <span className="eyebrow shrink-0">Allocation</span>
       <span className="shrink-0 font-mono tabular-nums slashed-zero">
         <span
           className="text-base font-semibold"
@@ -30,13 +28,12 @@ export function PointAllocatorBar({ allocated, cap = SKILL_CAP }: Props) {
         </span>
         <span className="text-xs text-foreground-subtle"> / {cap}</span>
       </span>
-      <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
+      <div className="vital-track flex-1">
         <div
-          className="h-full rounded-full"
+          className="vital-track-fill"
           style={{
             width: `${pct}%`,
-            backgroundColor: isCapped ? "var(--hp)" : "var(--primary)",
-            transition: "width 0.4s cubic-bezier(.4,0,.2,1)",
+            background: isCapped ? "var(--hp)" : "var(--primary)",
           }}
         />
       </div>

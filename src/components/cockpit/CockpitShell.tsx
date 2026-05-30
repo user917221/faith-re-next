@@ -38,18 +38,19 @@ const NAV: {
   icon: typeof LayoutDashboard;
   view?: string;
   href?: string;
+  soon?: boolean;
 }[] = [
   { label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
-  { label: "Roster", icon: Users },
-  { label: "Sessions", icon: CalendarDays },
+  { label: "Roster", icon: Users, soon: true },
+  { label: "Sessions", icon: CalendarDays, soon: true },
   { label: "Journal", icon: BookText, view: "journal" },
-  { label: "Maps", icon: Map },
+  { label: "Maps", icon: Map, soon: true },
   { label: "NPCs", icon: UserCircle2, view: "npcs" },
-  { label: "Items", icon: Package },
+  { label: "Items", icon: Package, soon: true },
   { label: "Logs", icon: History, view: "logs" },
   { label: "Règles", icon: Scale, view: "regles" },
   { label: "Plateau", icon: Dices, href: "/plateau" },
-  { label: "Réglages", icon: Settings },
+  { label: "Réglages", icon: Settings, soon: true },
 ];
 
 /**
@@ -103,30 +104,44 @@ export function CockpitShell({
       <CommandMenu user={user} />
 
       {/* ============ NAV SIDEBAR ============ */}
-      <aside className="cockpit-chrome hidden w-60 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
+      <aside className="cockpit-chrome chrome-rail hidden w-60 shrink-0 flex-col border-r border-border lg:flex">
         <div className="flex items-center gap-2.5 border-b border-border p-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-primary/35 bg-primary/12 text-primary">
             <CrestGlyph size={22} />
           </div>
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-sm font-semibold">FAITH&nbsp;:&nbsp;RE</span>
-            <span className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
-              Campaign cockpit
-            </span>
+            <span className="eyebrow mt-0.5">Campaign cockpit</span>
           </div>
         </div>
 
         <nav className="flex flex-1 flex-col gap-1 overflow-y-auto overscroll-none p-3">
-          <p className="px-1 pb-1 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
-            Navigation
-          </p>
-          {NAV.map(({ label, icon: Icon, view, href }) => {
+          <p className="eyebrow px-1 pb-1">Navigation</p>
+          {NAV.map(({ label, icon: Icon, view, href, soon }) => {
             const active = view !== undefined && view === activeView;
             const cls = `flex h-9 items-center gap-2.5 rounded-md border px-2.5 text-sm transition-colors ${
               active
                 ? "border-primary/30 bg-primary/12 text-primary"
                 : "border-transparent text-foreground-muted hover:border-border hover:bg-surface-overlay hover:text-foreground"
             }`;
+            if (soon) {
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  title="Bientôt"
+                  className="flex h-9 cursor-not-allowed items-center gap-2.5 rounded-md border border-transparent px-2.5 text-sm text-foreground-subtle/60"
+                >
+                  <Icon size={16} />
+                  <span>{label}</span>
+                  <span className="ml-auto font-mono text-[9px] uppercase tracking-[0.12em] text-foreground-subtle/50">
+                    Bientôt
+                  </span>
+                </button>
+              );
+            }
             if (href) {
               return (
                 <Link key={label} href={href} className={cls}>
@@ -157,7 +172,7 @@ export function CockpitShell({
       {/* ============ COLONNE PRINCIPALE ============ */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="cockpit-chrome relative z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
+        <header className="cockpit-chrome relative z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] backdrop-blur-xl dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
           {campaignSelector ?? (
             <button
               type="button"
@@ -228,7 +243,7 @@ export function CockpitShell({
         </div>
 
         {/* Bottom bar */}
-        <footer className="cockpit-chrome flex h-10 shrink-0 items-center justify-between border-t border-border px-4 text-[11px] text-foreground-subtle">
+        <footer className="cockpit-chrome chrome-rail flex h-10 shrink-0 items-center justify-between border-t border-border px-4 text-[11px] text-foreground-subtle">
           <span className="font-mono">FAITH&nbsp;:&nbsp;RE — cockpit</span>
           <div className="flex items-center gap-4">
             <Link

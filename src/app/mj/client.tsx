@@ -95,7 +95,7 @@ export function RosterNav({
         <div className="flex items-center gap-2">
           <p className="label-grimoire">Roster</p>
           <span className="tabular text-xs text-ink-tertiary">
-            <span className="text-foreground">{characters.length}</span> / 4
+            <span className="text-endu">{presentCount}</span>/{characters.length} présents
           </span>
         </div>
         {isMJ && <CreateCharacterDialog />}
@@ -271,17 +271,6 @@ export function RosterNav({
           })}
         </nav>
       </ScrollArea>
-
-      {/* Footer — présents */}
-      <footer className="border-t border-border px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
-          <span className="label-grimoire">Présents</span>
-          <span className="tabular text-xs text-foreground">
-            <span className="text-endu">{presentCount}</span>
-            <span className="text-ink-tertiary"> / {characters.length}</span>
-          </span>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -61,7 +61,7 @@ export function RecoveryPanel({ onRecoverHp, onRecoverEndurance }: Props) {
       aria-label="Récupération"
     >
       <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
-        <h2 className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+        <h2 className="eyebrow flex items-center gap-2">
           <Dices size={12} aria-hidden /> Récupération
         </h2>
         {lastResult && lastResult.kind !== "error" && (

@@ -243,12 +243,14 @@ export default function CharacterSheet({
           // top piloté par chaque coque : 0 dans le cockpit (scroll du pane
           // central), 3.5rem sous la top-bar de l'AppShell (scroll document).
           style={{ top: "var(--sheet-tabs-top, 0px)" }}
-          className="sticky z-20 flex w-full h-auto items-center gap-1 rounded-lg border border-border bg-background/95 p-1 backdrop-blur-xl"
+          // overflow-x-auto = filet anti-débordement sous ~360px ; scrollbar masquée
+          // pour rester dans l'esthétique épurée. Aucun effet desktop (le contenu ne déborde pas).
+          className="sticky z-20 flex w-full h-auto items-center gap-1 overflow-x-auto rounded-lg border border-border bg-background/95 p-1 backdrop-blur-xl [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {(
             [
               ["vitaux", "Vitaux"],
-              ["competences", "Stats"],
+              ["competences", "Compétences"],
               ["objets", "Objets"],
               ...(isMJ ? [["evolution", "Évolution"]] : []),
               ["profil", "Profil"],
@@ -327,7 +329,7 @@ export default function CharacterSheet({
                       {attr}
                     </span>
                     <span
-                      className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/16"
+                      className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-hairline-tertiary"
                       aria-hidden
                     />
                     {openAttrRoll ? (

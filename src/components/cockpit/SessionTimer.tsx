@@ -136,9 +136,7 @@ export function SessionTimer({
     <div className="campaign-subpanel flex flex-col gap-2 p-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-col">
-          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground-subtle">
-            Temps de session
-          </p>
+          <p className="eyebrow">Temps de session</p>
           <p className="font-mono text-sm tabular-nums slashed-zero text-foreground">
             {hh}:{mm}:{ss}
           </p>

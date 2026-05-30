@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Minus, Plus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { CountUp } from "./CountUp";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,9 +76,18 @@ export function VitalGauge({
     // Si dégât (delta < 0), l'armure réduit l'amplitude (sans jamais devenir un soin).
     const actualDelta =
       delta < 0 ? Math.min(0, delta + (armorReduction ?? 0)) : delta;
-    // Snap optimiste immédiat (la valeur bouge avant le retour serveur).
+    // La valeur affichée vient du serveur (source de vérité) ; en cas d'échec
+    // de la server action, on signale l'erreur — sinon l'ajustement échoue en
+    // silence et l'utilisateur croit le coup porté.
     startTransition(async () => {
-      await onAdjust(actualDelta);
+      try {
+        await onAdjust(actualDelta);
+      } catch (e) {
+        toast.error(
+          `Ajustement de ${label} impossible`,
+          { description: e instanceof Error ? e.message : undefined },
+        );
+      }
     });
   };
 
@@ -120,26 +130,39 @@ export function VitalGauge({
         <div
           className="absolute inset-0 flex flex-col items-center justify-center"
           style={{ top: 4 }}
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
         >
-          <CountUp
-            value={displayValue}
-            className="font-mono text-2xl font-semibold leading-none tabular-nums slashed-zero"
-            style={{
-              // PV négatifs (système de mort, jusqu'à -21) → bleu, signal distinct.
-              color:
-                displayValue < 0
-                  ? "var(--mhp)"
-                  : isLow
-                    ? "var(--hp)"
-                    : isEmpty
-                      ? color
-                      : "var(--foreground)",
-            }}
-          />
+          {/* Libellé lisible pour les lecteurs d'écran (ex. « Santé : 125 sur 220 »).
+              Le visuel est masqué de l'AT pour ne pas annoncer les chiffres animés. */}
+          <span className="sr-only">
+            {label} : {displayValue} sur {max}
+          </span>
+          <span aria-hidden="true" className="contents">
+            <CountUp
+              value={displayValue}
+              className="font-mono text-2xl font-semibold leading-none tabular-nums slashed-zero"
+              style={{
+                // PV négatifs (système de mort, jusqu'à -21) → bleu, signal distinct.
+                color:
+                  displayValue < 0
+                    ? "var(--mhp)"
+                    : isLow
+                      ? "var(--hp)"
+                      : isEmpty
+                        ? color
+                        : "var(--foreground)",
+              }}
+            />
+          </span>
           {isPending ? (
             <Loader2 className="mt-1 size-3 animate-spin text-primary" aria-hidden="true" />
           ) : (
-            <span className="text-foreground-subtle mt-0.5 font-mono text-[10px] tracking-[0.14em] tabular-nums slashed-zero">
+            <span
+              aria-hidden="true"
+              className="text-foreground-subtle mt-0.5 font-mono text-[10px] tracking-[0.14em] tabular-nums slashed-zero"
+            >
               /{max}
             </span>
           )}
@@ -148,23 +171,22 @@ export function VitalGauge({
 
       {/* Label + slot badge (hauteur réservée pour aligner les colonnes) */}
       <div className="flex h-7 flex-col items-center justify-start gap-0.5">
-        <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-          {label}
-        </span>
+        <span className="eyebrow">{label}</span>
         <span className="text-foreground-subtle font-mono text-[10px] tracking-widest tabular-nums">
           {badge || " "}
         </span>
       </div>
 
       {/* Ajusteur sobre — câblé serveur (dégât / soin avec montant) */}
+      {/* Cibles tactiles ≥ 36px sur mobile, taille desktop (24px) restaurée en sm. */}
       {onAdjust && (
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-1.5">
           <Button
             variant="outline"
             size="icon-xs"
             onClick={() => adjust(-amount)}
             disabled={isPending}
-            className="size-6 text-foreground-muted hover:text-foreground"
+            className="size-9 text-foreground-muted hover:text-foreground sm:size-6"
             aria-label={`Infliger ${amount} à ${label}`}
             title={`Dégât −${amount}`}
           >
@@ -181,14 +203,14 @@ export function VitalGauge({
             onFocus={(e) => e.currentTarget.select()}
             disabled={isPending}
             aria-label={`Montant pour ${label}`}
-            className="h-6 w-11 bg-background/50 text-center font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted outline-none [appearance:textfield] focus-visible:border-primary/40 focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="h-9 w-12 bg-background/50 text-center font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted outline-none [appearance:textfield] focus-visible:border-primary/40 focus-visible:ring-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none sm:h-6 sm:w-11"
           />
           <Button
             variant="outline"
             size="icon-xs"
             onClick={() => adjust(amount)}
             disabled={isPending}
-            className="size-6 text-foreground-muted hover:text-foreground"
+            className="size-9 text-foreground-muted hover:text-foreground sm:size-6"
             aria-label={`Soigner ${amount} de ${label}`}
             title={`Soin +${amount}`}
           >

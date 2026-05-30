@@ -99,9 +99,7 @@ export function ConditionsPanel({
   return (
     <section className="campaign-panel">
       <header className="campaign-header-line flex items-center justify-between px-4 py-2.5">
-        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground-subtle">
-          Conditions
-        </p>
+        <p className="eyebrow">Conditions</p>
         {editable && (
           <Button
             type="button"

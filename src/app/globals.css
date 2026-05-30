@@ -6,9 +6,11 @@
 
 /* ============================================================
    FAITH : RE — Design system
-   Direction : Linear (near-black #010102, lavande #5e6ad2 unique accent,
-   surface ladder + hairlines, Inter, dense software-craft).
-   Les glyphes SVG restent en accent monochrome discret (ink-subtle).
+   Direction : V3 « glassy bento + neumorphism subtil » — verre translucide
+   + backdrop-blur, arête lumineuse interne et relief INSET sur les sous-blocs.
+   Base off-white (:root) / abysse (.dark), accent lavande #5e6ad2 unique.
+   Police Outfit (display/sans) + JetBrains Mono (nombres), self-hostée via
+   next/font. Les glyphes SVG restent en accent monochrome discret (ink-subtle).
    ============================================================ */
 
 @theme inline {
@@ -78,10 +80,10 @@
   --color-danger: var(--destructive);
 
   /* ---- Typography (Outfit display + JetBrains Mono pour les nombres) ---- */
-  --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, "SF Mono", monospace;
 
   /* ---- Micro-tailles typo (labels/eyebrows denses, sous text-xs) ---- */
   --text-2xs: 0.6875rem; /* 11px — petits labels */
@@ -314,13 +316,24 @@
   h1, h2, h3 {
     letter-spacing: 0;
   }
+  /* Focus clavier visible (a11y) — les <button> natifs n'avaient aucun retour
+     focus. Anneau net sur les cibles interactives, navigation clavier comprise. */
+  button:focus-visible,
+  a:focus-visible,
+  [role="tab"]:focus-visible,
+  .stepper-btn:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
 }
 
 /* ============================================================
    Utilitaires — réskinnés Linear (surface ladder + hairlines, plat)
    ============================================================ */
 
-/* Eyebrow / label de section — v0 : foreground-subtle, uppercase, tracking-widest */
+/* Eyebrow / label de section — v0 : foreground-subtle, uppercase, tracking-widest.
+   Conservé : utilisé hors du périmètre fiche (page.tsx, mj/client.tsx, me/client.tsx,
+   signin, preview) → ne pas supprimer. */
 .label-grimoire {
   font-family: var(--font-sans);
   font-weight: 500;
@@ -330,14 +343,19 @@
   color: var(--foreground-subtle);
 }
 
-/* Eyebrow MONO (geste Omen — labels/eyebrows en Geist Mono) */
-.ui-eyebrow {
-  font-family: var(--font-mono);
-  font-weight: 500;
-  font-size: 0.625rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--foreground-subtle);
+/* Eyebrow canonique — label mono dense, unique grammaire d'eyebrow de la fiche.
+   Remplace le patchwork inline `font-mono text-[9-11px] uppercase tracking-[0.1*em]`.
+   Tracking par défaut 0.14em ; défini dans @layer components pour que les
+   utilitaires Tailwind (text-2xs/text-3xs, couleur…) puissent le surcharger. */
+@layer components {
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: var(--text-3xs); /* 10px */
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--foreground-subtle);
+  }
 }
 
 /* Filet pointillé de ledger (geste Omen — relie label → valeur) */
@@ -421,86 +439,44 @@ body > * { position: relative; z-index: 1; }
 /* .glass-strong / .card-grimoire / .card-hero supprimés (verre lourd grimoire,
    direction v0 → utiliser .glass aligné v0 ci-dessus ou <Card> shadcn) */
 
-/* Bouton primaire — lavande plein, Inter 500, radius 8px */
-.btn-grimoire {
+/* Structure commune des boutons (typo / padding / radius).
+   Le rendu glossy steel (fond, arête, ombre, états hover/active) est défini
+   plus bas — section « Glossy Steel Buttons » — pour .btn-grimoire & .btn-ghost. */
+.btn-grimoire,
+.btn-ghost {
   font-family: var(--font-sans);
   font-weight: 500;
   font-size: 0.82rem;
   letter-spacing: 0;
   text-transform: none;
-  background: linear-gradient(180deg, var(--primary-hover), var(--primary));
-  color: var(--primary-foreground);
-  border: 1px solid transparent;
+  color: var(--ink-muted);
   padding: 0.5rem 0.9rem;
   border-radius: 7px;
-  transition: background-color 0.15s ease;
 }
-.btn-grimoire:hover:not(:disabled) {
-  background: var(--primary-hover);
+.btn-grimoire:hover:not(:disabled),
+.btn-ghost:hover:not(:disabled) {
+  color: var(--foreground);
 }
-.btn-grimoire:active:not(:disabled) {
-  background: var(--primary-focus);
-}
-.btn-grimoire:disabled {
+.btn-grimoire:disabled,
+.btn-ghost:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* Bouton secondaire — surface-1 + hairline */
-.btn-ghost {
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  color: var(--ink-muted);
-  padding: 0.5rem 0.9rem;
-  border-radius: 7px;
-  transition: all 0.15s ease;
-}
-.btn-ghost:hover:not(:disabled) {
-  border-color: var(--hairline-strong);
-  color: var(--foreground);
-  background: var(--popover);
-}
-
-/* Input — surface-1, hairline, focus ring lavande */
-.input-grimoire {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  color: var(--foreground);
-  padding: 0.5rem 0.75rem;
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.input-grimoire:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
-}
-
-/* Select Linear */
+/* Select — pastille chevron + couleur d'option (le fond/arête/relief vitré est
+   défini plus bas, section « Polished Glass Fields »). */
 .select-grimoire {
-  background-color: var(--card);
-  border: 1px solid var(--border);
   color: var(--foreground);
   padding: 0.5rem 2rem 0.5rem 0.75rem;
-  border-radius: 7px;
   font-family: var(--font-sans);
   font-size: 0.85rem;
-  outline: none;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  transition: border-color 0.15s ease;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%238a8f98' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 L6 6.5 L11 1.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.7rem center;
   background-size: 0.6rem;
-}
-.select-grimoire:focus {
-  border-color: var(--primary);
 }
 .select-grimoire option {
   background: var(--card);
@@ -724,14 +700,14 @@ body > * { position: relative; z-index: 1; }
   border: 1px solid rgba(0, 0, 0, 0.04);
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.02);
-  box-shadow: 
+  box-shadow:
     inset 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .dark .campaign-subpanel {
   border: 1px solid rgba(255, 255, 255, 0.03);
   background: rgba(0, 0, 0, 0.25);
-  box-shadow: 
+  box-shadow:
     inset 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
@@ -743,6 +719,39 @@ body > * { position: relative; z-index: 1; }
 .dark .campaign-header-line {
   border-bottom: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.005);
+}
+
+/* ------------------------------------------------------------
+   Chrome relief — applique le MÊME langage verre/relief que
+   .campaign-panel / .campaign-subpanel au châssis du cockpit
+   (rails latéraux, top bar, tuiles de nav) qui jusque-là étaient plats.
+   Aucune valeur nouvelle : on réutilise l'arête lumineuse interne validée
+   et le relief INSET du subpanel. ------------------------------------------------------------ */
+
+/* Rail / colonne pleine hauteur (nav latérale, asides) — verre flush, sans
+   radius ni ombre portée (bord d'écran), mais avec backdrop-blur + arête. */
+.chrome-rail {
+  background: var(--sidebar);
+  backdrop-filter: blur(32px) saturate(140%);
+  -webkit-backdrop-filter: blur(32px) saturate(140%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.dark .chrome-rail {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Tuile / contrôle en creux (compteurs de nav, chips de top bar, boutons
+   d'état) — reprend exactement le relief INSET de .campaign-subpanel. */
+.chrome-tile {
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+.dark .chrome-tile {
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
 }
 
 /* ============================================================
@@ -826,64 +835,80 @@ a:hover svg.lucide {
     inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
 }
 
-/* Polished Acrylic Progress Bar Tracks */
-.h-1.flex-1.bg-white\/\[0\.06\] {
-  height: 5px !important;
-  background: rgba(0, 0, 0, 0.04) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
-  border: 1px solid rgba(0, 0, 0, 0.01) !important;
+/* ============================================================
+   SkillRow — barre de niveau + steppers.
+   Ex-sélecteurs utilitaires fragiles (.h-1.flex-1.bg-white/[0.06] et
+   button.flex.h-6.w-6...rounded) qui couplaient le CSS global à des combos
+   de classes Tailwind exactes (cassables au moindre réordonnancement).
+   Mêmes valeurs, en classes nommées appliquées dans SkillRow.tsx — sans
+   !important, sans couplage fragile.
+   ============================================================ */
+
+/* Piste de la barre de niveau (acrylique, creusée) */
+.vital-track {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.01);
 }
-.dark .h-1.flex-1.bg-white\/\[0\.06\] {
-  background: rgba(0, 0, 0, 0.45) !important;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid rgba(255, 255, 255, 0.01) !important;
+.dark .vital-track {
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.01);
 }
 
-/* Illuminated Neon Liquid Core progress bar fill */
-.h-1.flex-1.bg-white\/\[0\.06\] > div {
-  height: 100% !important;
-  border-radius: 999px !important;
-  box-shadow: 
+/* Remplissage néon liquide */
+.vital-track-fill {
+  height: 100%;
+  border-radius: 999px;
+  box-shadow:
     0 0 6px currentColor,
-    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-  filter: saturate(1.2) brightness(1.1) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  filter: saturate(1.2) brightness(1.1);
+  transition: width 0.3s ease;
 }
 
-/* Glossy steel interactive controls (Plus / Minus / Roll) */
-button.flex.h-6.w-6.items-center.justify-center.rounded {
-  background: linear-gradient(180deg, #ffffff, #f5f6f8) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
-  transition: all 0.15s ease !important;
-  border-radius: 6px !important;
+/* Stepper +/- (acier glossy) */
+.stepper-btn {
+  background: linear-gradient(180deg, #ffffff, #f5f6f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border-radius: 6px;
+  transition: all 0.15s ease;
 }
-.dark button.flex.h-6.w-6.items-center.justify-center.rounded {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+.dark .stepper-btn {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
-button.flex.h-6.w-6.items-center.justify-center.rounded:hover:not(:disabled) {
-  transform: scale(1.05) !important;
-  background: #ffffff !important;
-  border-color: var(--primary) !important;
+.stepper-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: #ffffff;
+  border-color: var(--primary);
 }
-.dark button.flex.h-6.w-6.items-center.justify-center.rounded:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03)) !important;
-  border-color: var(--primary) !important;
+.dark .stepper-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  border-color: var(--primary);
 }
-button.flex.h-6.w-6.items-center.justify-center.rounded:active:not(:disabled) {
-  transform: scale(0.97) !important;
-  background: rgba(0, 0, 0, 0.02) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+.stepper-btn:active:not(:disabled) {
+  transform: scale(0.97);
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
 }
-.dark button.flex.h-6.w-6.items-center.justify-center.rounded:active:not(:disabled) {
-  background: rgba(0, 0, 0, 0.4) !important;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+.dark .stepper-btn:active:not(:disabled) {
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* Polished Glass Fields (Inputs, Textareas, Selects) */
-.input-grimoire, 
-input[type="text"], 
+/* Polished Glass Fields (Inputs, Textareas, Selects) — définition unique.
+   `!important` conservé volontairement : porte sur des sélecteurs d'élément
+   (textarea/select) qui, sans lui, perdraient face aux utilitaires Tailwind
+   `bg-background`/`bg-card` posés en classe sur les champs. Le retirer
+   régresserait le rendu (champs plats). */
+.input-grimoire,
+input[type="text"],
 input[type="number"], 
 textarea, 
 select {
@@ -922,44 +947,44 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(94, 106, 210, 0.25) !important;
 }
 
-/* Glossy Steel Buttons */
+/* Glossy Steel Buttons — rendu unique de .btn-grimoire & .btn-ghost
+   (structure typo/padding/radius définie plus haut). */
 .btn-grimoire, .btn-ghost {
-  font-family: var(--font-sans) !important;
-  background: linear-gradient(180deg, #ffffff, #f5f6f8) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-  transition: all 0.2s ease-in-out !important;
+  background: linear-gradient(180deg, #ffffff, #f5f6f8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease-in-out;
 }
 .dark .btn-grimoire, .dark .btn-ghost {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01)) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
     0 4px 12px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 .btn-grimoire:hover:not(:disabled), .btn-ghost:hover:not(:disabled) {
-  transform: translateY(-1px) !important;
-  background: #ffffff !important;
-  border-color: var(--primary) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-1px);
+  background: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 .dark .btn-grimoire:hover:not(:disabled), .dark .btn-ghost:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)) !important;
-  border-color: var(--primary) !important;
-  box-shadow: 
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border-color: var(--primary);
+  box-shadow:
     0 6px 16px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 .btn-grimoire:active:not(:disabled), .btn-ghost:active:not(:disabled) {
-  transform: translateY(0) !important;
-  background: rgba(0, 0, 0, 0.02) !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(0);
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 .dark .btn-grimoire:active:not(:disabled), .dark .btn-ghost:active:not(:disabled) {
-  background: rgba(0, 0, 0, 0.4) !important;
-  box-shadow: 
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow:
     inset 0 1px 3px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.015) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.015);
 }
 
 /* ============================================================

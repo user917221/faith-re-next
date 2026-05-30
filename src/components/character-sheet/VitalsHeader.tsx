@@ -25,14 +25,12 @@ export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) 
       aria-label="Jauges de vitalité"
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-          État vital
-        </h2>
+        <h2 className="eyebrow">État vital</h2>
         <span
           className={`rounded-md border px-2 py-0.5 font-mono text-[10px] ${
             character.isPresent
-              ? "border-primary/25 bg-primary/10 text-primary"
-              : "border-border/60 text-foreground-subtle/60"
+              ? "border-primary/25 bg-primary/10 text-primary-hover"
+              : "border-border/60 text-foreground-subtle"
           }`}
         >
           {character.isPresent ? "Actif" : "Hors table"}
@@ -47,6 +45,7 @@ export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) 
             background: "color-mix(in oklab, var(--hp) 12%, transparent)",
           }}
           role="status"
+          aria-live="assertive"
         >
           <span
             className="flex items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.14em]"
@@ -66,7 +65,7 @@ export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) 
         </div>
       )}
 
-      <div className="grid grid-cols-2 items-start justify-items-center gap-6 sm:grid-cols-4 sm:gap-5">
+      <div className="grid grid-cols-2 items-start justify-items-center gap-x-3 gap-y-5 sm:grid-cols-4 sm:gap-5">
         <VitalGauge
           label="Santé"
           value={character.currentHp}

@@ -72,7 +72,7 @@ export function QuickRollPanel({
       {/* Résultat */}
       <section className="campaign-panel">
         <div className="campaign-header-line flex items-center justify-between px-4 py-3">
-          <h2 className="min-w-0 truncate font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <h2 className="eyebrow min-w-0 truncate">
             Pool de dés
             {characterName && (
               <span className="ml-1.5 normal-case tracking-normal text-foreground-muted">
@@ -81,7 +81,11 @@ export function QuickRollPanel({
             )}
           </h2>
         </div>
-        <div className="flex flex-col items-center gap-1 px-4 py-5">
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex flex-col items-center gap-1 px-4 py-5"
+        >
           <span
             className="font-mono text-5xl font-semibold leading-none tabular-nums slashed-zero transition-colors"
             style={{ color: critColor }}
@@ -103,13 +107,11 @@ export function QuickRollPanel({
       {/* Pool de dés */}
       <section className="campaign-panel p-4">
         <div className="mb-2 flex items-center justify-between">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
-            Pool de dés
-          </p>
+          <p className="eyebrow">Construire le pool</p>
           <button
             type="button"
             onClick={() => setPool((p) => [...p, { sides: 6, count: 1 }])}
-            className="font-mono text-[10px] text-foreground-muted transition-colors hover:text-foreground"
+            className="stepper-btn flex h-9 items-center px-2 font-mono text-[10px] text-foreground-muted hover:text-foreground sm:h-7"
           >
             + Dé
           </button>
@@ -125,7 +127,7 @@ export function QuickRollPanel({
                   )
                 }
                 aria-label="Face du dé"
-                className="rounded-md border border-border bg-background/40 px-1.5 py-1 font-mono text-[11px] text-foreground-muted outline-none"
+                className="h-9 rounded-md border border-border bg-background/40 px-1.5 font-mono text-[11px] text-foreground-muted outline-none sm:h-7"
               >
                 {DICE.map((n) => (
                   <option key={n} value={n}>
@@ -145,14 +147,14 @@ export function QuickRollPanel({
                   )
                 }
                 aria-label="Nombre de dés"
-                className="h-7 w-12 rounded-md border border-border bg-background/40 text-center font-mono text-[11px] tabular-nums text-foreground-muted outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
+                className="h-9 w-12 rounded-md border border-border bg-background/40 text-center font-mono text-[11px] tabular-nums text-foreground-muted outline-none [appearance:textfield] sm:h-7 [&::-webkit-inner-spin-button]:appearance-none"
               />
               {pool.length > 1 && (
                 <button
                   type="button"
                   onClick={() => setPool((pl) => pl.filter((_, j) => j !== i))}
-                  aria-label="Retirer"
-                  className="ml-auto text-foreground-subtle transition-colors hover:text-hp"
+                  aria-label="Retirer le dé"
+                  className="stepper-btn ml-auto flex size-9 items-center justify-center text-foreground-subtle hover:text-hp sm:size-7"
                 >
                   <X size={13} />
                 </button>
@@ -171,7 +173,7 @@ export function QuickRollPanel({
             onClick={() => setModSign(1)}
             aria-label="Modificateur positif"
             aria-pressed={modSign === 1}
-            className={`flex size-7 items-center justify-center rounded-md border transition-colors ${
+            className={`flex size-9 items-center justify-center rounded-md border transition-colors sm:size-7 ${
               modSign === 1
                 ? "border-endu/50 bg-endu/15 text-endu"
                 : "border-border text-foreground-subtle hover:text-foreground"
@@ -184,7 +186,7 @@ export function QuickRollPanel({
             onClick={() => setModSign(-1)}
             aria-label="Modificateur négatif"
             aria-pressed={modSign === -1}
-            className={`flex size-7 items-center justify-center rounded-md border transition-colors ${
+            className={`flex size-9 items-center justify-center rounded-md border transition-colors sm:size-7 ${
               modSign === -1
                 ? "border-hp/50 bg-hp/15 text-hp"
                 : "border-border text-foreground-subtle hover:text-foreground"
@@ -198,7 +200,7 @@ export function QuickRollPanel({
             value={modValue}
             onChange={(e) => setModValue(Math.max(0, +e.target.value || 0))}
             aria-label="Valeur du modificateur"
-            className="h-7 w-16 rounded-md border border-border bg-background/40 text-center font-mono text-sm tabular-nums slashed-zero text-foreground outline-none [appearance:textfield] focus:border-primary/40 [&::-webkit-inner-spin-button]:appearance-none"
+            className="h-9 w-16 rounded-md border border-border bg-background/40 text-center font-mono text-sm tabular-nums slashed-zero text-foreground outline-none [appearance:textfield] focus:border-primary/40 sm:h-7 [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
 

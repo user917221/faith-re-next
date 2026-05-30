@@ -66,8 +66,9 @@ export function SkillRow({
   const plusDisabled = isPending || !onSkillChange || isCapped;
   const minusDisabled = isPending || !onSkillChange || value <= 0;
 
+  // Cibles tactiles ≥ 36px sur mobile (h-9 w-9), taille desktop (24px) restaurée en sm.
   const ctrl =
-    "flex h-6 w-6 items-center justify-center rounded border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground active:translate-y-px disabled:cursor-not-allowed disabled:opacity-30";
+    "stepper-btn flex h-9 w-9 sm:h-6 sm:w-6 items-center justify-center text-foreground-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30";
 
   return (
     <div className="group px-5 py-2.5 transition-colors hover:bg-surface-overlay/50">
@@ -89,7 +90,7 @@ export function SkillRow({
         )}
 
         <span
-          className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/16"
+          className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-hairline-tertiary"
           aria-hidden
         />
 
@@ -121,7 +122,7 @@ export function SkillRow({
               aria-label={`Lancer 2d6 + ${name}`}
               title={`Lancer 2d6 + ${attrName} + ${name}`}
               onClick={openRoll}
-              className="ml-0.5 flex h-6 w-6 items-center justify-center rounded text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-primary"
+              className="stepper-btn ml-0.5 flex h-9 w-9 sm:h-6 sm:w-6 items-center justify-center text-foreground-muted hover:text-primary"
             >
               <Dices className="size-3.5" />
             </button>
@@ -132,17 +133,17 @@ export function SkillRow({
       {/* Ligne 2 — palier (rang) + barre de niveau */}
       <div className="mt-1.5 flex items-center gap-2.5">
         <span
-          className="shrink-0 rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[0.1em]"
+          className="shrink-0 rounded px-1.5 py-0.5 font-mono text-3xs uppercase tracking-[0.1em]"
           style={{
-            background: `rgba(${tier.rgb},0.12)`,
+            background: `rgba(${tier.rgb},0.16)`,
             color: `rgb(${tier.rgb})`,
           }}
         >
           {tier.label}
         </span>
-        <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+        <div className="vital-track flex-1">
           <div
-            className="h-full rounded-full transition-[width] duration-300"
+            className="vital-track-fill"
             style={{ width: `${fill}%`, background: `rgb(${tier.rgb})` }}
           />
         </div>
