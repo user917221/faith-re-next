@@ -6,6 +6,9 @@
 
 > Le `/loop` « fais tout dans l'ordre » est **terminé**. Les 8 phases du cockpit MJ FAITH:RE sont livrées, build vert, poussées sur master (Vercel déploie). Loop arrêté (plus de ScheduleWakeup).
 
+### Retours MJ post-livraison — FAIT (`25a1e60`)
+Lot de révisions appliqué : **Fiche** — Vitaux sans bandeau Combat ; onglet Compétences→**Stats** ; onglet Équipement→**Runes** (characterRunes enrichi level/rarity/damage + `updateRune` ; RuneInventory refait : niveau ±, rareté cyclable colorée, dégâts éditables, 3 catégories) ; barre d'onglets `sticky top-0` (reste fixe au scroll). **Sidebar** — bloc Statut de campagne supprimé. **Timer** — rappels d'horaires toutes les 37 min (matin→midi→soirée→nuit, toast + moment affiché + barre) + Fin de séance à 111 min. **Dés** — d6/d8/d50/d100, jet rapide simple + Avantage supprimés → Pool de Dés seul. **PNJ** — page développée (recherche + filtre disposition avec compteurs + édition complète en place via `updateNpc` + add/remove). _Dette : table/actions `items` (Phase 6) désormais inutilisées (fiche = runes) — conservées, à nettoyer ; combat stats data/actions conservées mais UI retirée._
+
 ### Les 8 phases (toutes sur master)
 1. **P1 shell & layout** (`8894df0`) — `CockpitShell` : nav-sidebar 10 entrées + top bar (campagne/Mode MJ/session/⌘K/avatar) + grille 3 panneaux (Roster | centre | Jet Rapide) + bottom bar. Câblé /mj (vraies données) + /cockpit (mock public).
 2. **P2 combat + conditions + identité** (`3ee7edb`) — `CombatStatsBanner` (init/armure/vitesse/maîtrise), `ConditionsPanel` (chips colorés), tags race/pronoms/classe. Table `condition` + `combat.ts`.
