@@ -53,11 +53,11 @@ _Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne
 - [x] **StatusNotesPanel** (pane droit /mj sous Jet Rapide) : add/remove, auteur + horodatage relatif. Actions add/removeStatusNote (MJ ou owner).
 - [x] CockpitShell : 3 slots (campaignSelector/campaignStatus/sessionTimer) + fallback stubs pour /cockpit.
 
-## Phase 6 — Modules de contenu des onglets · ~3 j
-- [ ] **GEAR / ITEMS** : table `item` (characterId, name, type, qty, equipped, description) + UI inventaire (liste + équipé). _Distinct des runes._
-- [ ] **BIO** : éditeur tags + texte libre + portrait.
-- [ ] **NOTES** : notes perso (joueur) vs status notes (MJ).
-- [ ] **EFFECTS** : effets actifs (durée, source) — réutilise `condition` enrichi.
+## Phase 6 — Modules de contenu des onglets · ~3 j ✅ FAIT (2026-05-30, commit 87397ca)
+- [x] **GEAR / ITEMS** : table `item` (name, type arme/armure/objet/consommable, qty, equipped, description) + enum + actions items.ts (add/remove/toggleEquip/updateItemQty) + `ItemInventory` (groupé, qty ±, badge Équipé, suppression) + nouvel onglet **Équipement**. Distinct des runes.
+- [x] **BIO** : colonne `bio` + textarea dans ProfileEditor (les tags identité existent déjà P2). Portrait → Phase 8 (Blob).
+- [x] **NOTES** : colonne `notes` (joueur) dans ProfileEditor, distincte des status_note MJ (P5).
+- [~] **EFFECTS** : les `conditions` (P2) font déjà office d'effets actifs → non recréées (éviter doublon). Enrichissement durée/source = polish futur si besoin.
 
 ## Phase 7 — Modules de nav secondaires · ~4 j (volumineux, parallélisable)
 - [ ] **Journal** (`session_log`/entries par session). **NPCs** (table + fiches légères). **Maps** (upload + pins, Vercel Blob). **Rules** (markdown statique/MDX). **Roster** (page dédiée). **Sessions** (historique + planif).

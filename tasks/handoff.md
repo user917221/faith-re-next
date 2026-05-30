@@ -4,7 +4,10 @@
 
 ## État courant — 2026-05-30 · Claude Code (Opus) · /loop autonome Phases 2-8
 
-> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-5. En cours : Phase 6.**
+> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-6. En cours : Phase 7.**
+
+### Phase 6 — FAIT (`87397ca`) : Équipement + Bio + Notes
+Table `item` (arme/armure/objet/consommable, qty, equipped) + actions items.ts + `ItemInventory` + onglet **Équipement**. Colonnes `bio`/`notes` + textarea ProfileEditor. EFFECTS = conditions (P2), non recréées.
 
 ### Phase 5 — FAIT (`1def988`) : campagne / séances / notes de statut
 3 tables Neon (`campaign`, `game_session` [pas `session` = Auth.js !], `status_note`). lib/campaign.ts (amorce paresseuse + temps live). Actions campaign.ts (statut/sélecteur/timer/notes). CockpitShell 3 slots. CampaignSelector + CampaignStatus éditable + SessionTimer persisté + StatusNotesPanel. Câblé /mj.
