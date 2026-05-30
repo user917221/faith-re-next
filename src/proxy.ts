@@ -10,7 +10,7 @@
  */
 import { auth } from "@/lib/auth";
 
-const PUBLIC_PATHS = ["/", "/signin", "/api/auth", "/preview"];
+const PUBLIC_PATHS = ["/", "/signin", "/api/auth", "/preview", "/cockpit"];
 
 export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
