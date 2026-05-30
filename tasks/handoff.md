@@ -4,7 +4,10 @@
 
 ## État courant — 2026-05-30 · Claude Code (Opus) · /loop autonome Phases 2-8
 
-> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1,2,3. En cours : Phase 4.**
+> **Loop en cours** : l'utilisateur a lancé `/loop` « fais tout dans l'ordre, appelle-moi quand t'as fini ». J'enchaîne les phases 2→8 du cockpit, 1 phase/itération, build+commit+push à chaque, ScheduleWakeup pour continuer. **✅ Phases 1-4. En cours : Phase 5.**
+
+### Phase 4 — FAIT (`5562dbe`) : compétences rang/MOD/palier
+RANK/MOD/PROG dérivés des points (moteur de jets inchangé). `getSkillTier`+`SKILL_TIERS` (Novice/Confirmé/Expert/Maître), `SkillRow` enrichi (MOD + chip palier + barre niveau), `SkillTierLegend`. Refonte 6 onglets repoussée en Phase 6 (éviter coquilles vides).
 
 ### Phase 3 — FAIT (`edded6f`) : Quick Roll panel réel
 `QuickRollPanel` contrôlé (prop `onRoll`). Nouvelle action `rollPublicPool` (plateau.ts) : dés NdS multiples + modificateur + keep all/highest/lowest (avantage), crits naturels, persiste public_roll → /plateau. `MJQuickRoll(characterId)` câblé dans le pane droit /mj. Fallback local Math.random pour /cockpit (mock sans BDD). Vérifié Playwright (Lancer → d20).

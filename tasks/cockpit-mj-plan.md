@@ -40,11 +40,11 @@ _Reste en stub (par design, câblés phases ultérieures)_ : sélecteur campagne
 - [x] Avantage = keep highest (désavantage keep lowest), prêt côté serveur. Fallback local Math.random pour l'aperçu /cockpit sans BDD.
 - _Note : pas de CountUp sur le résultat (snap direct) ; à ajouter au polish Phase 8 si voulu._
 
-## Phase 4 — Skills rank/mod/prog + onglets · ~2 j
-- [ ] Modèle skills : exposer **RANK (0-6)** + **MOD (+N dérivé)** + **PROG (%)**. Adapter `characterSkills` (ajouter `progress`/`mod` ou dériver).
-- [ ] Split **CORE / SPECIALIST** + légende tiers (Novice 0-1 / Trained 2-3 / Expert 4-5 / Master 6+).
-- [ ] Tabs `SKILLS / EVOLUTION / GEAR / BIO / NOTES / EFFECTS` (coquilles ; Skills+Evolution branchés, le reste = Phase 6).
-- [ ] Table skills 2-colonnes avec barre PROG + icône par skill.
+## Phase 4 — Skills rank/mod/prog + onglets · ~2 j ✅ FAIT (2026-05-30, commit 5562dbe)
+- [x] RANK + MOD + PROG **dérivés des points** (aucun changement schema ni moteur de jets) : `getSkillTier` + `SKILL_TIERS` (Novice 0-1 / Confirmé 2-3 / Expert 4-5 / Maître 6+) dans skills.ts. MOD = attr + comp. (bonus réel au 2d6). PROG = barre de niveau (points/8).
+- [x] Légende tiers (`SkillTierLegend`) sous la barre d'allocation.
+- [x] `SkillRow` enrichi : MOD + chip de palier coloré + barre de niveau, allocation+jet conservés. Table 2-col par attribut (= structure réelle FAITH:RE, équivalent CORE/SPECIALIST).
+- [~] Refonte 6 onglets (GEAR/BIO/NOTES/EFFECTS) **repoussée en Phase 6** (où le contenu existe) pour éviter coquilles vides + re-travail. Onglets actuels Vitaux/Compétences/Évolution/Profil conservés.
 
 ## Phase 5 — Campagne / Sessions / Status Notes · ~1.5 j
 - [ ] Schema : `campaign` (name, threatLevel, partyMorale, questsActive, downtime), `session` (campaignId, number, date, elapsedSeconds), `status_note` (characterId, text, authorId, createdAt). Push.
