@@ -61,7 +61,7 @@ export function EnduranceActionPanel({ onActionCost }: Props) {
       aria-label="Dépense d'endurance"
     >
       <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-        <h2 className="text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           Dépense d&apos;endurance
         </h2>
         <span className="font-mono text-[10px] text-foreground-subtle">

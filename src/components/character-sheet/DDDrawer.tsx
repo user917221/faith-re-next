@@ -82,7 +82,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
       >
         {/* Header */}
         <SheetHeader className="gap-1 border-b border-border px-6 py-5">
-          <p className="text-2xs font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
             Lancer de dés
           </p>
           <SheetTitle className="text-lg font-semibold tracking-tight text-foreground">
@@ -92,19 +92,19 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
 
         {/* Contexte du jet */}
         <section className="border-b border-border px-6 py-4">
-          <p className="text-2xs font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
             Formule
           </p>
           <p className="mt-1 font-mono tabular-nums slashed-zero text-xl text-foreground">
             2d6 <span className="text-foreground-subtle">+</span>{" "}
             <span className="text-primary">{context?.bonus}</span>
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{context?.bonusLabel}</p>
+          <p className="mt-1 text-xs text-foreground-muted">{context?.bonusLabel}</p>
         </section>
 
         {/* Selector DD */}
         <section className="border-b border-border px-6 py-5">
-          <p className="mb-3 text-2xs font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
             Difficulté
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -126,8 +126,8 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
                   }`}
                 >
                   <span
-                    className={`text-3xs font-medium uppercase tracking-widest ${
-                      active ? "text-primary-hover" : "text-muted-foreground"
+                    className={`text-[10px] font-medium uppercase tracking-widest ${
+                      active ? "text-primary-hover" : "text-foreground-muted"
                     }`}
                   >
                     {p.label}
@@ -139,7 +139,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
                   >
                     DD {p.value}
                   </span>
-                  <span className="text-3xs font-normal text-ink-tertiary">
+                  <span className="text-[10px] font-normal text-foreground-subtle">
                     {p.desc}
                   </span>
                 </Button>
@@ -158,7 +158,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
                   : ""
               }`}
             >
-              <span className="text-3xs font-medium uppercase tracking-widest text-muted-foreground">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                 DD perso
               </span>
               <span className="tabular ml-auto text-sm text-foreground">{custom}</span>
@@ -173,7 +173,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
                   : ""
               }`}
             >
-              <span className="text-3xs font-medium uppercase tracking-widest text-muted-foreground">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                 Sans DD
               </span>
               <span className="ml-auto text-sm text-foreground">∞</span>
@@ -182,7 +182,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
 
           {mode === "free" && (
             <div className="mt-2 flex items-center gap-3 rounded-md border border-border bg-surface-overlay/50 px-3 py-2">
-              <span className="text-3xs font-medium uppercase tracking-widest text-muted-foreground">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                 DD ciblé
               </span>
               <Input
@@ -202,17 +202,17 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
 
         {/* Récap final */}
         <section className="px-6 py-5">
-          <p className="mb-2 text-2xs font-medium uppercase tracking-widest text-muted-foreground">
+          <p className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
             Récap
           </p>
-          <p className="tabular text-sm leading-relaxed text-ink-muted">
+          <p className="tabular text-sm leading-relaxed text-foreground-muted">
             2d6 + <span className="text-primary">{context?.bonus}</span>
             {mode === "libre" ? (
-              <span className="ml-2 text-muted-foreground">— jet sans difficulté</span>
+              <span className="ml-2 text-foreground-muted">— jet sans difficulté</span>
             ) : (
               <>
                 {" "}
-                <span className="text-muted-foreground">contre</span>{" "}
+                <span className="text-foreground-muted">contre</span>{" "}
                 <span className="tabular text-primary-hover">DD {effectiveDD}</span>
               </>
             )}
@@ -229,7 +229,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
             {isPending ? "Lancement…" : "Lancer les dés"}
           </Button>
 
-          <p className="mt-3 text-center text-2xs text-ink-tertiary">
+          <p className="mt-3 text-center text-[11px] text-foreground-subtle">
             Le résultat apparaîtra dans le carnet du plateau.
           </p>
         </section>

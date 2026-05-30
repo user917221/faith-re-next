@@ -14,19 +14,9 @@ import {
   nextFluxTier,
   nextLevelXp,
 } from "@/lib/faith-system";
-import { TrendingUp } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import type { Character } from "./types";
 
 type Props = {
@@ -37,6 +27,15 @@ type Props = {
   onCombatChange?: (delta: 1 | -1) => Promise<void>;
   onTechnicalChange?: (delta: 1 | -1) => Promise<void>;
 };
+
+/** Chip pilule v0 — palier / label sobre. */
+function TierChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-0.5 font-mono text-[11px] tabular-nums slashed-zero text-foreground-muted">
+      {children}
+    </span>
+  );
+}
 
 /** Prochain palier technique non atteint (mirror de nextEnduranceTier). */
 function nextTechnicalTier(trainings: number) {
@@ -73,7 +72,7 @@ function StepperCounter({
       >
         −
       </Button>
-      <span className="flex-1 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 text-center font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
+      <span className="flex-1 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1 text-center font-mono tabular-nums slashed-zero text-foreground">
         {value}
       </span>
       <Button
@@ -170,34 +169,37 @@ export function EvolutionSection({
   const stepCombat = makeStepper(onCombatChange, character.combatsReal);
 
   return (
-    <Card className="relative border border-border ring-0">
-      <CardHeader>
-        <div className="flex items-baseline gap-2">
-          <TrendingUp
-            size={14}
-            className="shrink-0 self-center text-foreground-subtle"
-          />
-          <CardTitle className="text-sm">Évolution</CardTitle>
-          <span className="text-xs text-muted-foreground">(privé MJ)</span>
-        </div>
-      </CardHeader>
+    <section
+      className="overflow-hidden rounded-xl border border-border"
+      style={{
+        background: "rgba(17,19,24,0.98)",
+        boxShadow:
+          "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}
+    >
+      <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          Évolution
+        </h2>
+        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 font-mono text-[10px] tracking-widest text-foreground-muted">
+          privé MJ
+        </span>
+      </div>
 
-      <CardContent className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 p-5">
         {/* ─── XP / Niveau / Tier global ─── */}
         <div className="flex flex-col gap-3">
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                 Niveau
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="font-mono tabular-nums slashed-zero text-2xl font-medium text-foreground">
                   {level}
                 </span>
-                <Badge variant="outline" className="tabular">
-                  {character.tier}
-                </Badge>
-                <span className="tabular text-sm text-muted-foreground">
+                <TierChip>{character.tier}</TierChip>
+                <span className="font-mono tabular-nums slashed-zero text-sm text-foreground-muted">
                   bonus +{bonus}
                 </span>
               </div>
@@ -205,7 +207,7 @@ export function EvolutionSection({
             <div className="flex w-28 flex-col gap-1.5">
               <Label
                 htmlFor="evo-xp"
-                className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle"
+                className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle"
               >
                 XP total
               </Label>
@@ -221,21 +223,40 @@ export function EvolutionSection({
                 onKeyDown={(e) => {
                   if (e.key === "Enter") e.currentTarget.blur();
                 }}
-                className="tabular text-right"
+                className="text-right font-mono tabular-nums slashed-zero"
               />
             </div>
           </div>
-          <Progress value={xpProgress} />
-          <p className="text-xs text-muted-foreground">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-surface-overlay">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${xpProgress}%`,
+                backgroundColor: "var(--primary)",
+                transition: "width 0.4s cubic-bezier(.4,0,.2,1)",
+              }}
+            />
+          </div>
+          <p className="text-xs text-foreground-muted">
             {isMaxLevel ? (
               <>
-                Niveau max (<span className="tabular">{character.xp}</span> XP)
+                Niveau max (
+                <span className="font-mono tabular-nums slashed-zero">
+                  {character.xp}
+                </span>{" "}
+                XP)
               </>
             ) : (
               <>
-                <span className="tabular">{character.xp}</span> /{" "}
-                <span className="tabular">{nextXp}</span> — encore{" "}
-                <span className="tabular font-medium text-foreground">
+                <span className="font-mono tabular-nums slashed-zero">
+                  {character.xp}
+                </span>{" "}
+                /{" "}
+                <span className="font-mono tabular-nums slashed-zero">
+                  {nextXp}
+                </span>{" "}
+                — encore{" "}
+                <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                   {Math.max(0, nextXp - character.xp)}
                 </span>{" "}
                 XP pour Niv. {level + 1}
@@ -244,11 +265,11 @@ export function EvolutionSection({
           </p>
         </div>
 
-        <Separator />
+        <div className="border-t border-border" />
 
         {/* ─── Entraînements — un bloc par axe ─── */}
         <div className="flex flex-col gap-2">
-          <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
+          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
             Entraînements
           </span>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -258,9 +279,7 @@ export function EvolutionSection({
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Physique
                 </span>
-                <Badge variant="outline" className="text-endu">
-                  {enduTier.label}
-                </Badge>
+                <TierChip>{enduTier.label}</TierChip>
               </div>
               <StepperCounter
                 value={character.enduranceTrainings}
@@ -269,23 +288,26 @@ export function EvolutionSection({
                 minLabel="Retirer un entraînement physique"
                 plusLabel="Ajouter un entraînement physique"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-foreground-muted">
                 Endurance max{" "}
-                <span className="tabular font-medium text-foreground">
+                <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                   {character.maxEndurance}
                 </span>
                 {nextEndu ? (
                   <>
                     {" "}
                     — encore{" "}
-                    <span className="tabular font-medium text-foreground">
+                    <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                       {Math.max(
                         0,
                         nextEndu.trainings - character.enduranceTrainings,
                       )}
                     </span>{" "}
                     pour {nextEndu.label} (
-                    <span className="tabular">{nextEndu.max}</span>)
+                    <span className="font-mono tabular-nums slashed-zero">
+                      {nextEndu.max}
+                    </span>
+                    )
                   </>
                 ) : (
                   <> — palier max</>
@@ -299,9 +321,7 @@ export function EvolutionSection({
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Flux
                 </span>
-                <Badge variant="outline" className="text-ink-muted">
-                  {fluxTier.label}
-                </Badge>
+                <TierChip>{fluxTier.label}</TierChip>
               </div>
               <StepperCounter
                 value={character.fluxTrainings}
@@ -310,20 +330,23 @@ export function EvolutionSection({
                 minLabel="Retirer un entraînement de Flux"
                 plusLabel="Ajouter un entraînement de Flux"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-foreground-muted">
                 {nextFlux ? (
                   <>
                     Vers {nextFlux.label} :{" "}
-                    <span className="tabular font-medium text-foreground">
+                    <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                       {character.fluxTrainings}
                     </span>
-                    /<span className="tabular">{nextFlux.fluxTrainings}</span>{" "}
+                    /
+                    <span className="font-mono tabular-nums slashed-zero">
+                      {nextFlux.fluxTrainings}
+                    </span>{" "}
                     entraîn.
                     {fluxTrainingsNeeded > 0 ? (
                       <>
                         {" "}
                         (encore{" "}
-                        <span className="tabular font-medium text-foreground">
+                        <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                           {fluxTrainingsNeeded}
                         </span>
                         )
@@ -335,7 +358,9 @@ export function EvolutionSection({
                 ) : (
                   <>
                     Condition Flux remplie au palier max (
-                    <span className="tabular">{character.fluxTrainings}</span>{" "}
+                    <span className="font-mono tabular-nums slashed-zero">
+                      {character.fluxTrainings}
+                    </span>{" "}
                     entraîn.)
                   </>
                 )}
@@ -348,9 +373,9 @@ export function EvolutionSection({
                 <span className="text-sm font-medium tracking-tight text-foreground">
                   Technique
                 </span>
-                <Badge variant="outline" className="text-ink-muted">
+                <TierChip>
                   {character.technicalLabel || techTier.label}
-                </Badge>
+                </TierChip>
               </div>
               <StepperCounter
                 value={character.technicalTrainings}
@@ -359,14 +384,14 @@ export function EvolutionSection({
                 minLabel="Retirer un entraînement technique"
                 plusLabel="Ajouter un entraînement technique"
               />
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-foreground-muted">
                 {nextTech ? (
                   <>
-                    <span className="tabular font-medium text-foreground">
+                    <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                       {character.technicalTrainings}
                     </span>{" "}
                     entraîn. — encore{" "}
-                    <span className="tabular font-medium text-foreground">
+                    <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                       {Math.max(
                         0,
                         nextTech.trainings - character.technicalTrainings,
@@ -377,7 +402,7 @@ export function EvolutionSection({
                 ) : (
                   <>
                     Palier max (
-                    <span className="tabular">
+                    <span className="font-mono tabular-nums slashed-zero">
                       {character.technicalTrainings}
                     </span>{" "}
                     entraîn.)
@@ -388,13 +413,13 @@ export function EvolutionSection({
           </div>
         </div>
 
-        <Separator />
+        <div className="border-t border-border" />
 
         {/* ─── Combats réels + Palier de Flux (level-up MJ) ─── */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Combats réels */}
           <div className="flex flex-col gap-2.5">
-            <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
+            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
               Combats réels
             </span>
             <div className="flex items-end justify-between gap-3">
@@ -402,7 +427,7 @@ export function EvolutionSection({
                 <span className="font-mono tabular-nums slashed-zero text-2xl font-medium text-foreground">
                   {character.combatsReal}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-foreground-muted">
                   combats menés
                 </span>
               </div>
@@ -416,19 +441,23 @@ export function EvolutionSection({
                 />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-foreground-muted">
               {nextFlux ? (
                 <>
                   Vers {nextFlux.label} :{" "}
-                  <span className="tabular font-medium text-foreground">
+                  <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                     {character.combatsReal}
                   </span>
-                  /<span className="tabular">{nextFlux.combats}</span> combats
+                  /
+                  <span className="font-mono tabular-nums slashed-zero">
+                    {nextFlux.combats}
+                  </span>{" "}
+                  combats
                   {combatsNeeded > 0 ? (
                     <>
                       {" "}
                       (encore{" "}
-                      <span className="tabular font-medium text-foreground">
+                      <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                         {combatsNeeded}
                       </span>
                       )
@@ -440,7 +469,10 @@ export function EvolutionSection({
               ) : (
                 <>
                   Condition combats remplie au palier max (
-                  <span className="tabular">{character.combatsReal}</span>)
+                  <span className="font-mono tabular-nums slashed-zero">
+                    {character.combatsReal}
+                  </span>
+                  )
                 </>
               )}
             </p>
@@ -449,53 +481,53 @@ export function EvolutionSection({
           {/* Palier de Flux — le « level up » que le MJ doit voir */}
           <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-surface-overlay/50 p-3">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-foreground-subtle">
+              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                 Palier de Flux
               </span>
-              <Badge variant="outline" className="text-foreground">
-                {character.fluxLabel || fluxTier.label}
-              </Badge>
+              <TierChip>{character.fluxLabel || fluxTier.label}</TierChip>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="tabular text-xs text-muted-foreground">
-                jauge max
-              </span>
-              <span className="tabular text-lg font-semibold text-foreground">
+              <span className="text-xs text-foreground-muted">jauge max</span>
+              <span className="font-mono tabular-nums slashed-zero text-lg font-semibold text-foreground">
                 {character.maxFlux}
               </span>
             </div>
-            <Separator />
+            <div className="border-t border-border" />
             {isFluxMax || !nextFlux ? (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-foreground-muted">
                 Palier de Flux maximal atteint.
               </p>
             ) : (
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-foreground-muted">
                   Prochain seuil —{" "}
                   <span className="font-medium text-foreground">
                     {nextFlux.label}
                   </span>{" "}
-                  (jauge <span className="tabular">{nextFlux.max}</span>)
+                  (jauge{" "}
+                  <span className="font-mono tabular-nums slashed-zero">
+                    {nextFlux.max}
+                  </span>
+                  )
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-foreground-muted">
                   Requiert{" "}
-                  <span className="tabular font-medium text-foreground">
+                  <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                     {nextFlux.fluxTrainings}
                   </span>{" "}
                   entraîn. Flux +{" "}
-                  <span className="tabular font-medium text-foreground">
+                  <span className="font-mono tabular-nums slashed-zero font-medium text-foreground">
                     {nextFlux.combats}
                   </span>{" "}
                   combats.
                 </p>
-                <p className="text-xs text-ink-tertiary">
+                <p className="text-xs text-foreground-subtle">
                   Manque{" "}
-                  <span className="tabular text-muted-foreground">
+                  <span className="font-mono tabular-nums slashed-zero text-foreground-muted">
                     {fluxTrainingsNeeded}
                   </span>{" "}
                   entraîn. ·{" "}
-                  <span className="tabular text-muted-foreground">
+                  <span className="font-mono tabular-nums slashed-zero text-foreground-muted">
                     {combatsNeeded}
                   </span>{" "}
                   combats.
@@ -504,7 +536,7 @@ export function EvolutionSection({
             )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

@@ -20,7 +20,7 @@ function buildMockBrad(): Character {
     level: 3,
     enduranceTrainings: 5,
     currentHp: 125,
-    currentMental: 125,
+    currentMental: 22,
     currentEndurance: 750,
     maxHp: 125,
     maxMental: 125,
@@ -234,7 +234,7 @@ export default function PreviewPage() {
               type="button"
               onClick={() => setIsMJ((v) => !v)}
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                isMJ ? "bg-primary" : "bg-secondary"
+                isMJ ? "bg-foreground/25" : "bg-surface-overlay"
               }`}
               aria-pressed={isMJ}
             >
@@ -246,7 +246,7 @@ export default function PreviewPage() {
             </button>
             <span
               className={`tabular text-xs font-semibold uppercase tracking-[0.12em] ${
-                isMJ ? "text-primary" : "text-ink-tertiary"
+                isMJ ? "text-foreground" : "text-foreground-subtle"
               }`}
             >
               {isMJ ? "ON" : "OFF"}

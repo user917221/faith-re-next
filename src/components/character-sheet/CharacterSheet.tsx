@@ -9,6 +9,7 @@ import {
 } from "@/lib/skills";
 import { SKILL_CAP, calculateLevel } from "@/lib/faith-system";
 import { Brain, Eye, Shield, Crosshair, Dices } from "lucide-react";
+import { ConstellationGlyph } from "@/components/glyphs";
 import { initialsOf, avatarFallbackStyle } from "@/lib/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -75,20 +76,26 @@ export default function CharacterSheet({
 
   return (
     <div className="relative z-[2] flex flex-col gap-6">
-      {/* ─── Identité — carte header (direction v0) ─── */}
+      {/* ─── Identité — carte header (v0 + glyphe signature) ─── */}
       <header
-        className="rounded-xl border border-border p-5"
+        className="relative overflow-hidden rounded-xl border border-border p-5"
         style={{
-          background:
-            "linear-gradient(145deg, rgba(22,24,32,0.98) 0%, rgba(14,15,20,0.99) 100%)",
+          background: "rgba(17,19,24,0.98)",
           boxShadow:
-            "0 1px 3px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+            "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
         }}
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-          {/* Avatar */}
+        {/* Glyphe signature FAITH:RE — filigrane d'angle (identité, pas déco) */}
+        <ConstellationGlyph
+          size={148}
+          aria-hidden
+          className="pointer-events-none absolute -right-9 -top-10 text-foreground opacity-[0.045]"
+        />
+
+        {/* Ligne identité */}
+        <div className="relative flex items-center gap-3.5">
           <div className="relative shrink-0">
-            <Avatar className="size-14 rounded-xl ring-1 ring-[rgba(94,106,210,0.25)]">
+            <Avatar className="size-12 rounded-xl ring-1 ring-border">
               <AvatarImage
                 src={character.avatarUrl ?? undefined}
                 alt=""
@@ -113,18 +120,17 @@ export default function CharacterSheet({
             />
           </div>
 
-          {/* Nom + badges + sous-ligne + chips d'attributs */}
           <div className="min-w-0 flex-1">
-            <div className="mb-1 flex flex-wrap items-center gap-2">
-              <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-lg font-semibold tracking-tight text-foreground">
                 {character.name}
               </h1>
-              <HeaderBadge accent>{isMJ ? "MJ" : "Joueur"}</HeaderBadge>
+              <HeaderBadge>{isMJ ? "MJ" : "Joueur"}</HeaderBadge>
               <HeaderBadge>{character.tier}</HeaderBadge>
               <HeaderBadge>Flux {character.fluxLabel}</HeaderBadge>
             </div>
 
-            <p className="mb-3 text-sm text-foreground-muted">
+            <p className="mt-1 text-sm text-foreground-muted">
               {character.nom && <span>{character.nom}</span>}
               {character.nom && (
                 <span className="mx-2 text-foreground-subtle">·</span>
@@ -133,48 +139,23 @@ export default function CharacterSheet({
                 <>
                   <span>
                     Niv.{" "}
-                    <span className="tabular-nums">{derivedLevel}</span>
+                    <span className="font-mono tabular-nums slashed-zero">
+                      {derivedLevel}
+                    </span>
                   </span>
                   <span className="mx-2 text-foreground-subtle">·</span>
                 </>
               )}
-              <span className="tabular-nums">{character.age || "?"}</span> ans
+              <span className="font-mono tabular-nums slashed-zero">
+                {character.age || "?"}
+              </span>{" "}
+              ans
             </p>
-
-            <div
-              className="flex flex-wrap gap-1.5"
-              role="list"
-              aria-label="Attributs"
-            >
-              {ATTR_CHIPS.map(({ name, short, icon: Icon }) => {
-                const score = calculateAttribute(character.skills, name);
-                return (
-                  <div
-                    key={short}
-                    role="listitem"
-                    title={name}
-                    className="flex items-center gap-1.5 rounded-md border border-white/[0.07] bg-white/[0.04] px-2 py-1"
-                  >
-                    <Icon
-                      size={10}
-                      className="text-foreground-subtle"
-                      aria-hidden
-                    />
-                    <span className="text-[10px] uppercase tracking-widest text-foreground-subtle">
-                      {short}
-                    </span>
-                    <span className="font-mono text-xs font-medium tabular-nums text-foreground-muted">
-                      {score}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
           </div>
 
           {/* Présence — chip + toggle (à droite) */}
           {onTogglePresence && (
-            <div className="flex shrink-0 items-center gap-2.5 self-start rounded-md border border-border bg-surface-overlay px-3 py-2">
+            <div className="flex shrink-0 items-center gap-2.5 self-center rounded-md border border-border bg-surface-overlay px-3 py-1.5">
               <span
                 className={`inline-block h-2 w-2 rounded-full ${
                   character.isPresent ? "presence-led-on" : "presence-led-off"
@@ -194,6 +175,33 @@ export default function CharacterSheet({
               />
             </div>
           )}
+        </div>
+
+        {/* Rangée d'attributs — pied de carte pleine largeur (ledger horizontal) */}
+        <div
+          className="relative mt-4 grid grid-cols-4 divide-x divide-border border-t border-border pt-3"
+          role="list"
+          aria-label="Attributs"
+        >
+          {ATTR_CHIPS.map(({ name, short, icon: Icon }) => {
+            const score = calculateAttribute(character.skills, name);
+            return (
+              <div
+                key={short}
+                role="listitem"
+                title={name}
+                className="flex items-center justify-center gap-2 px-2"
+              >
+                <Icon size={11} className="text-foreground-subtle" aria-hidden />
+                <span className="text-[10px] font-medium uppercase tracking-widest text-foreground-subtle">
+                  {short}
+                </span>
+                <span className="font-mono text-sm font-semibold tabular-nums slashed-zero text-foreground">
+                  {score}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </header>
 
@@ -292,7 +300,7 @@ export default function CharacterSheet({
                       {attr}
                     </span>
                     <span
-                      className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/15"
+                      className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/18"
                       aria-hidden
                     />
                     {openAttrRoll ? (

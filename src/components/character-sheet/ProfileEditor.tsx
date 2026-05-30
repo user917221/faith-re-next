@@ -43,7 +43,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
       }}
     >
       <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-        <h2 className="text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           Profil — identité
         </h2>
         {feedback && (
@@ -54,53 +54,56 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
       </div>
 
       <div className="flex flex-col gap-3 p-5">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-name" className="text-foreground-muted">
-            Prénom <span className="text-foreground-subtle">*</span>
-          </Label>
-          <Input
-            id="profile-name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            disabled={!onProfileChange}
-          />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="profile-name" className="text-foreground-muted">
+              Prénom <span className="text-foreground-subtle">*</span>
+            </Label>
+            <Input
+              id="profile-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={!onProfileChange}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="profile-nom" className="text-foreground-muted">
+              Nom de famille
+            </Label>
+            <Input
+              id="profile-nom"
+              type="text"
+              value={nom}
+              onChange={(e) => setNom(e.target.value)}
+              disabled={!onProfileChange}
+            />
+          </div>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-nom" className="text-foreground-muted">
-            Nom de famille
-          </Label>
-          <Input
-            id="profile-nom"
-            type="text"
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
-            disabled={!onProfileChange}
-          />
+        <div className="flex items-end justify-between gap-3">
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="profile-age" className="text-foreground-muted">
+              Âge
+            </Label>
+            <Input
+              id="profile-age"
+              type="number"
+              min={1}
+              max={999}
+              value={age}
+              onChange={(e) => setAge(parseInt(e.target.value, 10) || 0)}
+              disabled={!onProfileChange}
+              className="w-24 font-mono tabular-nums slashed-zero"
+            />
+          </div>
+          <Button
+            type="button"
+            disabled={!onProfileChange || !dirty || isPending}
+            onClick={save}
+          >
+            {isPending ? "Enregistrement…" : "Enregistrer"}
+          </Button>
         </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="profile-age" className="text-foreground-muted">
-            Âge
-          </Label>
-          <Input
-            id="profile-age"
-            type="number"
-            min={1}
-            max={999}
-            value={age}
-            onChange={(e) => setAge(parseInt(e.target.value, 10) || 0)}
-            disabled={!onProfileChange}
-            className="tabular-nums"
-          />
-        </div>
-        <Button
-          type="button"
-          className="w-full"
-          disabled={!onProfileChange || !dirty || isPending}
-          onClick={save}
-        >
-          {isPending ? "…" : "Enregistrer"}
-        </Button>
       </div>
     </section>
   );

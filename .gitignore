@@ -46,3 +46,4 @@ next-env.d.ts
 
 # fichiers temp workflow
 .tmp-*
+.tmp-screens/

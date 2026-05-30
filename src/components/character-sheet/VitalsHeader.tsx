@@ -18,17 +18,16 @@ type Props = {
 export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) {
   return (
     <section
-      className="rounded-xl border border-border p-6"
+      className="rounded-xl border border-border p-5"
       style={{
-        background:
-          "linear-gradient(145deg, rgba(28,30,40,0.95) 0%, rgba(17,19,24,0.98) 100%)",
+        background: "rgba(17,19,24,0.98)",
         boxShadow:
           "0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)",
       }}
       aria-label="Jauges de vitalité"
     >
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           État vital
         </h2>
         <span
@@ -42,7 +41,7 @@ export function VitalsHeader({ character, onVitalChange, onFluxChange }: Props) 
         </span>
       </div>
 
-      <div className="grid grid-cols-2 items-start justify-items-center gap-8 sm:grid-cols-4 sm:gap-6">
+      <div className="grid grid-cols-2 items-start justify-items-center gap-6 sm:grid-cols-4 sm:gap-5">
         <VitalGauge
           label="Santé"
           value={character.currentHp}

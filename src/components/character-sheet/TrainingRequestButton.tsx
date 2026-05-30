@@ -45,7 +45,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
         style={SURFACE}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-          <h2 className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+          <h2 className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
             <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-2 py-0.5 text-[10px] tracking-widest text-foreground-muted">
               En attente
             </span>
@@ -75,7 +75,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
       style={SURFACE}
     >
       <div className="border-b border-border px-5 py-3.5">
-        <h2 className="text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           Entraînement endurance
         </h2>
         <p className="mt-1 text-xs text-foreground-subtle">

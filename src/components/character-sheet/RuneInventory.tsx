@@ -58,7 +58,7 @@ function RuneRow({
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{rune.name}</p>
         {rune.description ? (
-          <p className="text-xs text-muted-foreground">{rune.description}</p>
+          <p className="text-xs text-foreground-muted">{rune.description}</p>
         ) : null}
       </div>
       {onRemoveRune ? (
@@ -70,7 +70,7 @@ function RuneRow({
           title="Supprimer"
           disabled={isPending}
           onClick={() => startTransition(() => onRemoveRune(rune.id))}
-          className="shrink-0 text-muted-foreground hover:text-destructive"
+          className="shrink-0 text-foreground-muted hover:text-destructive"
         >
           <Trash2 className="size-3.5" />
         </Button>
@@ -196,7 +196,7 @@ export function RuneInventory({ runes, onAddRune, onRemoveRune }: Props) {
       }}
     >
       <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
-        <h2 className="text-[11px] font-medium uppercase tracking-widest text-foreground-subtle">
+        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
           Inventaire de runes
         </h2>
         {hasRunes && (
@@ -210,7 +210,7 @@ export function RuneInventory({ runes, onAddRune, onRemoveRune }: Props) {
           <div className="flex flex-col gap-4">
             {groups.map((group) => (
               <div key={group.type}>
-                <p className="mb-1.5 text-[10px] font-medium uppercase tracking-widest text-foreground-subtle">
+                <p className="mb-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
                   {group.label}
                 </p>
                 <div className="divide-y divide-border">

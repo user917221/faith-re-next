@@ -58,7 +58,7 @@ export function SkillRow({
   const minusDisabled = isPending || !onSkillChange || value <= 0;
 
   const ctrl =
-    "flex h-6 w-6 items-center justify-center rounded text-foreground-subtle transition-colors hover:bg-surface-overlay hover:text-foreground-muted disabled:cursor-not-allowed disabled:opacity-30";
+    "flex h-6 w-6 items-center justify-center rounded border border-border text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-foreground active:translate-y-px disabled:cursor-not-allowed disabled:opacity-30";
 
   return (
     <div className="group flex items-center px-5 py-2.5 transition-colors hover:bg-surface-overlay/50">
@@ -78,7 +78,7 @@ export function SkillRow({
       )}
 
       <span
-        className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/15"
+        className="mx-2 mb-1.5 min-w-5 flex-1 self-end border-b border-dotted border-white/18"
         aria-hidden
       />
 
@@ -110,7 +110,7 @@ export function SkillRow({
             aria-label={`Lancer 2d6 + ${name}`}
             title={`Lancer 2d6 + ${attrName} + ${name}`}
             onClick={openRoll}
-            className="ml-0.5 flex h-6 w-6 items-center justify-center rounded text-foreground-subtle transition-colors hover:bg-surface-overlay hover:text-primary"
+            className="ml-0.5 flex h-6 w-6 items-center justify-center rounded text-foreground-muted transition-colors hover:bg-surface-overlay hover:text-primary"
           >
             <Dices className="size-3.5" />
           </button>

@@ -4,41 +4,38 @@
 
 ## État courant — 2026-05-30 · Claude Code (Opus)
 
-### Ce qui vient d'être fait : refonte visuelle complète **v0 sobre + gestes Omen**, poussée sur `master`
+### Boucle d'amélioration design « jusqu'à 9.5 » — fiche /me poussée à **9.22/10**
 
-Direction validée : design sobre/premium type « v0/Vercel dark », enrichi de gestes signature empruntés au dashboard **Omen** (`../omen`, @omen/web). Accent lavande unique `#5e6ad2` (= --primary), traité comme **signal rare** (jamais déco).
+Méthode : boucle critique→fix→re-score via workflows multi-agents (6 DA notent chaque dimension contre la barre Stripe/Linear/Vercel-v0/Omen, en **regardant les captures Playwright** + le code). Captures fiables via `scripts/shoot.py` (Playwright headless sur localhost:3008/preview — le screenshot du Preview MCP timeout sur cette machine).
 
-**1. Fiche réelle (`CharacterSheet`, montée par /me /mj /plateau /preview) — entièrement v0 + fonctionnelle :**
-- `VitalGauge` (faith/) : jauge arc sobre **contrôlée** (vraies données) + ajusteur dégât/soin câblé serveur + **CountUp** (anim douce des chiffres) + mono slashed-zero.
-- `VitalsHeader` : 4 jauges (Santé/Mental/Endurance/Flux) dans dalle « État vital ».
-- Header de fiche : carte v0, avatar tuile, badges pilule, **chips d'attributs réels** INT/PSY/CON/MAN.
-- **Nav onglets = segmented-pills mono** (Tabs controlled, actif = inversion ink blanc/noir — geste Omen).
-- **Compétences = ledger à dot-leaders** (`Encyclopédie ···· 1`, filet pointillé `border-dotted border-white/15`) + allocation + jet conservés.
-- Profil : ProfileEditor / RuneInventory / TrainingRequestButton en surfaces v0.
-- Récupération + Dépense d'endurance : listes sobres.
+**Trajectoire : 8.23 → 8.73 → 9.07 → 9.17 → 9.22** (5 mesures, 6 rounds de fix). État final : **toutes dimensions ≥ 9.1, ZÉRO gap HIGH.** craft 9.3 · cohérence 9.2 · typo 9.1 · couleur-accent 9.4 · layout 9.2 · âme 9.1.
 
-**2. Chrome harmonisé (global, propagé partout) :**
-- `globals.css` : `.glass` (toutes les `Card`) → panneau v0 quasi-opaque ; fond `body::before` → plat (orbs atténuées) ; tokens `ink-*` remappés sur la triade `foreground-muted/subtle` ; `.label-grimoire` → eyebrow v0 ; `.list-portfolio` → liste v0 ; suppression CSS verre mort (`.glass-strong/.card-grimoire/.card-hero`).
-- `/plateau` : **hero number du dernier jet = CountUp mono sobre** (lavande only sur réussite critique) ; 4 états vides `RoundTableGlyph` → icônes lucide ; `CritOverlay` sobre (sigils ✦/⚜ retirés, impact par typo + shake).
-- `/mj`, `/me` (claim), accueil, signin, AppShell/AppSidebar, EvolutionSection, DDDrawer : surfaces `bg-card/bg-muted/bg-popover` → panneaux/chips v0, eyebrows mono Omen, gros chiffres → mono sobre, glyphe AscensionGlyph retiré.
-
-**3. Cleanup :** supprimé `VitalRing`, `PresenceBadge`, `VitalBar`, `FluxBar`, `AttributesGrid` (orphelins).
-
-**4. Nouveau :** `components/faith/CountUp.tsx` (compteur rAF easeOutQuart, reduced-motion). `/v0` = page mock publique de référence (faith/CharacterHeader+VitauxTab+… — non utilisée hors /v0).
+Changements de la boucle :
+- **Discipline d'accent** (la grosse montée) : boutons primaires → inversion ink BLANC (button.tsx default variant) ; lavande réservée au SEUL signal de progression (barre d'allocation + jauge XP) ; badge MJ neutralisé ; jauges re-palettées en **famille acier cool unique** (fini le multicolore/Flux saturé), assez lumineuses pour que « plein » se lise ; présence en vert muet (plus émeraude).
+- **Données mono** : tous les chiffres en Geist Mono `tabular-nums slashed-zero` (vérifié au DOM — le critique confondait Geist Mono/Sans) ; eyebrows mono partout ; `.tabular` aligné slashed-zero.
+- **Ledger** : dot-leaders adoucis (white/18), steppers en chips bordées cohérentes jauges↔skills.
+- **Header** : signature `ConstellationGlyph` en filigrane d'angle (l'âme), rangée d'attributs en pied pleine largeur, surface plate, p-5.
+- **UI optimiste** sur les jauges (snap immédiat + réconciliation `useEffect`), état bas < 25 % → rouge `--hp`, garde `prefers-reduced-motion` (CSS + JS).
+- **Un seul dialecte** : `EvolutionSection` réécrit `<Card>`→`<section>` v0 (dernier outlier shadcn) ; tokens gris unifiés (DDDrawer/RuneInventory `text-muted-foreground`→`foreground-*`).
+- **Cleanup** : purge du code mort `/v0` + 5 mocks `faith/*Tab`+`CharacterHeader` ; alias grimoire morts retirés de globals.css.
 
 ### Vérifié
-- `pnpm build` ✅ vert (TypeScript OK, toutes routes). Câblage testé sur /preview (jauge 125→115, récup +7). DOM inspect : pills inversion-ink mono OK, 24 dot-leaders OK.
-- ⚠️ Le **screenshot du Preview MCP timeout** sur cette session (machine chargée) — vérif faite via `preview_inspect` (plus fiable) + build. Le dev server répond (eval OK).
-- Build : lancer depuis le dossier `faith-re-next` (cwd). `pnpm -C` casse (worker Tailwind EINVAL via inférence workspace-root). Utiliser `(cd faith-re-next && pnpm build)`.
+- `pnpm build` ✅ vert à chaque round. Câblage server-actions intact (la fiche reste 100 % fonctionnelle).
+- Build : lancer depuis `faith-re-next` (`(cd faith-re-next && pnpm build)` — le cwd du shell se réinitialise ; `pnpm -C` casse via worker Tailwind EINVAL).
+- Captures : `python scripts/shoot.py` (Playwright) → `.tmp-screens/0{1,2,3}-*.png`.
 
-### Prochaines étapes (différé, non abandonné)
-- Étendre la couche Omen au `/plateau` plus loin (ledger du carnet, pills Acte/Stats).
-- Dés physiques animés, moteur de combat (initiative/tour → `combatsReal`), sorts jouables (`SPELL_CATEGORIES`), upload portrait (`avatarUrl` existe), bot Discord Python → Neon.
-- Specs : `tasks/fiche-omen-design.md`, `tasks/redesign-v2-design.md`, `tasks/soul-and-combat-design.md`.
+### Note d'honnêteté
+Le score plafonne ~9.2 : à zéro gap HIGH, le critique IA circule sur des **nits de cohérence de tokens sub-pixel** (ink ladder à 2 vraies marches, ligne méta identité mono-partielle, vital-flash défini non câblé). Le **vrai juge de « ce que j'attends » = Corentin** (joueur). La fiche est au niveau « indiscernable de Linear/v0 » selon le critique.
+
+### Prochaines étapes possibles (si on veut viser 9.5 strict)
+- ink ladder à 3 marches réelles (tier-2 ~#6a6e80 pour les `/max`/captions).
+- Câbler `vital-flash` au changement de valeur ; toasts sonner partout (déjà sur /me réel).
+- Étendre la couche Omen au `/plateau` (hero number existe déjà), `/mj`.
+- Différé : dés animés, moteur de combat, sorts jouables, upload portrait, bot Discord→Neon.
 
 ### Blockers
 - Aucun. Build vert, poussé sur master (Vercel déploie depuis master).
 
-### Notes durables
-- Token piège : `--accent` vaut `#141516` en dark (`.dark` écrase le `#5e6ad2` de `:root`) → `text-accent`/`bg-accent` = quasi-noir. Pour la lavande, utiliser **`--primary` / `text-primary`** (jamais `text-accent`).
-- Dev server géré par Preview MCP (launch.json workspace, nom `faith-re-next`, port 3008). Next 16 = lock mono-serveur.
+### Note durable
+- Token piège : `--accent` = `#141516` en dark → utiliser `--primary`/`text-primary` pour la lavande.
+- Specs : `tasks/fiche-omen-design.md`, `redesign-v2-design.md`, `soul-and-combat-design.md`.
