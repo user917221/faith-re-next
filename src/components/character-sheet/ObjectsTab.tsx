@@ -82,7 +82,7 @@ function LightCrystalsSection({
   return (
     <section className="campaign-panel">
       <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
-        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+        <h2 className="eyebrow">
           Cristaux de Lumière
         </h2>
         <span className="font-mono text-[10px] tabular-nums text-foreground-subtle">
@@ -198,7 +198,7 @@ function CompetencesAleaSection({
   return (
     <section className="campaign-panel">
       <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
-        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+        <h2 className="eyebrow">
           Compétences de l&apos;Aléa
         </h2>
         {hasItems && (

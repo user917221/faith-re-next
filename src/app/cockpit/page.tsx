@@ -29,6 +29,7 @@ import { ModificationsPanel } from "@/components/cockpit/ModificationsPanel";
 import { JournalView } from "@/components/cockpit/JournalView";
 import { NpcsView } from "@/components/cockpit/NpcsView";
 import { RulesView } from "@/components/cockpit/RulesView";
+import { TableView } from "@/components/cockpit/TableView";
 
 const MOCK_JOURNAL = [
   {
@@ -416,6 +417,8 @@ function CockpitInner() {
     center = <NpcsView campaignId="mock" npcs={MOCK_NPCS} canEdit />;
   } else if (view === "regles") {
     center = <RulesView />;
+  } else if (view === "table") {
+    center = <TableView characters={chars} />;
   } else {
     center = (
       <div className="flex flex-col gap-3">

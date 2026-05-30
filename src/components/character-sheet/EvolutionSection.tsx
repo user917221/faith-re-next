@@ -173,7 +173,7 @@ export function EvolutionSection({
       className="campaign-panel"
     >
       <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
-        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+        <h2 className="eyebrow">
           Évolution
         </h2>
         <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 font-mono text-[10px] tracking-widest text-primary">
@@ -186,7 +186,7 @@ export function EvolutionSection({
         <div className="flex flex-col gap-3">
           <div className="flex items-end justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+              <span className="eyebrow">
                 Niveau
               </span>
               <div className="flex items-baseline gap-2">
@@ -264,7 +264,7 @@ export function EvolutionSection({
 
         {/* ─── Entraînements — un bloc par axe ─── */}
         <div className="flex flex-col gap-2">
-          <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <span className="eyebrow">
             Entraînements
           </span>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -414,7 +414,7 @@ export function EvolutionSection({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {/* Combats réels */}
           <div className="flex flex-col gap-2.5">
-            <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+            <span className="eyebrow">
               Combats réels
             </span>
             <div className="flex items-end justify-between gap-3">
@@ -476,7 +476,7 @@ export function EvolutionSection({
           {/* Palier de Flux — le « level up » que le MJ doit voir */}
           <div className="campaign-subpanel flex flex-col gap-2.5 p-3">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+              <span className="eyebrow">
                 Palier de Flux
               </span>
               <TierChip>{character.fluxLabel || fluxTier.label}</TierChip>

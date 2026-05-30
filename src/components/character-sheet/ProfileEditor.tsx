@@ -63,7 +63,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
       className="campaign-panel"
     >
       <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
-        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+        <h2 className="eyebrow">
           Profil — identité
         </h2>
         {feedback && (

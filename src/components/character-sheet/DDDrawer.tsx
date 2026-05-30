@@ -83,7 +83,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
       >
         {/* Header */}
         <SheetHeader className="gap-1 border-b border-border px-6 py-5">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <p className="eyebrow">
             Lancer de dés
           </p>
           <SheetTitle className="text-lg font-semibold tracking-tight text-foreground">
@@ -93,7 +93,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
 
         {/* Contexte du jet */}
         <section className="border-b border-border px-6 py-4">
-          <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <p className="eyebrow">
             Formule
           </p>
           <p className="mt-1 font-mono tabular-nums slashed-zero text-xl text-foreground">
@@ -105,7 +105,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
 
         {/* Selector DD */}
         <section className="border-b border-border px-6 py-5">
-          <p className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <p className="mb-3 eyebrow">
             Difficulté
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -159,7 +159,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
                   : ""
               }`}
             >
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+              <span className="eyebrow">
                 DD perso
               </span>
               <span className="tabular ml-auto text-sm text-foreground">{custom}</span>
@@ -174,7 +174,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
                   : ""
               }`}
             >
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+              <span className="eyebrow">
                 Sans DD
               </span>
               <span className="ml-auto text-sm text-foreground">∞</span>
@@ -183,7 +183,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
 
           {mode === "free" && (
             <div className="mt-2 flex items-center gap-3 rounded-md border border-border bg-surface-overlay/50 px-3 py-2">
-              <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+              <span className="eyebrow">
                 DD ciblé
               </span>
               <Input
@@ -203,7 +203,7 @@ export function DDDrawer({ context, onClose, onRoll }: Props) {
 
         {/* Récap final */}
         <section className="px-6 py-5">
-          <p className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <p className="mb-2 eyebrow">
             Récap
           </p>
           <p className="tabular text-sm leading-relaxed text-foreground-muted">

@@ -39,7 +39,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
         className="campaign-panel"
       >
         <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
-          <h2 className="flex items-center gap-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+          <h2 className="flex items-center gap-2 eyebrow">
             <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-[10px] tracking-widest text-primary">
               En attente
             </span>
@@ -68,7 +68,7 @@ export function TrainingRequestButton({ pending, onRequestTraining }: Props) {
       className="campaign-panel"
     >
       <div className="campaign-header-line px-5 py-3.5">
-        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+        <h2 className="eyebrow">
           Entraînement endurance
         </h2>
         <p className="mt-1 text-xs text-foreground-subtle">

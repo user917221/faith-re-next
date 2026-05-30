@@ -7,6 +7,7 @@ import { KeepWarmToggle } from "@/components/app-shell/KeepWarmToggle";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   LayoutDashboard,
+  LayoutGrid,
   Users,
   CalendarDays,
   BookText,
@@ -41,6 +42,7 @@ const NAV: {
   soon?: boolean;
 }[] = [
   { label: "Dashboard", icon: LayoutDashboard, view: "dashboard" },
+  { label: "Table", icon: LayoutGrid, view: "table" },
   { label: "Roster", icon: Users, soon: true },
   { label: "Sessions", icon: CalendarDays, soon: true },
   { label: "Journal", icon: BookText, view: "journal" },

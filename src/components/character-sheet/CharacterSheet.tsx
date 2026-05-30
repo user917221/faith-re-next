@@ -219,7 +219,7 @@ export default function CharacterSheet({
                 />
                 <span className="flex items-center gap-1.5">
                   <Icon size={12} style={{ color: accent }} aria-hidden />
-                  <span className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+                  <span className="eyebrow">
                     {short}
                   </span>
                 </span>

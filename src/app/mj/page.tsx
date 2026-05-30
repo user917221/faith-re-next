@@ -19,6 +19,7 @@ import { JournalView } from "@/components/cockpit/JournalView";
 import { NpcsView } from "@/components/cockpit/NpcsView";
 import { RulesView } from "@/components/cockpit/RulesView";
 import { SessionLogsView } from "@/components/cockpit/SessionLogsView";
+import { TableView } from "@/components/cockpit/TableView";
 import {
   MJCharacterClient,
   MJQuickRoll,
@@ -85,6 +86,8 @@ export default async function MjDashboardPage({
     );
   } else if (view === "regles") {
     center = <RulesView />;
+  } else if (view === "table") {
+    center = <TableView characters={allChars} />;
   } else if (selected) {
     center = <MJCharacterClient character={selected} isMJ={!playerView} />;
   } else {

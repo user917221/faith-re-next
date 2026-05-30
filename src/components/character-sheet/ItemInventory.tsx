@@ -282,7 +282,7 @@ export function ItemInventory({
   return (
     <section className="campaign-panel">
       <div className="campaign-header-line flex items-center justify-between px-5 py-3.5">
-        <h2 className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+        <h2 className="eyebrow">
           Inventaire d&apos;objets
         </h2>
         {hasItems && (
@@ -296,7 +296,7 @@ export function ItemInventory({
           <div className="flex flex-col gap-4">
             {groups.map((group) => (
               <div key={group.type}>
-                <p className="mb-2 font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-foreground-subtle">
+                <p className="mb-2 eyebrow">
                   {group.label}
                 </p>
                 <div className="flex flex-col">
