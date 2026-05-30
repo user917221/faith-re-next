@@ -158,7 +158,9 @@ export default function CockpitPreview() {
 }
 
 function CockpitInner() {
-  const view = useSearchParams().get("view") ?? "dashboard";
+  const sp = useSearchParams();
+  const view = sp.get("view") ?? "dashboard";
+  const playerView = sp.get("mode") === "player";
   const [chars, setChars] = useState<Character[]>(INITIAL);
   const [selId, setSelId] = useState("c1");
   const selected = chars.find((c) => c.id === selId) ?? chars[0];
@@ -304,7 +306,7 @@ function CockpitInner() {
     center = (
       <CharacterSheet
         character={selected}
-        isMJ
+        isMJ={!playerView}
         onVitalChange={onVitalChange}
         onSkillChange={onSkillChange}
         onFluxChange={onFluxChange}
@@ -323,6 +325,7 @@ function CockpitInner() {
     <CockpitShell
       user={{ name: "Game Master", role: "mj", image: null }}
       activeView={view}
+      playerView={playerView}
       rollPanel={<QuickRollPanel characterName={selected.name} />}
       roster={
         <div className="campaign-panel">

@@ -264,7 +264,13 @@ function PreviewStat({
  * MJCharacterClient — fiche complète + feedback toasts.
  * Les signatures de CharacterSheet restent intactes.
  * ============================================================ */
-export function MJCharacterClient({ character }: { character: Character }) {
+export function MJCharacterClient({
+  character,
+  isMJ = true,
+}: {
+  character: Character;
+  isMJ?: boolean;
+}) {
   const router = useRouter();
   const [, startTransition] = useTransition();
   const refresh = () => startTransition(() => router.refresh());
@@ -272,7 +278,7 @@ export function MJCharacterClient({ character }: { character: Character }) {
   return (
     <CharacterSheet
       character={character}
-      isMJ={true}
+      isMJ={isMJ}
       onSkillChange={async (skillName, delta) => {
         await updateSkill(character.id, skillName, delta);
         toast.success(

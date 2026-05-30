@@ -15,6 +15,7 @@ type ProfilePatch = {
   charClass?: string;
   bio?: string;
   notes?: string;
+  avatarUrl?: string;
 };
 
 // Normalise un tag d'identité optionnel : trim, cap 40, vide → null (effacement).
@@ -38,6 +39,7 @@ export async function updateProfile(
     charClass: string | null;
     bio: string | null;
     notes: string | null;
+    avatarUrl: string | null;
     updatedAt: Date;
   }> = {
     updatedAt: new Date(),
@@ -68,6 +70,13 @@ export async function updateProfile(
   if (typeof patch.notes === "string") {
     const v = patch.notes.trim();
     update.notes = v.length ? v.slice(0, 1000) : null;
+  }
+  if (typeof patch.avatarUrl === "string") {
+    const v = patch.avatarUrl.trim();
+    if (v && !/^https?:\/\//i.test(v)) {
+      return { ok: false, reason: "URL de portrait invalide (http/https)" };
+    }
+    update.avatarUrl = v.length ? v.slice(0, 500) : null;
   }
 
   const [row] = await db

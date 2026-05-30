@@ -30,7 +30,7 @@ export const dynamic = "force-dynamic";
 export default async function MjDashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ id?: string; view?: string }>;
+  searchParams: Promise<{ id?: string; view?: string; mode?: string }>;
 }) {
   const session = await auth();
   if (!session?.user) redirect("/signin?callbackUrl=/mj");
@@ -43,6 +43,7 @@ export default async function MjDashboardPage({
     getCampaignContext(),
   ]);
   const view = params.view ?? "dashboard";
+  const playerView = params.mode === "player";
   const selectedId = params.id ?? allChars[0]?.id;
   const [selected, statusNotes, journalEntries, npcList] = await Promise.all([
     selectedId ? loadCharacter(selectedId) : Promise.resolve(null),
@@ -72,7 +73,7 @@ export default async function MjDashboardPage({
   } else if (view === "regles") {
     center = <RulesView />;
   } else if (selected) {
-    center = <MJCharacterClient character={selected} />;
+    center = <MJCharacterClient character={selected} isMJ={!playerView} />;
   } else {
     center = (
       <div className="campaign-panel p-10 text-center text-sm text-foreground-subtle">
@@ -127,11 +128,14 @@ export default async function MjDashboardPage({
         selected ? (
           <div className="flex flex-col gap-3">
             <MJQuickRoll characterId={selected.id} characterName={selected.name} />
-            <StatusNotesPanel characterId={selected.id} notes={statusNotes} />
+            {!playerView && (
+              <StatusNotesPanel characterId={selected.id} notes={statusNotes} />
+            )}
           </div>
         ) : undefined
       }
       activeView={view}
+      playerView={playerView}
     >
       {center}
     </CockpitShell>

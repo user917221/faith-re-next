@@ -194,6 +194,7 @@ export default function PreviewPage() {
       charClass?: string;
       bio?: string;
       notes?: string;
+      avatarUrl?: string;
     }) => {
       await Promise.resolve();
       setCharacter((c) => ({
@@ -206,6 +207,8 @@ export default function PreviewPage() {
           patch.charClass !== undefined ? patch.charClass || null : c.charClass,
         bio: patch.bio !== undefined ? patch.bio || null : c.bio,
         notes: patch.notes !== undefined ? patch.notes || null : c.notes,
+        avatarUrl:
+          patch.avatarUrl !== undefined ? patch.avatarUrl || null : c.avatarUrl,
       }));
     },
     [],

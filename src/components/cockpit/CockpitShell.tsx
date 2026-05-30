@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
@@ -61,6 +62,7 @@ export function CockpitShell({
   campaignStatus,
   sessionTimer,
   activeView = "dashboard",
+  playerView = false,
 }: {
   user: ShellUser;
   campaignName?: string;
@@ -73,18 +75,29 @@ export function CockpitShell({
   campaignStatus?: ReactNode;
   sessionTimer?: ReactNode;
   activeView?: string;
+  playerView?: boolean;
 }) {
+  const searchParams = useSearchParams();
   const openPalette = () =>
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "k", metaKey: true }),
     );
 
+  // Lien qui (dé)bascule le mode joueur en conservant id / view courants.
+  const modeHref = (mode: "mj" | "player") => {
+    const p = new URLSearchParams(searchParams?.toString() ?? "");
+    if (mode === "player") p.set("mode", "player");
+    else p.delete("mode");
+    const q = p.toString();
+    return q ? `?${q}` : "?";
+  };
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
+    <div className="cockpit-root flex h-screen w-full overflow-hidden bg-background text-foreground">
       <CommandMenu user={user} />
 
       {/* ============ NAV SIDEBAR ============ */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
+      <aside className="cockpit-chrome hidden w-60 shrink-0 flex-col border-r border-border bg-sidebar lg:flex">
         <div className="flex items-center gap-2.5 border-b border-border p-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-primary/35 bg-primary/12 text-primary">
             <CrestGlyph size={22} />
@@ -131,7 +144,7 @@ export function CockpitShell({
       {/* ============ COLONNE PRINCIPALE ============ */}
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
+        <header className="cockpit-chrome flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl">
           {campaignSelector ?? (
             <button
               type="button"
@@ -142,10 +155,16 @@ export function CockpitShell({
             </button>
           )}
 
-          {user.role === "mj" && (
-            <span className="hidden items-center gap-1.5 rounded-md border border-primary/35 bg-primary/12 px-2 py-1 font-mono text-[11px] uppercase tracking-wide text-primary sm:flex">
-              <Crown size={12} /> Mode MJ
+          {playerView ? (
+            <span className="hidden items-center gap-1.5 rounded-md border border-border bg-card/60 px-2 py-1 font-mono text-[11px] uppercase tracking-wide text-foreground-muted sm:flex">
+              <Eye size={12} /> Vue joueur
             </span>
+          ) : (
+            user.role === "mj" && (
+              <span className="hidden items-center gap-1.5 rounded-md border border-primary/35 bg-primary/12 px-2 py-1 font-mono text-[11px] uppercase tracking-wide text-primary sm:flex">
+                <Crown size={12} /> Mode MJ
+              </span>
+            )
           )}
 
           <div className="ml-2 hidden items-center gap-3 font-mono text-[11px] text-foreground-subtle md:flex">
@@ -182,26 +201,42 @@ export function CockpitShell({
 
         {/* 3 panneaux */}
         <div className="flex min-h-0 flex-1 overflow-hidden">
-          <aside className="hidden w-72 shrink-0 flex-col gap-3 overflow-y-auto border-r border-border p-3 md:flex">
+          <aside className="cockpit-chrome hidden w-72 shrink-0 flex-col gap-3 overflow-y-auto border-r border-border p-3 md:flex">
             {roster}
           </aside>
-          <main className="min-w-0 flex-1 overflow-y-auto p-4 lg:p-5">{children}</main>
-          <aside className="hidden w-72 shrink-0 overflow-y-auto border-l border-border p-3 xl:block">
+          <main className="cockpit-print-area min-w-0 flex-1 overflow-y-auto p-4 lg:p-5">
+            {children}
+          </main>
+          <aside className="cockpit-chrome hidden w-72 shrink-0 overflow-y-auto border-l border-border p-3 xl:block">
             {rollPanel ?? <QuickRollPanel />}
           </aside>
         </div>
 
         {/* Bottom bar */}
-        <footer className="flex h-10 shrink-0 items-center justify-between border-t border-border px-4 text-[11px] text-foreground-subtle">
-          <span className="font-mono">Sauvegardé il y a 2 min</span>
+        <footer className="cockpit-chrome flex h-10 shrink-0 items-center justify-between border-t border-border px-4 text-[11px] text-foreground-subtle">
+          <span className="font-mono">FAITH&nbsp;:&nbsp;RE — cockpit</span>
           <div className="flex items-center gap-4">
-            <button type="button" className="flex items-center gap-1.5 transition-colors hover:text-foreground">
+            <Link
+              href={modeHref("mj")}
+              className={`flex items-center gap-1.5 transition-colors hover:text-foreground ${
+                !playerView ? "text-primary" : ""
+              }`}
+            >
               <MonitorPlay size={13} /> Écran MJ
-            </button>
-            <button type="button" className="flex items-center gap-1.5 transition-colors hover:text-foreground">
+            </Link>
+            <Link
+              href={modeHref("player")}
+              className={`flex items-center gap-1.5 transition-colors hover:text-foreground ${
+                playerView ? "text-primary" : ""
+              }`}
+            >
               <Eye size={13} /> Vue joueur
-            </button>
-            <button type="button" className="flex items-center gap-1.5 transition-colors hover:text-foreground">
+            </Link>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 transition-colors hover:text-foreground"
+            >
               <FileDown size={13} /> Export PDF
             </button>
           </div>

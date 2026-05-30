@@ -21,6 +21,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
   const [charClass, setCharClass] = useState(character.charClass ?? "");
   const [bio, setBio] = useState(character.bio ?? "");
   const [notes, setNotes] = useState(character.notes ?? "");
+  const [avatarUrl, setAvatarUrl] = useState(character.avatarUrl ?? "");
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -32,7 +33,8 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
     pronouns.trim() !== (character.pronouns ?? "") ||
     charClass.trim() !== (character.charClass ?? "") ||
     bio.trim() !== (character.bio ?? "") ||
-    notes.trim() !== (character.notes ?? "");
+    notes.trim() !== (character.notes ?? "") ||
+    avatarUrl.trim() !== (character.avatarUrl ?? "");
 
   function save() {
     if (!onProfileChange || !dirty) return;
@@ -46,6 +48,7 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
         charClass: charClass.trim(),
         bio: bio.trim(),
         notes: notes.trim(),
+        avatarUrl: avatarUrl.trim(),
       });
       setFeedback("Profil sauvegardé.");
       setTimeout(() => setFeedback(null), 2000);
@@ -140,6 +143,21 @@ export function ProfileEditor({ character, onProfileChange }: Props) {
               disabled={!onProfileChange}
             />
           </div>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="profile-avatar" className="text-foreground-muted">
+            URL du portrait
+          </Label>
+          <Input
+            id="profile-avatar"
+            type="url"
+            value={avatarUrl}
+            maxLength={500}
+            placeholder="https://… (image du personnage)"
+            onChange={(e) => setAvatarUrl(e.target.value)}
+            disabled={!onProfileChange}
+            className="font-mono text-xs"
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="profile-bio" className="text-foreground-muted">

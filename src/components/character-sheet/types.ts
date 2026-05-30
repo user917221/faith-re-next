@@ -99,6 +99,7 @@ export type ProfilePatch = {
   charClass?: string;
   bio?: string;
   notes?: string;
+  avatarUrl?: string;
 };
 
 export type PendingTrainingRequest = {

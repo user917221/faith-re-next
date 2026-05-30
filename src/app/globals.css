@@ -667,3 +667,34 @@ body > * { position: relative; z-index: 1; }
   border-bottom: 1px solid var(--border);
   background: rgba(11, 10, 8, 0.22);
 }
+
+/* ============================================================
+ *  Impression / Export PDF (Phase 8)
+ *  N'imprime que le centre du cockpit (la fiche / le module) ;
+ *  masque la nav, top bar, roster, panneau de jet, bottom bar.
+ * ============================================================ */
+@media print {
+  .cockpit-chrome {
+    display: none !important;
+  }
+  .cockpit-root {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .cockpit-print-area {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+  /* Conserver les couleurs sombres de la fiche à l'impression. */
+  html,
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: var(--background) !important;
+  }
+  /* La barre d'onglets sticky devient statique pour ne pas se superposer. */
+  [role="tablist"] {
+    position: static !important;
+  }
+}
