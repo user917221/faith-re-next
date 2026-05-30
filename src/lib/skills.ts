@@ -56,6 +56,37 @@ export const ATTR_SHORTHAND: Record<string, AttributeName> = {
   MNV: "MANŒUVRE",
 };
 
+// ---------------- Paliers de compétence (rank / tier) ----------------
+// Dérivés des points alloués — NE change PAS le moteur de jets (2d6 + attr +
+// points). Sert à l'affichage cockpit : rang, badge de palier, barre de niveau.
+
+export type SkillTierKey = "novice" | "trained" | "expert" | "master";
+export type SkillTierInfo = {
+  key: SkillTierKey;
+  label: string;
+  min: number; // borne basse (incluse)
+  range: string; // libellé de plage pour la légende
+  rgb: string; // teinte du chip (sur fond sombre)
+};
+
+export const SKILL_TIERS: SkillTierInfo[] = [
+  { key: "novice", label: "Novice", min: 0, range: "0–1", rgb: "150,150,168" },
+  { key: "trained", label: "Confirmé", min: 2, range: "2–3", rgb: "130,169,107" },
+  { key: "expert", label: "Expert", min: 4, range: "4–5", rgb: "111,166,184" },
+  { key: "master", label: "Maître", min: 6, range: "6+", rgb: "196,154,92" },
+];
+
+/** Palier d'une compétence selon ses points. */
+export function getSkillTier(points: number): SkillTierInfo {
+  if (points >= 6) return SKILL_TIERS[3];
+  if (points >= 4) return SKILL_TIERS[2];
+  if (points >= 2) return SKILL_TIERS[1];
+  return SKILL_TIERS[0];
+}
+
+// Plafond d'affichage pour la barre de niveau (un skill au-delà = plein).
+export const SKILL_DISPLAY_MAX = 8;
+
 /** Score d'attribut = somme des 5 skills sous-jacents. */
 export function calculateAttribute(
   skills: Record<string, number>,

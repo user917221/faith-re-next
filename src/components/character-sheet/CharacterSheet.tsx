@@ -19,6 +19,7 @@ import { ConditionsPanel } from "./ConditionsPanel";
 import { RuneInventory } from "./RuneInventory";
 import { EnduranceActionPanel } from "./EnduranceActionPanel";
 import { PointAllocatorBar } from "./PointAllocatorBar";
+import { SkillTierLegend } from "./SkillTierLegend";
 import { SkillRow } from "./SkillRow";
 import { EvolutionSection } from "./EvolutionSection";
 import { ProfileEditor } from "./ProfileEditor";
@@ -292,8 +293,9 @@ export default function CharacterSheet({
 
         {/* ─── Attributs & compétences ─── cartes de section v0 ─── */}
         <TabsContent value="competences">
-          <div className="mb-4">
+          <div className="mb-4 flex flex-col gap-3">
             <PointAllocatorBar allocated={allocated} />
+            <SkillTierLegend />
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

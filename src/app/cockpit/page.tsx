@@ -21,7 +21,22 @@ import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 import { CockpitShell } from "@/components/cockpit/CockpitShell";
 import { QuickRollPanel } from "@/components/cockpit/QuickRollPanel";
 
-const SKILLS = Object.fromEntries(ALL_SKILLS.map((s) => [s, 1]));
+const SKILLS: Record<string, number> = Object.fromEntries(
+  ALL_SKILLS.map((s) => [s, 1]),
+);
+// Variété de paliers pour l'aperçu (Novice/Confirmé/Expert/Maître).
+Object.assign(SKILLS, {
+  Encyclopédie: 6,
+  Logique: 4,
+  Rhétorique: 3,
+  "Sang-Froid": 7,
+  Empathie: 4,
+  Autorité: 2,
+  Résilience: 3,
+  Volonté: 5,
+  Puissance: 4,
+  "Vitesse de Réaction": 2,
+});
 
 function mk(id: string, name: string, hp: number, maxHp: number): Character {
   return {
