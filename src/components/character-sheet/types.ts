@@ -23,6 +23,11 @@ export type Character = {
   maxHp: number;
   maxMental: number;
   maxEndurance: number;
+  // overrides MJ des max (null = dérivé). Pilotés par le panneau Modifications.
+  maxHpOverride: number | null;
+  maxMentalOverride: number | null;
+  maxEnduranceOverride: number | null;
+  maxFluxOverride: number | null;
   fatePoints: number;
   runes: string[];
   skills: Record<string, number>;

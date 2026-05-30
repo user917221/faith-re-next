@@ -45,6 +45,8 @@ export {
   updateNpc,
 } from "./world";
 
+export { updateCharacterFull, type FullCharacterPatch } from "./admin";
+
 export {
   updateCombatStats,
   addCondition,

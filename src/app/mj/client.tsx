@@ -24,6 +24,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { QuickRollPanel } from "@/components/cockpit/QuickRollPanel";
+import { ModificationsPanel } from "@/components/cockpit/ModificationsPanel";
 import { toast } from "sonner";
 import { Inbox } from "lucide-react";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
@@ -277,9 +278,15 @@ export function MJCharacterClient({
   const refresh = () => startTransition(() => router.refresh());
 
   return (
-    <CharacterSheet
-      character={character}
-      isMJ={isMJ}
+    <div className="flex flex-col gap-3">
+      {isMJ && (
+        <div className="flex justify-end">
+          <ModificationsPanel character={character} />
+        </div>
+      )}
+      <CharacterSheet
+        character={character}
+        isMJ={isMJ}
       onSkillChange={async (skillName, delta) => {
         await updateSkill(character.id, skillName, delta);
         toast.success(
@@ -481,7 +488,8 @@ export function MJCharacterClient({
         await updateItemQty(character.id, itemId, delta);
         refresh();
       }}
-    />
+      />
+    </div>
   );
 }
 

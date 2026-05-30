@@ -141,6 +141,11 @@ export const characters = pgTable("character", {
   currentMental: integer("current_mental").default(45).notNull(),
   currentEndurance: integer("current_endurance").default(250).notNull(),
   currentFlux: integer("current_flux").default(100).notNull(),
+  // overrides MJ des max vitaux (null = max dérivé par la formule du jeu)
+  maxHpOverride: integer("max_hp_override"),
+  maxMentalOverride: integer("max_mental_override"),
+  maxEnduranceOverride: integer("max_endurance_override"),
+  maxFluxOverride: integer("max_flux_override"),
   // narration
   fatePoints: integer("fate_points").default(2).notNull(),
   runes: jsonb("runes").$type<string[]>().default([]).notNull(),

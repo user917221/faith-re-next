@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { avatarFallbackStyle, initialsOf } from "@/lib/avatar";
 import { CockpitShell } from "@/components/cockpit/CockpitShell";
 import { QuickRollPanel } from "@/components/cockpit/QuickRollPanel";
+import { ModificationsPanel } from "@/components/cockpit/ModificationsPanel";
 import { JournalView } from "@/components/cockpit/JournalView";
 import { NpcsView } from "@/components/cockpit/NpcsView";
 import { RulesView } from "@/components/cockpit/RulesView";
@@ -84,6 +85,10 @@ function mk(id: string, name: string, hp: number, maxHp: number): Character {
     maxHp,
     maxMental: maxHp,
     maxEndurance: 750,
+    maxHpOverride: null,
+    maxMentalOverride: null,
+    maxEnduranceOverride: null,
+    maxFluxOverride: null,
     fatePoints: 2,
     runes: ["", "", ""],
     skills: SKILLS,
@@ -359,10 +364,16 @@ function CockpitInner() {
     center = <RulesView />;
   } else {
     center = (
-      <CharacterSheet
-        character={selected}
-        isMJ={!playerView}
-        onVitalChange={onVitalChange}
+      <div className="flex flex-col gap-3">
+        {!playerView && (
+          <div className="flex justify-end">
+            <ModificationsPanel character={selected} />
+          </div>
+        )}
+        <CharacterSheet
+          character={selected}
+          isMJ={!playerView}
+          onVitalChange={onVitalChange}
         onSkillChange={onSkillChange}
         onFluxChange={onFluxChange}
         onCombatStatChange={onCombatStatChange}
@@ -371,7 +382,8 @@ function CockpitInner() {
         onAddRune={onAddRune}
         onRemoveRune={onRemoveRune}
         onUpdateRune={onUpdateRune}
-      />
+        />
+      </div>
     );
   }
 
