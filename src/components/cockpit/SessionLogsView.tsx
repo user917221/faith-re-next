@@ -72,6 +72,37 @@ function groupBySession(logs: SessionLogEntry[]): Group[] {
 }
 
 function LogEntryRow({ entry }: { entry: SessionLogEntry }) {
+  // Entrée de dégâts subis (perte de PV) — pas un jet de dés. Identifiée par
+  // damageValue non-null (les jets archivés ont toujours damageValue null).
+  if (entry.damageValue !== null) {
+    const src =
+      entry.casterName && entry.casterName !== entry.characterName
+        ? entry.casterName
+        : null;
+    return (
+      <li className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-4 py-2">
+        <span className="tabular font-mono text-2xs uppercase tracking-wide text-hp">
+          Dégâts
+        </span>
+        <span className="text-ink-tertiary">→</span>
+        <span className="text-sm font-medium text-foreground">
+          {entry.characterName}
+        </span>
+        <span className="tabular text-sm font-semibold text-hp">
+          −{entry.damageValue} PV
+        </span>
+        {src && (
+          <span className="text-2xs text-ink-tertiary">
+            par <span className="text-muted-foreground">{src}</span>
+          </span>
+        )}
+        <span className="tabular ml-auto text-3xs uppercase tracking-[0.08em] text-ink-tertiary">
+          {TIME_FMT.format(new Date(entry.rolledAt))}
+        </span>
+      </li>
+    );
+  }
+
   const totalClass = entry.isCritSucc
     ? "text-primary"
     : entry.isCritFail
@@ -156,7 +187,7 @@ export function SessionLogsView({
                   variant="outline"
                   className="tabular text-2xs text-ink-tertiary"
                 >
-                  {g.entries.length} jet{g.entries.length > 1 ? "s" : ""}
+                  {g.entries.length} entrée{g.entries.length > 1 ? "s" : ""}
                 </Badge>
               </span>
               <span className="tabular text-3xs uppercase tracking-[0.08em] text-ink-tertiary">

@@ -15,7 +15,14 @@
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { characters, characterSkills, conditions } from "@/db/schema";
+import {
+  characters,
+  characterSkills,
+  conditions,
+  campaigns,
+  gameSessions,
+  sessionLogs,
+} from "@/db/schema";
 import {
   ENDURANCE_COSTS,
   calculateLevel,
@@ -73,6 +80,60 @@ async function manageFatigueCondition(
     });
   } else if (!shouldHaveFatigue && existing) {
     await db.delete(conditions).where(eq(conditions.id, existing.id));
+  }
+}
+
+/**
+ * Journalise une perte de PV (dégâts subis) dans `session_log`, rattachée à la
+ * session active de la campagne active. 1 ligne par perte, `damageValue` = PV
+ * réellement perdus. Affichée dans l'onglet « Logs de session » (#87/#88).
+ *
+ * Best-effort : toute erreur (pas de campagne/session active, écriture KO) est
+ * avalée — journaliser ne doit JAMAIS casser la mise à jour des PV.
+ */
+async function logHpDamage(
+  characterId: string,
+  characterName: string,
+  amount: number,
+  actorUserId: string | null,
+  actorName: string,
+): Promise<void> {
+  try {
+    const campaign = await db.query.campaigns.findFirst({
+      where: eq(campaigns.isActive, 1),
+    });
+    if (!campaign) return; // pas de campagne active → rien à rattacher
+    const gs = await db.query.gameSessions.findFirst({
+      where: and(
+        eq(gameSessions.campaignId, campaign.id),
+        eq(gameSessions.isActive, 1),
+      ),
+    });
+    if (!gs) return; // pas de session active
+
+    const now = new Date();
+    await db.insert(sessionLogs).values({
+      campaignId: campaign.id,
+      gameSessionId: gs.id,
+      sessionNumber: gs.number,
+      casterUserId: actorUserId,
+      characterId,
+      casterName: actorName,
+      characterName,
+      diceFormula: "Dégâts",
+      diceRolls: [],
+      diceTotal: 0,
+      damageValue: amount,
+      dd: null,
+      success: null,
+      isCritSucc: 0,
+      isCritFail: 0,
+      rolledAt: now,
+      endedAt: now,
+      createdByUserId: actorUserId,
+    });
+  } catch {
+    // best-effort : on n'interrompt jamais l'update vital sur un échec de log.
   }
 }
 
@@ -140,7 +201,7 @@ export async function updateVital(
   type: "hp" | "mental" | "endu",
   delta: number,
 ): Promise<ActionResult<{ newValue: number }>> {
-  const { character } = await assertCanEdit(characterId);
+  const { character, session } = await assertCanEdit(characterId);
 
   let current: number;
   let max: number;
@@ -182,6 +243,23 @@ export async function updateVital(
   // l'endurance via l'UI, donc c'est le bon point d'ancrage.
   if (type === "endu") {
     await manageFatigueCondition(characterId, newValue, max);
+  }
+
+  // Dégâts subis : toute perte de PV réelle est journalisée dans les logs de
+  // session (PV avant − PV après ; gère l'overkill : capé à la perte effective).
+  if (type === "hp") {
+    const hpLost = current - newValue;
+    if (hpLost > 0) {
+      const actorName =
+        session.user.role === "mj" ? "MJ" : session.user.name ?? "—";
+      await logHpDamage(
+        characterId,
+        character.name,
+        hpLost,
+        session.user.id ?? null,
+        actorName,
+      );
+    }
   }
 
   revalidateAll();
